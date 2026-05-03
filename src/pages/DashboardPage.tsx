@@ -69,6 +69,7 @@ const DashboardFooter = () => (
 );
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [shippingConfig, setShippingConfig] = useState<ShippingConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -142,7 +143,13 @@ const DashboardPage = () => {
                 <FiPackage size={18} />
                 Products
               </Link>
-              <Button type="button" label="New product" icon={<FiPlus size={18} />} className="px-4 py-3" />
+              <Button
+                type="button"
+                label="New product"
+                icon={<FiPlus size={18} />}
+                onClick={() => navigate('/products/new')}
+                className="px-4 py-3"
+              />
             </div>
           </div>
         </section>

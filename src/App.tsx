@@ -7,6 +7,7 @@ import SignUpPage from "./pages/SignUpPage"
 import DashboardPage from "./pages/DashboardPage"
 import ProductListPage from "./pages/ProductListPage"
 import OrderListPage from "./pages/OrderListPage"
+import AddProductPage from "./pages/AddProductPage"
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/products" element={<ProductListPage />} />
+        <Route path="/products/new" element={<AddProductPage />} />
         <Route path="/orders" element={<OrderListPage />} />
       </Routes>
       <ToastContainer
