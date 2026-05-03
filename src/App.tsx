@@ -8,6 +8,8 @@ import DashboardPage from "./pages/DashboardPage"
 import ProductListPage from "./pages/ProductListPage"
 import OrderListPage from "./pages/OrderListPage"
 import AddProductPage from "./pages/AddProductPage"
+import ProductDetailsPage from "./pages/ProductDetailsPage"
+import EditProductPage from "./pages/EditProductPage"
 
 const App = () => {
   return (
@@ -19,6 +21,8 @@ const App = () => {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/products" element={<ProductListPage />} />
         <Route path="/products/new" element={<AddProductPage />} />
+        <Route path="/products/:productId" element={<ProductDetailsPage />} />
+        <Route path="/products/:productId/edit" element={<EditProductPage />} />
         <Route path="/orders" element={<OrderListPage />} />
       </Routes>
       <ToastContainer
