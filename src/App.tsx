@@ -11,6 +11,7 @@ import AddProductPage from "./pages/AddProductPage"
 import ProductDetailsPage from "./pages/ProductDetailsPage"
 import EditProductPage from "./pages/EditProductPage"
 import ShippingConfigPage from "./pages/ShippingConfigPage"
+import OffersPage from "./pages/OffersPage"
 
 const App = () => {
   return (
@@ -26,6 +27,7 @@ const App = () => {
         <Route path="/products/:productId/edit" element={<EditProductPage />} />
         <Route path="/orders" element={<OrderListPage />} />
         <Route path="/shipping" element={<ShippingConfigPage />} />
+        <Route path="/offers" element={<OffersPage />} />
       </Routes>
       <ToastContainer
         position="top-right"
