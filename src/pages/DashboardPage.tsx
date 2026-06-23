@@ -49,6 +49,8 @@ const DashboardTopBar = () => {
           <Link className="rounded-lg px-3 py-2 text-accent hover:bg-secondary" to="/dashboard">Dashboard</Link>
           <Link className="rounded-lg px-3 py-2 hover:bg-secondary hover:text-accent" to="/products">Products</Link>
           <Link className="rounded-lg px-3 py-2 hover:bg-secondary hover:text-accent" to="/orders">Orders</Link>
+          <Link className="rounded-lg px-3 py-2 hover:bg-secondary hover:text-accent" to="/shipping">Shipping</Link>
+          <Link className="rounded-lg px-3 py-2 hover:bg-secondary hover:text-accent" to="/offers">Offers</Link>
           <button type="button" onClick={logout} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-text hover:border-primary hover:text-accent">
             <FiLogOut size={18} />
             Logout
