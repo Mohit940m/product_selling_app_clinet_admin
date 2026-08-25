@@ -3,7 +3,11 @@ import type { FormEvent } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FiMapPin, FiSave, FiTruck } from 'react-icons/fi';
-import Button from '../components/Button';
+import Container from '../components/layout/Container';
+import Panel from '../components/ui/Panel';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+import Skeleton from '../components/ui/Skeleton';
 import sellerApi from '../api/sellerApi';
 
 type ShippingRate = {
@@ -134,115 +138,96 @@ const ShippingConfigPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text">
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-        <div className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-wide text-accent">Logistics</p>
-          <h1 className="mt-2 text-2xl font-bold text-text">Shipping Configuration</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            {hasConfig
-              ? 'Update your shipping origin and delivery rates per zone.'
-              : 'Set up your shipping origin and delivery rates to start selling.'}
-          </p>
+    <Container className="max-w-3xl! py-6 lg:py-8">
+      <div className="mb-6">
+        <p className="font-mono text-[11px] font-bold text-muted">LOGISTICS</p>
+        <h1 className="mt-1.5 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">Shipping</h1>
+        <p className="mt-1 text-[12.5px] font-semibold text-muted">
+          {hasConfig
+            ? 'Update your shipping origin and delivery rates per zone.'
+            : 'Set up your shipping origin and delivery rates to start selling.'}
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-64" />
         </div>
+      ) : (
+        <form onSubmit={saveConfig} className="space-y-5">
+          <Panel>
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-tile bg-soft text-[var(--k-on-soft)]">
+                <FiMapPin size={20} />
+              </span>
+              <div>
+                <h2 className="text-[16px] font-extrabold text-ink">Shipping Origin</h2>
+                <p className="text-[12.5px] font-semibold text-muted">Where your products ship from.</p>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3.5 sm:grid-cols-2">
+              <Input
+                label="City"
+                value={form.city}
+                onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))}
+                placeholder="e.g. Kolkata"
+                required
+              />
+              <Input
+                label="State"
+                value={form.state}
+                onChange={(event) => setForm((current) => ({ ...current, state: event.target.value }))}
+                placeholder="e.g. West Bengal"
+                required
+              />
+            </div>
+          </Panel>
 
-        {isLoading ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-md">
-            Loading configuration...
-          </div>
-        ) : (
-          <form onSubmit={saveConfig} className="space-y-6">
-            <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
-                  <FiMapPin size={22} />
-                </span>
-                <div>
-                  <h2 className="text-lg font-bold text-text">Shipping Origin</h2>
-                  <p className="text-sm text-gray-600">Where your products ship from.</p>
-                </div>
+          <Panel>
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-tile bg-soft text-[var(--k-on-soft)]">
+                <FiTruck size={20} />
+              </span>
+              <div>
+                <h2 className="text-[16px] font-extrabold text-ink">Shipping Rates</h2>
+                <p className="text-[12.5px] font-semibold text-muted">Set cost (₹) and estimated delivery time for each delivery zone.</p>
               </div>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-text">City</label>
-                  <input
-                    id="city"
-                    value={form.city}
-                    onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="e.g. Kolkata"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="state" className="block text-sm font-medium text-text">State</label>
-                  <input
-                    id="state"
-                    value={form.state}
-                    onChange={(event) => setForm((current) => ({ ...current, state: event.target.value }))}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="e.g. West Bengal"
-                    required
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
-                  <FiTruck size={22} />
-                </span>
-                <div>
-                  <h2 className="text-lg font-bold text-text">Shipping Rates</h2>
-                  <p className="text-sm text-gray-600">Set cost (₹) and estimated delivery time for each delivery zone.</p>
-                </div>
-              </div>
-              <div className="mt-4 space-y-3">
-                {RATE_KEYS.map((key) => (
-                  <div key={key} className="rounded-lg border border-gray-200 p-3">
-                    <p className="text-sm font-semibold text-text">{RATE_LABELS[key]}</p>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600">Cost (₹)</label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={form[key].cost}
-                          onChange={(event) => updateRate(key, 'cost', event.target.value)}
-                          className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                          placeholder="0"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-600">Delivery Time</label>
-                        <input
-                          type="text"
-                          value={form[key].time}
-                          onChange={(event) => updateRate(key, 'time', event.target.value)}
-                          className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                          placeholder={DEFAULT_TIMES[key]}
-                          required
-                        />
-                      </div>
-                    </div>
+            </div>
+            <div className="mt-4 space-y-2.5">
+              {RATE_KEYS.map((key) => (
+                <div key={key} className="rounded-tile border border-line p-3.5 t-fast hover:border-accent">
+                  <p className="text-[12.5px] font-bold text-ink">{RATE_LABELS[key]}</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <Input
+                      label="Cost (₹)"
+                      type="number"
+                      min="0"
+                      value={form[key].cost}
+                      onChange={(event) => updateRate(key, 'cost', event.target.value)}
+                      placeholder="0"
+                      required
+                    />
+                    <Input
+                      label="Delivery Time"
+                      type="text"
+                      value={form[key].time}
+                      onChange={(event) => updateRate(key, 'time', event.target.value)}
+                      placeholder={DEFAULT_TIMES[key]}
+                      required
+                    />
                   </div>
-                ))}
-              </div>
-            </section>
+                </div>
+              ))}
+            </div>
+          </Panel>
 
-            <Button
-              type="submit"
-              label={isSaving ? 'Saving...' : hasConfig ? 'Update configuration' : 'Create configuration'}
-              icon={<FiSave size={18} />}
-              disabled={isSaving}
-              className="w-full py-3"
-            />
-          </form>
-        )}
-      </main>
-    </div>
+          <Button type="submit" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />}>
+            {hasConfig ? 'Update configuration' : 'Create configuration'}
+          </Button>
+        </form>
+      )}
+    </Container>
   );
 };
 

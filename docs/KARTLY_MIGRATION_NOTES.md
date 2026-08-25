@@ -214,3 +214,20 @@ filter (4.6.6), and the mobile card-list equivalents (4.6.8-4.6.11) are
 not built — there is no order data to populate them with, and a table
 that always renders its own empty state would just be this page's
 `EmptyState` with extra steps.
+
+### 4.7 ShippingConfigPage
+
+Implemented: restyled on `Panel`/`Input`/`Button`/`Skeleton`, rate rows as
+bordered tiles with a hover state. Kept the existing single-column,
+whole-form-save UX (all five rate zones always editable, one Save action)
+rather than the plan's inline-edit-per-row pattern — this backend's
+shipping config is one document with five **fixed** rate keys
+(`sameCity/sameState/sameRegion/restOfIndia/remote`), not a addable/
+removable list, so "+ Add rate" (4.7.5) and per-row inline-edit-then-Save
+(4.7.4/4.7.9) don't map onto the real data model. A free-shipping
+threshold field (4.7.6) doesn't exist in the schema either.
+
+Not built: the two-column origin/rates desktop layout (kept one stacked
+column at every width, matching the original), a real-data `PageHeader`
+subtitle showing the configured city/state, moving Save into the page
+header, and a `MobileActionBar`.
