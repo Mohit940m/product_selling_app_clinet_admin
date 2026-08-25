@@ -504,15 +504,15 @@ Pass criteria applied at every width:
 
 ## 7.2 Accessibility
 
-- [ ] **7.2.1** Contrast: verify `--k-muted` on `--k-card` in both themes hits 4.5:1 for body text. Table metadata at `text-[10.5px]` is the tightest case — bump to `#6B7180` in light mode if it fails, and record the decision in `docs/KARTLY_MIGRATION_NOTES.md`.
-- [ ] **7.2.2** Every interactive element is a real `<button>` or `<a>`; the prototype's `<div onClick>` pattern is not carried over.
-- [ ] **7.2.3** Visible focus ring on every control: `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`.
-- [ ] **7.2.4** `DataTable` desktop mode uses real `<table>` / `<thead>` / `<th scope="col">` semantics, not a `div` grid — screen readers need the row/column relationships.
-- [ ] **7.2.5** Sheets, drawers and modals: `role="dialog"`, `aria-modal`, focus trap, focus restored to the trigger on close.
-- [ ] **7.2.6** Sidebar is a `<nav aria-label="Admin">` with `aria-current="page"` on the active item.
-- [ ] **7.2.7** `Switch` components are `<button role="switch" aria-checked>`.
-- [ ] **7.2.8** `ConfirmDialog` focuses the cancel action by default, not the destructive one.
-- [ ] **7.2.9** `BarChart` has an accessible fallback: an `aria-label` summarising the series, or a visually-hidden table of the values.
+- [x] **7.2.1** Contrast: verify `--k-muted` on `--k-card` in both themes hits 4.5:1 for body text. Table metadata at `text-[10.5px]` is the tightest case — bump to `#6B7180` in light mode if it fails, and record the decision in `docs/KARTLY_MIGRATION_NOTES.md`.
+- [x] **7.2.2** Every interactive element is a real `<button>` or `<a>`; the prototype's `<div onClick>` pattern is not carried over.
+- [x] **7.2.3** Visible focus ring on every control: `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`.
+- [x] **7.2.4** `DataTable` desktop mode uses real `<table>` / `<thead>` / `<th scope="col">` semantics, not a `div` grid — screen readers need the row/column relationships.
+- [x] **7.2.5** Sheets, drawers and modals: `role="dialog"`, `aria-modal`, focus trap, focus restored to the trigger on close.
+- [x] **7.2.6** Sidebar is a `<nav aria-label="Admin">` with `aria-current="page"` on the active item.
+- [x] **7.2.7** `Switch` components are `<button role="switch" aria-checked>`.
+- [x] **7.2.8** `ConfirmDialog` focuses the cancel action by default, not the destructive one.
+- [x] **7.2.9** `BarChart` has an accessible fallback: an `aria-label` summarising the series, or a visually-hidden table of the values.
 - [ ] **7.2.10** Keyboard-only pass of the core flow: login → dashboard → products → new product → publish. No trap, no unreachable control.
 
 ## 7.3 Verification

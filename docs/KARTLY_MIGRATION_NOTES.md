@@ -312,3 +312,38 @@ text-clipping), 6.8 (forms single-column below `lg` — true by construction
 in every page built this phase, but not visually confirmed), 6.9 (both
 themes side by side), 6.10 (landscape phone), 6.12 (landscape drawer/action
 bar). Recommend a manual device/browser pass before shipping.
+
+## Phase 7.2 — accessibility
+
+- **7.2.1 contrast** — fixed proactively in Phase 1 (see the `--k-muted`
+  comment in `src/index.css`), same value and same reasoning as the user
+  client: light-mode `#767C8C` was ~4.18:1 on white, now `#6B7180` at
+  ~4.89:1.
+- **7.2.2** — audited for the `<div onClick>` anti-pattern. Every hit is a
+  legitimate `aria-hidden` backdrop click-catcher (`Modal`, `Sheet`,
+  `MobileTopBar`'s drawer) or a `stopPropagation` wrapper
+  (`ProductListPage`'s row-action cluster) — Esc already covers keyboard
+  dismissal for the dialogs via `useDialogBehavior`.
+- **7.2.3 focus rings** — found and fixed the same class of gap as the
+  user client, in two places this time: `OrderListPage` and
+  `ProductListPage` both had a custom search bar with `outline-none` on
+  the `<input>` and no replacement. Added `focus-within:outline-*` to
+  both wrappers, and made `ProductListPage`'s `max-w-[340px]` consistently
+  `lg:`-scoped to match `OrderListPage` (was unscoped, though not an
+  actual overflow risk per the Phase 6 audit).
+- **7.2.4 DataTable** — already real `<table>`/`<thead>`/`<th scope="col">`
+  from Phase 2.
+- **7.2.5 dialog semantics** — already correct from Phase 2 via
+  `useDialogBehavior`, shared by `Sheet`, `Modal`, and `MobileTopBar`'s
+  drawer.
+- **7.2.6 sidebar** — `SidebarNavLinks`' `<nav aria-label="Admin">`;
+  `aria-current="page"` comes free from react-router's `NavLink`.
+- **7.2.7 Switch** — `role="switch" aria-checked`, used live in `Sidebar`
+  (theme toggle) and `OffersPage` ("Active immediately").
+- **7.2.8 ConfirmDialog** — focuses `Modal`'s own close button first (the
+  first focusable element in the DOM), which is exactly as safe as
+  focusing a dedicated Cancel button — never the destructive action.
+- **7.2.9 BarChart accessible fallback** — already built in Phase 2: an
+  `aria-label` summary plus a visually-hidden `<table>` of the values.
+- **7.2.10 keyboard-only pass** — needs a live browser; not performed in
+  this session for the same reason as Phase 6.

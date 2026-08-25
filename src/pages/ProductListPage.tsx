@@ -190,7 +190,7 @@ const ProductListPage = () => {
       />
 
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex max-w-[340px] flex-1 items-center gap-2.5 rounded-full border border-line px-4 py-2.5 t-fast focus-within:border-accent">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-full border border-line px-4 py-2.5 t-fast focus-within:border-accent focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent lg:max-w-[340px]">
           <FiSearch className="shrink-0 text-muted" size={16} />
           <input
             value={search}
