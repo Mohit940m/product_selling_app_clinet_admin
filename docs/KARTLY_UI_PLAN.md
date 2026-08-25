@@ -422,16 +422,16 @@ At 458 lines this is the largest page; restructure rather than restyle in place.
 
 No prototype screen exists; compose from the design-system panel.
 
-- [ ] **4.9.1** Delete both private `AuthTopBar` copies; use a centred `BrandMark` header instead.
-- [ ] **4.9.2** Split screen at `lg`: left `flex-[1.1]` brand panel `bg-soft rounded-hero` with the mark, a display heading (`Run your store.`), and three muted feature lines; right the form column at `max-w-[420px]`, centred.
-- [ ] **4.9.3** Mobile: brand panel collapses to a compact header; form takes full width.
-- [ ] **4.9.4** Rebuild both forms with the `Input` primitive; step 1 (credentials) and step 2 (OTP) as two `animate-up` panels with a crossfade.
-- [ ] **4.9.5** OTP entry: six `48×56 rounded-ctl border border-line text-center font-extrabold text-[20px]` boxes with auto-advance, paste support and backspace-to-previous; filled boxes get `border-accent`.
-- [ ] **4.9.6** The backend returns the OTP in the response body ("for testing/demo purposes"). Keep surfacing it, but in a clearly-marked dev notice card (`Badge tone="warn"` + mono text).
-- [ ] **4.9.7** Resend link with a 60s countdown.
-- [ ] **4.9.8** Submit as a full-width `primary` Button with `loading` wired to the existing request flags.
-- [ ] **4.9.9** Error surface `rounded-btn border border-danger bg-bad-bg text-bad-fg px-4 py-3 text-[13px] font-semibold`, entering with `animate-up`.
-- [ ] **4.9.10** After login, `sellerProfile` in `localStorage` feeds the sidebar footer card (3.1.5) — confirm the fields it needs are actually stored.
+- [x] **4.9.1** Delete both private `AuthTopBar` copies; use a centred `BrandMark` header instead.
+- [x] **4.9.2** Split screen at `lg`: left `flex-[1.1]` brand panel `bg-soft rounded-hero` with the mark, a display heading (`Run your store.`), and three muted feature lines; right the form column at `max-w-[420px]`, centred.
+- [x] **4.9.3** Mobile: brand panel collapses to a compact header; form takes full width.
+- [x] **4.9.4** Rebuild both forms with the `Input` primitive; step 1 (credentials) and step 2 (OTP) as two `animate-up` panels with a crossfade.
+- [x] **4.9.5** OTP entry: six `48×56 rounded-ctl border border-line text-center font-extrabold text-[20px]` boxes with auto-advance, paste support and backspace-to-previous; filled boxes get `border-accent`.
+- [x] **4.9.6** The backend returns the OTP in the response body ("for testing/demo purposes"). Keep surfacing it, but in a clearly-marked dev notice card (`Badge tone="warn"` + mono text).
+- [x] **4.9.7** Resend link with a 60s countdown.
+- [x] **4.9.8** Submit as a full-width `primary` Button with `loading` wired to the existing request flags.
+- [x] **4.9.9** Error surface `rounded-btn border border-danger bg-bad-bg text-bad-fg px-4 py-3 text-[13px] font-semibold`, entering with `animate-up`.
+- [x] **4.9.10** After login, `sellerProfile` in `localStorage` feeds the sidebar footer card (3.1.5) — confirm the fields it needs are actually stored.
 
 ---
 
