@@ -336,8 +336,8 @@ The prototype's admin artboard is essentially this page. Match it closely.
 
 - [ ] **4.4.1** Reuse the **exact same form composition** as 4.3 — extract `src/components/products/ProductForm.tsx` and have both pages render it with a `mode` prop. Do not maintain two divergent 300-line forms.
 - [ ] **4.4.2** `PageHeader` title `Edit product`, subtitle showing the product name and mono id.
-- [ ] **4.4.3** Existing images render in the same thumbnail strip as staged ones, visually distinguished by a muted `Uploaded` label; removal marks them for deletion on save.
-- [ ] **4.4.4** Add a `danger` `Delete product` action at the bottom of the Status panel, behind `ConfirmDialog`.
+- [x] **4.4.3** Existing images render in the same thumbnail strip as staged ones, visually distinguished by a muted `Uploaded` label; removal marks them for deletion on save.
+- [x] **4.4.4** Add a `danger` `Delete product` action at the bottom of the Status panel, behind `ConfirmDialog`.
 - [ ] **4.4.5** Unsaved-changes guard: warn on navigation away when the form is dirty.
 - [ ] **4.4.6** **Mobile:** identical to 4.3.9–4.3.13, with `Save changes` as the `MobileActionBar` primary.
 

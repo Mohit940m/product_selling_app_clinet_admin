@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
+import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FiArrowLeft, FiImage, FiSave, FiTrash2, FiUploadCloud } from 'react-icons/fi';
-import Button from '../components/Button';
+import { FiArrowLeft, FiImage, FiSave, FiTrash2 } from 'react-icons/fi';
+import Container from '../components/layout/Container';
+import Panel from '../components/ui/Panel';
+import Input from '../components/ui/Input';
+import Textarea from '../components/ui/Textarea';
+import Button from '../components/ui/Button';
+import FileDrop from '../components/ui/FileDrop';
+import Skeleton from '../components/ui/Skeleton';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages } from '../api/cloudinaryApi';
 
@@ -39,6 +46,8 @@ const EditProductPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -64,12 +73,7 @@ const EditProductPage = () => {
     );
   };
 
-  const handleNewImages = (event: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files ?? []);
-    event.target.value = '';
-
-    if (selectedFiles.length === 0) return;
-
+  const handleNewImages = (files: File[]) => {
     setNewImages((current) => {
       const retained = existingImages.length - imagesToDelete.length;
       const availableSlots = 5 - retained - current.length;
@@ -79,13 +83,13 @@ const EditProductPage = () => {
         return current;
       }
 
-      if (selectedFiles.length > availableSlots) {
+      if (files.length > availableSlots) {
         toast.info(`Only ${availableSlots} more image${availableSlots === 1 ? '' : 's'} can be added.`);
       }
 
       return [
         ...current,
-        ...selectedFiles.slice(0, availableSlots).map((file) => ({
+        ...files.slice(0, availableSlots).map((file) => ({
           id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
           file,
           previewUrl: URL.createObjectURL(file),
@@ -135,156 +139,148 @@ const EditProductPage = () => {
     }
   };
 
+  const deleteProduct = async () => {
+    setIsDeleting(true);
+    try {
+      await sellerApi.delete(`/products/delete-product/${productId}`);
+      toast.success('Product deleted.');
+      navigate('/products');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Unable to delete product.'));
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   const totalImageCount = existingImages.length - imagesToDelete.length + newImages.length;
 
   return (
-    <div className="min-h-screen bg-background text-text">
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-        <Link to={`/products/${productId}`} className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
-          <FiArrowLeft size={18} />
-          Product details
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold text-text">Edit Product</h1>
-        <p className="mt-1 text-sm text-gray-600">Update product information and images.</p>
+    <Container className="max-w-3xl! py-6 lg:py-8">
+      <Link to={`/products/${productId}`} className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
+        <FiArrowLeft size={16} />
+        Product details
+      </Link>
+      <h1 className="mt-2 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">Edit product</h1>
+      <p className="mt-1 text-[12.5px] font-semibold text-muted">Update product information and images.</p>
 
-        {isLoading ? (
-          <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-md">
-            Loading product...
-          </div>
-        ) : (
-          <form className="mt-6 space-y-6" onSubmit={saveProduct}>
-            <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <h2 className="text-lg font-bold text-text">Product Details</h2>
-              <div className="mt-4 space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-text">Name</label>
-                  <input
-                    id="name"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-text">Category</label>
-                  <input
-                    id="category"
-                    value={category}
-                    onChange={(event) => setCategory(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-text">Description</label>
-                  <textarea
-                    id="description"
-                    value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                    className="mt-1 min-h-36 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
+      {isLoading ? (
+        <div className="mt-6 space-y-3">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-40" />
+        </div>
+      ) : (
+        <form className="mt-6 space-y-5" onSubmit={saveProduct}>
+          <Panel>
+            <h2 className="text-[16px] font-extrabold text-ink">Basics</h2>
+            <div className="mt-4 space-y-3.5">
+              <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input label="Category" value={category} onChange={(e) => setCategory(e.target.value)} required />
+              <Textarea
+                label="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="min-h-36"
+                required
+              />
+            </div>
+          </Panel>
+
+          <Panel>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-[16px] font-extrabold text-ink">Images</h2>
+                <p className="text-[12.5px] font-semibold text-muted">{totalImageCount}/5 images. Mark existing ones for removal or upload new ones.</p>
               </div>
-            </section>
+            </div>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-bold text-text">Images</h2>
-                  <p className="text-sm text-gray-600">{totalImageCount}/5 images. Mark existing ones for removal or upload new ones.</p>
-                </div>
-                <label htmlFor="new-images" className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-text hover:border-primary hover:text-accent">
-                  <FiUploadCloud size={18} />
-                  Add images
-                  <input
-                    id="new-images"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleNewImages}
-                    className="sr-only"
-                  />
-                </label>
+            <FileDrop onFiles={handleNewImages} label="Add images" disabled={totalImageCount >= 5} />
+
+            {existingImages.length === 0 && newImages.length === 0 && (
+              <div className="mt-4 rounded-tile border border-dashed border-edge p-6 text-center">
+                <FiImage className="mx-auto text-accent" size={26} />
+                <p className="mt-2 text-[12.5px] font-medium text-muted">No images on this product.</p>
               </div>
-
-              {existingImages.length === 0 && newImages.length === 0 && (
-                <div className="mt-4 rounded-lg border border-dashed border-gray-300 p-6 text-center">
-                  <FiImage className="mx-auto text-primary" size={28} />
-                  <p className="mt-2 text-sm text-gray-600">No images on this product.</p>
-                </div>
-              )}
-
-              {existingImages.length > 0 && (
-                <div className="mt-4">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Current Images</p>
-                  <div className="grid grid-cols-3 gap-3">
-                    {existingImages.map((url) => {
-                      const markedForDelete = imagesToDelete.includes(url);
-                      return (
-                        <div key={url} className={`relative overflow-hidden rounded-lg border ${markedForDelete ? 'border-red-300 opacity-50' : 'border-gray-200'}`}>
-                          <img src={url} alt="" className="aspect-square w-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => toggleDeleteExisting(url)}
-                            aria-label={markedForDelete ? 'Undo remove' : 'Mark for removal'}
-                            className={`absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-lg shadow-md ${markedForDelete ? 'bg-red-600 text-white' : 'bg-white text-gray-700 hover:text-red-600'}`}
-                          >
-                            <FiTrash2 size={14} />
-                          </button>
-                          {markedForDelete && (
-                            <div className="absolute inset-x-0 bottom-0 bg-red-600 py-1 text-center text-xs font-bold text-white">
-                              Will be removed
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {newImages.length > 0 && (
-                <div className="mt-4">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">New Images to Upload</p>
-                  <div className="grid grid-cols-3 gap-3">
-                    {newImages.map((image) => (
-                      <div key={image.id} className="overflow-hidden rounded-lg border border-primary">
-                        <div className="relative">
-                          <img src={image.previewUrl} alt={image.file.name} className="aspect-square w-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => removeNewImage(image.id)}
-                            aria-label={`Remove ${image.file.name}`}
-                            className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-lg bg-white text-gray-700 shadow-md hover:text-red-600"
-                          >
-                            <FiTrash2 size={14} />
-                          </button>
-                        </div>
-                        <p className="truncate px-2 py-1 text-xs text-gray-600">{image.file.name}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {uploadStatus && (
-              <div className="rounded-lg border border-primary bg-secondary p-3 text-sm text-accent">{uploadStatus}</div>
             )}
 
-            <Button
-              type="submit"
-              label={isSaving ? 'Saving...' : 'Save product'}
-              icon={<FiSave size={18} />}
-              disabled={isSaving}
-              className="w-full py-3"
-            />
-          </form>
-        )}
-      </main>
-    </div>
+            {existingImages.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 font-mono text-[10px] font-extrabold uppercase tracking-wide text-muted">Current Images</p>
+                <div className="grid grid-cols-3 gap-2.5">
+                  {existingImages.map((url) => {
+                    const markedForDelete = imagesToDelete.includes(url);
+                    return (
+                      <div key={url} className={`relative overflow-hidden rounded-tile border t-fast ${markedForDelete ? 'border-danger opacity-50' : 'border-line'}`}>
+                        <img src={url} alt="" className="aspect-square w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => toggleDeleteExisting(url)}
+                          aria-label={markedForDelete ? 'Undo remove' : 'Mark for removal'}
+                          className={`absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full shadow-kartly t-fast ${markedForDelete ? 'bg-danger text-card' : 'bg-card text-muted hover:text-danger'}`}
+                        >
+                          <FiTrash2 size={14} />
+                        </button>
+                        {markedForDelete && (
+                          <div className="absolute inset-x-0 bottom-0 bg-danger py-1 text-center text-[10px] font-extrabold text-card">
+                            Will be removed
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {newImages.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 font-mono text-[10px] font-extrabold uppercase tracking-wide text-muted">New Images to Upload</p>
+                <div className="grid grid-cols-3 gap-2.5">
+                  {newImages.map((image) => (
+                    <div key={image.id} className="overflow-hidden rounded-tile border border-accent">
+                      <div className="relative">
+                        <img src={image.previewUrl} alt={image.file.name} className="aspect-square w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeNewImage(image.id)}
+                          aria-label={`Remove ${image.file.name}`}
+                          className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-card text-muted shadow-kartly t-fast hover:text-danger"
+                        >
+                          <FiTrash2 size={14} />
+                        </button>
+                      </div>
+                      <p className="truncate px-2 py-1.5 text-[10.5px] text-muted">{image.file.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Panel>
+
+          {uploadStatus && (
+            <div className="rounded-btn border border-accent bg-soft2 p-3 text-[12.5px] font-semibold text-accent">{uploadStatus}</div>
+          )}
+
+          <Button type="submit" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />}>
+            Save changes
+          </Button>
+
+          <Button type="button" variant="danger" fullWidth icon={<FiTrash2 size={16} />} onClick={() => setShowDeleteConfirm(true)}>
+            Delete product
+          </Button>
+        </form>
+      )}
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={deleteProduct}
+        title="Delete this product?"
+        description="This removes it from your catalog. This action can't be undone from here."
+        confirmLabel="Delete product"
+        loading={isDeleting}
+      />
+    </Container>
   );
 };
 
