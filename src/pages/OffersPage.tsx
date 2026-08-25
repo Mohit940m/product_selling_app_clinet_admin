@@ -2,8 +2,15 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FiGift, FiPlus, FiTag, FiTrash2 } from 'react-icons/fi';
-import Button from '../components/Button';
+import { FiClock, FiGift, FiPlus, FiTag, FiTrash2 } from 'react-icons/fi';
+import Container from '../components/layout/Container';
+import Panel from '../components/ui/Panel';
+import Input from '../components/ui/Input';
+import Textarea from '../components/ui/Textarea';
+import Chip from '../components/ui/Chip';
+import Switch from '../components/ui/Switch';
+import Button from '../components/ui/Button';
+import EmptyState from '../components/ui/EmptyState';
 import sellerApi from '../api/sellerApi';
 
 type OfferType = 'DISCOUNT' | 'CASHBACK' | 'BUY_GET' | 'PRODUCT_BUNDLE';
@@ -35,6 +42,7 @@ const getErrorMessage = (err: unknown, fallback: string) => {
 };
 
 const today = () => new Date().toISOString().slice(0, 16);
+const makeBundleItem = (): BundleItem => ({ id: Date.now() + Math.floor(Math.random() * 1000), productId: '', quantity: '1' });
 
 const OffersPage = () => {
   const [offerType, setOfferType] = useState<OfferType>('DISCOUNT');
@@ -53,14 +61,16 @@ const OffersPage = () => {
   const [buyQty, setBuyQty] = useState('');
   const [getQty, setGetQty] = useState('');
 
-  const [bundleItems, setBundleItems] = useState<BundleItem[]>([{ id: Date.now(), productId: '', quantity: '1' }]);
+  // Lazy initializer avoids calling the impure Date.now() during render
+  // (react-hooks/purity flagged the previous `useState([{ id: Date.now() ... }])`).
+  const [bundleItems, setBundleItems] = useState<BundleItem[]>(() => [makeBundleItem()]);
   const [bundlePrice, setBundlePrice] = useState('');
 
   const [productIds, setProductIds] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addBundleItem = () => {
-    setBundleItems((current) => [...current, { id: Date.now(), productId: '', quantity: '1' }]);
+    setBundleItems((current) => [...current, makeBundleItem()]);
   };
 
   const removeBundleItem = (id: number) => {
@@ -83,7 +93,7 @@ const OffersPage = () => {
     setCashbackAmount('');
     setBuyQty('');
     setGetQty('');
-    setBundleItems([{ id: Date.now(), productId: '', quantity: '1' }]);
+    setBundleItems([makeBundleItem()]);
     setBundlePrice('');
     setProductIds('');
   };
@@ -156,300 +166,185 @@ const OffersPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text">
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-        <div className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-wide text-accent">Promotions</p>
-          <h1 className="mt-2 text-2xl font-bold text-text">Create Offer</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Build discounts, cashback, buy-get deals, and product bundles for your catalog.
-          </p>
-        </div>
+    <Container className="max-w-3xl! py-6 lg:py-8">
+      <div className="mb-6">
+        <p className="font-mono text-[11px] font-bold text-muted">PROMOTIONS</p>
+        <h1 className="mt-1.5 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">Offers</h1>
+        <p className="mt-1 text-[12.5px] font-semibold text-muted">
+          Build discounts, cashback, buy-get deals, and product bundles for your catalog.
+        </p>
+      </div>
 
-        <form onSubmit={submitOffer} className="space-y-6">
-          <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
-                <FiGift size={22} />
-              </span>
-              <h2 className="text-lg font-bold text-text">Offer Type</h2>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {(Object.keys(OFFER_TYPE_LABELS) as OfferType[]).map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setOfferType(type)}
-                  className={`rounded-lg border p-3 text-left transition-colors ${
-                    offerType === type
-                      ? 'border-primary bg-secondary text-accent'
-                      : 'border-gray-200 hover:border-primary hover:text-accent'
-                  }`}
-                >
-                  <p className="text-sm font-bold">{OFFER_TYPE_LABELS[type]}</p>
-                  <p className="mt-1 text-xs text-gray-600">{OFFER_TYPE_DESCRIPTIONS[type]}</p>
-                </button>
-              ))}
-            </div>
-          </section>
+      <Panel className="mb-5">
+        <EmptyState
+          icon={<FiGift size={28} />}
+          title="Your active offers will appear here"
+          description="The seller API only exposes offer creation right now — listing, editing, and disabling existing offers needs endpoints that don't exist yet."
+          action={
+            <span className="flex items-center gap-2 rounded-full border border-line bg-soft2 px-4 py-2 text-xs font-semibold text-muted">
+              <FiClock size={14} className="text-accent" />
+              Offer listing coming soon
+            </span>
+          }
+        />
+      </Panel>
 
-          <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
-                <FiTag size={22} />
-              </span>
-              <h2 className="text-lg font-bold text-text">Offer Details</h2>
+      <form onSubmit={submitOffer} className="space-y-5">
+        <Panel>
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-tile bg-soft text-[var(--k-on-soft)]">
+              <FiGift size={20} />
+            </span>
+            <h2 className="text-[16px] font-extrabold text-ink">Offer Type</h2>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {(Object.keys(OFFER_TYPE_LABELS) as OfferType[]).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setOfferType(type)}
+                className={`rounded-tile border p-3.5 text-left t-fast ${
+                  offerType === type
+                    ? 'border-accent bg-soft2 text-accent'
+                    : 'border-line hover:border-accent hover:text-accent'
+                }`}
+              >
+                <p className="text-[13px] font-bold">{OFFER_TYPE_LABELS[type]}</p>
+                <p className="mt-1 text-[11.5px] font-medium text-muted">{OFFER_TYPE_DESCRIPTIONS[type]}</p>
+              </button>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel>
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-tile bg-soft text-[var(--k-on-soft)]">
+              <FiTag size={20} />
+            </span>
+            <h2 className="text-[16px] font-extrabold text-ink">Offer Details</h2>
+          </div>
+          <div className="mt-4 space-y-3.5">
+            <Input label="Offer Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Summer Sale 10% Off" required />
+            <div className="grid gap-3.5 sm:grid-cols-2">
+              <Input label="Valid From" type="datetime-local" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} required />
+              <Input label="Valid Till" type="datetime-local" value={validTill} onChange={(e) => setValidTill(e.target.value)} required />
             </div>
-            <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between rounded-tile border border-line px-4 py-3.5">
               <div>
-                <label htmlFor="offer-name" className="block text-sm font-medium text-text">Offer Name</label>
-                <input
-                  id="offer-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g. Summer Sale 10% Off"
-                  required
-                />
+                <p className="text-[13px] font-bold text-ink">Active immediately</p>
+                <p className="text-[11.5px] font-medium text-muted">Offer goes live as soon as it is created.</p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="valid-from" className="block text-sm font-medium text-text">Valid From</label>
-                  <input
-                    id="valid-from"
-                    type="datetime-local"
-                    value={validFrom}
-                    onChange={(event) => setValidFrom(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="valid-till" className="block text-sm font-medium text-text">Valid Till</label>
-                  <input
-                    id="valid-till"
-                    type="datetime-local"
-                    value={validTill}
-                    onChange={(event) => setValidTill(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-              </div>
-              <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3">
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(event) => setIsActive(event.target.checked)}
-                  className="h-4 w-4 accent-primary"
-                />
-                <div>
-                  <p className="text-sm font-medium text-text">Active immediately</p>
-                  <p className="text-xs text-gray-600">Offer goes live as soon as it is created.</p>
-                </div>
-              </label>
+              <Switch checked={isActive} onChange={() => setIsActive((v) => !v)} label="Active immediately" />
             </div>
-          </section>
+          </div>
+        </Panel>
 
-          {offerType !== 'PRODUCT_BUNDLE' && (
-            <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <h2 className="text-lg font-bold text-text">Applies To</h2>
-              <p className="mt-1 text-sm text-gray-600">Enter the product IDs this offer applies to, separated by commas.</p>
-              <textarea
-                value={productIds}
-                onChange={(event) => setProductIds(event.target.value)}
-                className="mt-3 min-h-20 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                placeholder="697bcc089b9dbee534801d65, 697bcc089b9dbee534801d66"
-                required
-              />
-            </section>
-          )}
+        {offerType !== 'PRODUCT_BUNDLE' && (
+          <Panel>
+            <h2 className="text-[16px] font-extrabold text-ink">Applies To</h2>
+            <p className="mt-1 text-[12.5px] font-semibold text-muted">Enter the product IDs this offer applies to, separated by commas.</p>
+            <Textarea
+              wrapperClassName="mt-3"
+              value={productIds}
+              onChange={(e) => setProductIds(e.target.value)}
+              className="min-h-20"
+              placeholder="697bcc089b9dbee534801d65, 697bcc089b9dbee534801d66"
+              required
+            />
+          </Panel>
+        )}
 
-          <section className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-            <h2 className="text-lg font-bold text-text">
-              {OFFER_TYPE_LABELS[offerType]} Configuration
-            </h2>
+        <Panel>
+          <h2 className="text-[16px] font-extrabold text-ink">{OFFER_TYPE_LABELS[offerType]} Configuration</h2>
 
-            {offerType === 'DISCOUNT' && (
-              <div className="mt-4 space-y-4">
-                <div>
-                  <p className="mb-2 block text-sm font-medium text-text">Discount Type</p>
-                  <div className="flex gap-3">
-                    {(['PERCENTAGE', 'FLAT'] as DiscountType[]).map((type) => (
-                      <label key={type} className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-4 py-3 text-sm font-medium hover:border-primary">
-                        <input
-                          type="radio"
-                          name="discount-type"
-                          value={type}
-                          checked={discountType === type}
-                          onChange={() => setDiscountType(type)}
-                          className="accent-primary"
-                        />
-                        {type === 'PERCENTAGE' ? 'Percentage (%)' : 'Flat Amount (₹)'}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <label htmlFor="discount-value" className="block text-sm font-medium text-text">
-                      {discountType === 'PERCENTAGE' ? 'Percentage (%)' : 'Flat Amount (₹)'}
-                    </label>
-                    <input
-                      id="discount-value"
-                      type="number"
-                      min="0"
-                      value={discountValue}
-                      onChange={(event) => setDiscountValue(event.target.value)}
-                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      placeholder={discountType === 'PERCENTAGE' ? '10' : '500'}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="max-discount" className="block text-sm font-medium text-text">Max Discount (₹)</label>
-                    <input
-                      id="max-discount"
-                      type="number"
-                      min="0"
-                      value={maxDiscountAmount}
-                      onChange={(event) => setMaxDiscountAmount(event.target.value)}
-                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Optional"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="min-cart" className="block text-sm font-medium text-text">Min Cart Value (₹)</label>
-                    <input
-                      id="min-cart"
-                      type="number"
-                      min="0"
-                      value={minCartValue}
-                      onChange={(event) => setMinCartValue(event.target.value)}
-                      className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Optional"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {offerType === 'CASHBACK' && (
-              <div className="mt-4">
-                <label htmlFor="cashback-amount" className="block text-sm font-medium text-text">Cashback Amount (₹)</label>
-                <input
-                  id="cashback-amount"
-                  type="number"
-                  min="0"
-                  value={cashbackAmount}
-                  onChange={(event) => setCashbackAmount(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="50"
-                  required
-                />
-              </div>
-            )}
-
-            {offerType === 'BUY_GET' && (
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="buy-qty" className="block text-sm font-medium text-text">Buy Quantity</label>
-                  <input
-                    id="buy-qty"
-                    type="number"
-                    min="1"
-                    value={buyQty}
-                    onChange={(event) => setBuyQty(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="2"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="get-qty" className="block text-sm font-medium text-text">Get Quantity (Free)</label>
-                  <input
-                    id="get-qty"
-                    type="number"
-                    min="1"
-                    value={getQty}
-                    onChange={(event) => setGetQty(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="1"
-                    required
-                  />
-                </div>
-              </div>
-            )}
-
-            {offerType === 'PRODUCT_BUNDLE' && (
-              <div className="mt-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-600">Add the products that make up this bundle.</p>
-                  <Button type="button" label="Add item" icon={<FiPlus size={16} />} onClick={addBundleItem} />
-                </div>
-                <div className="space-y-3">
-                  {bundleItems.map((item, index) => (
-                    <div key={item.id} className="grid items-center gap-3 rounded-lg border border-gray-200 p-3 sm:grid-cols-[1fr_120px_44px]">
-                      <div>
-                        <label className="block text-xs text-gray-600">Product ID</label>
-                        <input
-                          type="text"
-                          value={item.productId}
-                          onChange={(event) => updateBundleItem(item.id, 'productId', event.target.value)}
-                          className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                          placeholder="697bcc089b9dbee534801d65"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-gray-600">Quantity</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(event) => updateBundleItem(item.id, 'quantity', event.target.value)}
-                          className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                          required
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeBundleItem(item.id)}
-                        aria-label={`Remove bundle item ${index + 1}`}
-                        className="mt-4 flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-600"
-                      >
-                        <FiTrash2 size={16} />
-                      </button>
-                    </div>
+          {offerType === 'DISCOUNT' && (
+            <div className="mt-4 space-y-3.5">
+              <div>
+                <p className="mb-2 text-[12px] font-extrabold text-ink">Discount Type</p>
+                <div className="flex gap-2">
+                  {(['PERCENTAGE', 'FLAT'] as DiscountType[]).map((type) => (
+                    <Chip key={type} selected={discountType === type} onClick={() => setDiscountType(type)}>
+                      {type === 'PERCENTAGE' ? 'Percentage (%)' : 'Flat Amount (₹)'}
+                    </Chip>
                   ))}
                 </div>
-                <div>
-                  <label htmlFor="bundle-price" className="block text-sm font-medium text-text">Bundle Price (₹)</label>
-                  <input
-                    id="bundle-price"
-                    type="number"
-                    min="0"
-                    value={bundlePrice}
-                    onChange={(event) => setBundlePrice(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="999"
-                    required
-                  />
-                </div>
               </div>
-            )}
-          </section>
+              <div className="grid gap-3.5 sm:grid-cols-3">
+                <Input
+                  label={discountType === 'PERCENTAGE' ? 'Percentage (%)' : 'Flat Amount (₹)'}
+                  type="number"
+                  min="0"
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(e.target.value)}
+                  placeholder={discountType === 'PERCENTAGE' ? '10' : '500'}
+                  required
+                />
+                <Input label="Max Discount (₹)" type="number" min="0" value={maxDiscountAmount} onChange={(e) => setMaxDiscountAmount(e.target.value)} placeholder="Optional" />
+                <Input label="Min Cart Value (₹)" type="number" min="0" value={minCartValue} onChange={(e) => setMinCartValue(e.target.value)} placeholder="Optional" />
+              </div>
+            </div>
+          )}
 
-          <Button
-            type="submit"
-            label={isSubmitting ? 'Creating offer...' : 'Create offer'}
-            icon={<FiGift size={18} />}
-            disabled={isSubmitting}
-            className="w-full py-3"
-          />
-        </form>
-      </main>
-    </div>
+          {offerType === 'CASHBACK' && (
+            <div className="mt-4">
+              <Input label="Cashback Amount (₹)" type="number" min="0" value={cashbackAmount} onChange={(e) => setCashbackAmount(e.target.value)} placeholder="50" required />
+            </div>
+          )}
+
+          {offerType === 'BUY_GET' && (
+            <div className="mt-4 grid gap-3.5 sm:grid-cols-2">
+              <Input label="Buy Quantity" type="number" min="1" value={buyQty} onChange={(e) => setBuyQty(e.target.value)} placeholder="2" required />
+              <Input label="Get Quantity (Free)" type="number" min="1" value={getQty} onChange={(e) => setGetQty(e.target.value)} placeholder="1" required />
+            </div>
+          )}
+
+          {offerType === 'PRODUCT_BUNDLE' && (
+            <div className="mt-4 space-y-3.5">
+              <div className="flex items-center justify-between">
+                <p className="text-[12.5px] font-semibold text-muted">Add the products that make up this bundle.</p>
+                <Button type="button" variant="outline" size="sm" icon={<FiPlus size={16} />} onClick={addBundleItem}>
+                  Add item
+                </Button>
+              </div>
+              <div className="space-y-2.5">
+                {bundleItems.map((item, index) => (
+                  <div key={item.id} className="grid items-end gap-2.5 rounded-tile border border-line p-3 sm:grid-cols-[1fr_110px_40px]">
+                    <Input
+                      label="Product ID"
+                      value={item.productId}
+                      onChange={(e) => updateBundleItem(item.id, 'productId', e.target.value)}
+                      placeholder="697bcc089b9dbee534801d65"
+                      required
+                    />
+                    <Input
+                      label="Quantity"
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => updateBundleItem(item.id, 'quantity', e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeBundleItem(item.id)}
+                      aria-label={`Remove bundle item ${index + 1}`}
+                      className="flex h-11 w-10 items-center justify-center rounded-btn border border-line text-muted t-fast hover:border-danger hover:text-danger"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <Input label="Bundle Price (₹)" type="number" min="0" value={bundlePrice} onChange={(e) => setBundlePrice(e.target.value)} placeholder="999" required />
+            </div>
+          )}
+        </Panel>
+
+        <Button type="submit" variant="primary" fullWidth loading={isSubmitting} icon={<FiGift size={16} />}>
+          Create offer
+        </Button>
+      </form>
+    </Container>
   );
 };
 

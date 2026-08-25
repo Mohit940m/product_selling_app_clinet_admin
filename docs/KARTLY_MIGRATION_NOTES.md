@@ -231,3 +231,35 @@ Not built: the two-column origin/rates desktop layout (kept one stacked
 column at every width, matching the original), a real-data `PageHeader`
 subtitle showing the configured city/state, moving Save into the page
 header, and a `MobileActionBar`.
+
+### 4.8 OffersPage
+
+**Root cause for most of this section's gaps:** the seller offer routes
+(`product_selling_app_server/src/routes/seller.routes/offerManagement.routes.ts`)
+expose exactly one endpoint — `POST /create-offer`. There is no list, get,
+update, delete, or enable/disable endpoint. This page was always a
+create-only form, never a list+CRUD screen, so the plan's grid-of-offer-
+cards / Modal edit / delete-with-Switch / status filter chips (4.8.2-4.8.4,
+4.8.7, and their mobile equivalents 4.8.9-4.8.12) don't have data to work
+against and weren't built.
+
+Implemented: the create form restyled on the new primitives (`Panel`,
+`Input`, `Textarea`, `Chip` for offer-type and discount-type selection,
+`Switch` for "active immediately", `Button`), plus an honest panel at the
+top of the page explaining that offer listing isn't available yet
+(mirroring the `OrderListPage` pattern) rather than the plan's assumed
+"no offers yet" empty state — this app genuinely cannot know whether
+offers exist, only that it can't list them. Also fixed the pre-existing
+baseline lint **error**: `useState<BundleItem[]>([{ id: Date.now(), ... }])`
+called the impure `Date.now()` directly in the initializer expression;
+replaced with a `makeBundleItem()` factory called from a lazy `useState`
+initializer, same pattern used in `AddProductPage`.
+
+**Not built (all a consequence of the missing list/edit endpoints):** the
+target-product picker as a searchable checkbox list (kept the original
+comma-separated product-ID textarea — there's no product-list fetch wired
+into this form to back a picker with), and everything Modal/Sheet/grid
+related above.
+
+With this page fixed, **all three pre-existing baseline lint issues from
+Phase 0 are now resolved** — `npm run lint` is fully clean.

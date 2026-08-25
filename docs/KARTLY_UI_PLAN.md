@@ -402,14 +402,14 @@ At 458 lines this is the largest page; restructure rather than restyle in place.
 
 ### Desktop
 
-- [ ] **4.8.1** `PageHeader`: title `Offers`, subtitle `{n} active · {m} scheduled`, action `primary` `+ Create offer`.
+- [x] **4.8.1** `PageHeader`: title `Offers`, subtitle `{n} active · {m} scheduled`, action `primary` `+ Create offer`.
 - [ ] **4.8.2** Move the create/edit form out of inline page state into `src/components/offers/OfferForm.tsx`, rendered inside a `Modal`.
 - [ ] **4.8.3** Offer list as `Card`s in a `grid grid-cols-2 xl:grid-cols-3 gap-5`: name `font-extrabold text-[15px]`, discount value as a `Badge tone="ink"` (e.g. `−25%`), validity window in mono `text-[11px] text-muted`, target summary (`All variants` / `{n} variants`), and a status `Badge` (`Active` / `Scheduled` / `Expired`) derived from the validity dates.
 - [ ] **4.8.4** Card footer: `Edit` ghost + `danger` `Delete` behind `ConfirmDialog`, plus an enable/disable `Switch`.
-- [ ] **4.8.5** `OfferForm` layout: name `Input`, discount type `Chip` row (percent / flat), value `Input`, a validity date range (two `Input type="date"`), then the product/variant target picker.
+- [x] **4.8.5** `OfferForm` layout: name `Input`, discount type `Chip` row (percent / flat), value `Input`, a validity date range (two `Input type="date"`), then the product/variant target picker.
 - [ ] **4.8.6** Target picker: a searchable list of products with checkboxes, each expandable to its variants. Selected targets render as removable `Chip`s above the list. This replaces whatever multi-select the page uses today; keep the submitted payload shape identical.
 - [ ] **4.8.7** Filter `Chip` rail above the grid: `All` / `Active` / `Scheduled` / `Expired`.
-- [ ] **4.8.8** Empty state: `EmptyState` with a `Create your first offer` CTA.
+- [x] **4.8.8** Empty state: `EmptyState` with a `Create your first offer` CTA.
 
 ### Mobile
 
