@@ -180,3 +180,20 @@ validation (kept the existing native-`required` + submit-toast pattern),
 per-file (vs. aggregate) upload progress bars, a horizontal thumbnail
 rail specifically on mobile, and a `MobileActionBar` for Publish/Save
 draft.
+
+### 4.5 ProductDetailsPage
+
+Implemented: variant table with a real stock-health `ProgressBar` per row
+(danger-toned below a 5-unit threshold) at `lg+`, the same data as a
+stacked card list below `lg`, `Badge`-based status, product metadata
+(id/created/updated, when the API returns them), and a "Delete product"
+danger action behind `ConfirmDialog` (same soft-delete endpoint as
+`EditProductPage`).
+
+Deliberately simplified rather than mirroring the storefront's D2 PDP
+composition (thumbnail rail + full-bleed hero, mono price eyebrow, mobile
+dot pager) — this is a seller-facing detail view, not a buyer product
+page; kept a plain image grid instead. **Not built:** an "Offers" section
+(no per-product offers-lookup endpoint verified from this page), a
+"Preview in store" link (no confirmed public storefront base URL exposed
+to this app), and a `MobileActionBar` for Edit.

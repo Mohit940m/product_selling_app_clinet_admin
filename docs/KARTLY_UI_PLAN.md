@@ -349,12 +349,12 @@ The prototype's admin artboard is essentially this page. Match it closely.
 - [ ] **4.5.2** Info column: mono category eyebrow, name `font-black text-[34px] leading-[1.05] tracking-[-.03em]`, price row with the offer-discounted price and a `Badge tone="ink"` discount tag when an offer applies.
 - [ ] **4.5.3** Below the fold: a `Panel` per section — Variants (table of attribute / price / stock), Offers (active offer cards), and Metadata (mono created/updated timestamps, product id).
 - [ ] **4.5.4** Actions in `PageHeader`: `outline` `Preview in store` (opens the storefront URL for this product in a new tab), `primary` `Edit`, `danger` `Delete` behind `ConfirmDialog`.
-- [ ] **4.5.5** Stock health strip: a `ProgressBar` per variant, `bg-bad-bg` fill when below the low-stock threshold.
+- [x] **4.5.5** Stock health strip: a `ProgressBar` per variant, `bg-bad-bg` fill when below the low-stock threshold.
 
 ### Mobile
 
 - [ ] **4.5.6** Gallery full-bleed at `h-[280px]` with a dot pager; thumbnails become a horizontal rail beneath it.
-- [ ] **4.5.7** Info stacks under the gallery; the variant table becomes a stacked card list.
+- [x] **4.5.7** Info stacks under the gallery; the variant table becomes a stacked card list.
 - [ ] **4.5.8** `Edit` in `MobileActionBar`; `Delete` stays inside the page body so it cannot be hit by accident.
 
 ## 4.6 `OrderListPage.tsx` — orders
