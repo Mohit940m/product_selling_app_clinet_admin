@@ -439,19 +439,19 @@ No prototype screen exists; compose from the design-system panel.
 
 Do this once every page is structurally converted, so timings stay consistent.
 
-- [ ] **5.1** Page transitions: fade + 14px rise (`animate-up`, 300ms) on route change, applied once in `AdminLayout`, keyed by pathname.
-- [ ] **5.2** Stat cards: `t-card`, hover `lift-stat border-accent shadow-lift-stat`.
-- [ ] **5.3** Sidebar nav rows: `t-fast`, hover `bg-card text-ink slide-x`.
-- [ ] **5.4** Table rows: `t-fast`, hover `bg-soft2`; the hover action cluster fades in on `group-hover`.
-- [ ] **5.5** All buttons: `t-base`, hover `lift` + matching shadow, `active:translate-y-0 active:shadow-none`.
-- [ ] **5.6** All inputs and chips: `t-fast`, hover/focus `border-accent`.
-- [ ] **5.7** `BarChart` bars run `animate-bar` on mount and on data change; hover dims to `opacity-75` and reveals a value tooltip.
+- [x] **5.1** Page transitions: fade + 14px rise (`animate-up`, 300ms) on route change, applied once in `AdminLayout`, keyed by pathname.
+- [x] **5.2** Stat cards: `t-card`, hover `lift-stat border-accent shadow-lift-stat`.
+- [x] **5.3** Sidebar nav rows: `t-fast`, hover `bg-card text-ink slide-x`.
+- [x] **5.4** Table rows: `t-fast`, hover `bg-soft2`; the hover action cluster fades in on `group-hover`.
+- [x] **5.5** All buttons: `t-base`, hover `lift` + matching shadow, `active:translate-y-0 active:shadow-none`.
+- [x] **5.6** All inputs and chips: `t-fast`, hover/focus `border-accent`.
+- [x] **5.7** `BarChart` bars run `animate-bar` on mount and on data change; hover dims to `opacity-75` and reveals a value tooltip.
 - [ ] **5.8** Stat values count up from 0 over 600ms on first load (skip entirely under reduced motion).
-- [ ] **5.9** Grid entrance stagger: product and offer grids reveal with `Reveal` at `index * 40ms`, capped at 400ms total.
-- [ ] **5.10** Sheets and drawers: 250ms `cubic-bezier(.2,.8,.2,1)` translate; backdrops fade at 200ms. The sidebar drawer slides from `-translate-x-full`.
-- [ ] **5.11** Skeletons: `animate-shim` everywhere. Confirm `grep -rn "animate-pulse" src/` returns nothing.
-- [ ] **5.12** Save confirmations use the `Toast` (2.5.4) with `animate-up`; the save button briefly shows a check before reverting.
-- [ ] **5.13** Verify the reduced-motion guard: with the OS setting on, no bar animation, no count-up, no looping motion; every entrance is instant.
+- [x] **5.9** Grid entrance stagger: product and offer grids reveal with `Reveal` at `index * 40ms`, capped at 400ms total.
+- [x] **5.10** Sheets and drawers: 250ms `cubic-bezier(.2,.8,.2,1)` translate; backdrops fade at 200ms. The sidebar drawer slides from `-translate-x-full`.
+- [x] **5.11** Skeletons: `animate-shim` everywhere. Confirm `grep -rn "animate-pulse" src/` returns nothing.
+- [x] **5.12** Save confirmations use the `Toast` (2.5.4) with `animate-up`; the save button briefly shows a check before reverting.
+- [x] **5.13** Verify the reduced-motion guard: with the OS setting on, no bar animation, no count-up, no looping motion; every entrance is instant.
 
 ---
 

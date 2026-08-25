@@ -49,8 +49,13 @@ const DataTable = <T,>({ columns, rows, rowKey, onRowClick, loading, loadingRows
     <>
       {/* Mobile: card list */}
       <div className="space-y-3 lg:hidden">
-        {rows.map((row) => (
-          <div key={rowKey(row)} onClick={() => onRowClick?.(row)} className={onRowClick ? 'cursor-pointer' : ''}>
+        {rows.map((row, i) => (
+          <div
+            key={rowKey(row)}
+            onClick={() => onRowClick?.(row)}
+            className={`animate-up ${onRowClick ? 'cursor-pointer' : ''}`}
+            style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
+          >
             {mobileCard(row)}
           </div>
         ))}

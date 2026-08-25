@@ -11,6 +11,7 @@ import Textarea from '../components/ui/Textarea';
 import Button from '../components/ui/Button';
 import FileDrop from '../components/ui/FileDrop';
 import ProgressBar from '../components/ui/ProgressBar';
+import { showKartlyToast } from '../components/ui/showKartlyToast';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages, type UploadedProductImage } from '../api/cloudinaryApi';
 
@@ -170,7 +171,7 @@ const AddProductPage = () => {
 
       await sellerApi.post('/products/create-product', formData);
 
-      toast.success('Product created successfully.');
+      showKartlyToast({ title: 'Product created', sub: name });
       navigate('/products');
     } catch (err) {
       toast.error(getErrorMessage(err, 'Unable to create product.'));

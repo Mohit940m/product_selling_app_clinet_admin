@@ -263,3 +263,15 @@ related above.
 
 With this page fixed, **all three pre-existing baseline lint issues from
 Phase 0 are now resolved** — `npm run lint` is fully clean.
+
+## Phase 5 — motion & interaction pass
+
+12 of 13 items done. Added a `Reveal`-style stagger (`animate-up`,
+`index * 40ms`, capped at 400ms) to `DataTable`'s mobile card list, and
+wired `showKartlyToast` into two representative save-confirmation flows
+(`AddProductPage` create, `EditProductPage` save) as the sample for that
+pattern — matching the scope the user client's Phase 5 used for the same
+item, not an exhaustive sweep of every `toast.success` call in the app.
+
+Not built: **5.8 stat-value count-up animation** on `StatCard` — no
+count-up was implemented; values render at their final number immediately.

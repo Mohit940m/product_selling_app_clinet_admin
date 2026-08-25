@@ -12,6 +12,7 @@ import Button from '../components/ui/Button';
 import FileDrop from '../components/ui/FileDrop';
 import Skeleton from '../components/ui/Skeleton';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { showKartlyToast } from '../components/ui/showKartlyToast';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages } from '../api/cloudinaryApi';
 
@@ -129,7 +130,7 @@ const EditProductPage = () => {
 
       setUploadStatus('Saving product...');
       await sellerApi.put(`/products/edit-product/${productId}`, formData);
-      toast.success('Product updated successfully.');
+      showKartlyToast({ title: 'Product updated', sub: name });
       navigate(`/products/${productId}`);
     } catch (err) {
       toast.error(getErrorMessage(err, 'Unable to update product.'));
