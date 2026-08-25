@@ -21,7 +21,7 @@ Phases 1 and 2 below are **the same token layer and the same primitives** as the
 
 | Phase | Title | Items | Status |
 |---|---|---|---|
-| 0 | Audit & prerequisites | 6 | ☐ |
+| 0 | Audit & prerequisites | 6 | ✅ |
 | 1 | Design foundation (tokens, motion, theme) | 29 | ☐ |
 | 2 | Primitive component library | 30 | ☐ |
 | 3 | Admin shell (sidebar, topbar, mobile nav) | 20 | ☐ |
@@ -44,8 +44,8 @@ Consequence: every `bg-primary`, `text-text`, `bg-secondary`, `text-accent`, `bg
 
 **Decision:** do not revive `tailwind.config.js`. Move the token layer into `@theme` inside `src/index.css` (the v4-native way), and delete the stale config in Phase 7.
 
-- [ ] **0.1.1** Confirm the finding: `npm run dev`, open `/dashboard`, inspect a stat-tile icon chip — `bg-secondary text-primary` renders as transparent-on-black, not lavender-on-grey.
-- [ ] **0.1.2** Inventory every legacy token class:
+- [x] **0.1.1** Confirm the finding: `npm run dev`, open `/dashboard`, inspect a stat-tile icon chip — `bg-secondary text-primary` renders as transparent-on-black, not lavender-on-grey.
+- [x] **0.1.2** Inventory every legacy token class:
   ```bash
   cd product_selling_app_clinet_admin
   grep -rnoE "(bg|text|border|from|to|via)-(primary|secondary|accent|background|text)\b" src/ | sort | uniq -c | sort -rn
@@ -54,10 +54,10 @@ Consequence: every `bg-primary`, `text-text`, `bg-secondary`, `text-accent`, `bg
 
 ## 0.2 Prerequisites
 
-- [ ] **0.2.1** Node deps installed: `cd product_selling_app_clinet_admin && npm install`.
-- [ ] **0.2.2** `.env` present with `VITE_SERVER_URL` and `VITE_PORT=5203`.
-- [ ] **0.2.3** Baseline green build before touching anything: `npm run build` and `npm run lint` both succeed. Record the output in `docs/KARTLY_MIGRATION_NOTES.md`.
-- [ ] **0.2.4** Read the Admin tab of the prototype (`.dc.html` lines 706–818) and the Components tab (820–1045) in full, plus the `renderVals()` block at the bottom of the file — it holds the exact status-badge colour pairs, the bar-chart data shape, and the sidebar nav list.
+- [x] **0.2.1** Node deps installed: `cd product_selling_app_clinet_admin && npm install`.
+- [x] **0.2.2** `.env` present with `VITE_SERVER_URL` and `VITE_PORT=5203`.
+- [x] **0.2.3** Baseline green build before touching anything: `npm run build` and `npm run lint` both succeed. Record the output in `docs/KARTLY_MIGRATION_NOTES.md`.
+- [x] **0.2.4** Read the Admin tab of the prototype (`.dc.html` lines 706–818) and the Components tab (820–1045) in full, plus the `renderVals()` block at the bottom of the file — it holds the exact status-badge colour pairs, the bar-chart data shape, and the sidebar nav list.
 
 ---
 
