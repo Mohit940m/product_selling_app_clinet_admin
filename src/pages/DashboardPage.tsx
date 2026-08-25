@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiBox, FiLogOut, FiMapPin, FiPackage, FiPlus, FiShoppingBag, FiTag, FiTruck } from 'react-icons/fi';
+import { FiBox, FiMapPin, FiPackage, FiPlus, FiShoppingBag, FiTag, FiTruck } from 'react-icons/fi';
 import axios from 'axios';
 import sellerApi from '../api/sellerApi';
 import Button from '../components/Button';
@@ -25,50 +25,6 @@ type ShippingConfig = {
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
-
-const DashboardTopBar = () => {
-  const navigate = useNavigate();
-
-  const logout = () => {
-    localStorage.removeItem('sellerToken');
-    localStorage.removeItem('sellerProfile');
-    navigate('/login');
-  };
-
-  return (
-    <header className="sticky top-0 z-10 border-b border-gray-200 bg-white">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-        <Link to="/dashboard" className="flex items-center gap-2 text-text">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
-            <FiShoppingBag size={22} />
-          </span>
-          <span className="text-lg font-bold">Seller Admin</span>
-        </Link>
-
-        <nav className="flex flex-wrap items-center gap-2 text-sm font-semibold text-gray-600">
-          <Link className="rounded-lg px-3 py-2 text-accent hover:bg-secondary" to="/dashboard">Dashboard</Link>
-          <Link className="rounded-lg px-3 py-2 hover:bg-secondary hover:text-accent" to="/products">Products</Link>
-          <Link className="rounded-lg px-3 py-2 hover:bg-secondary hover:text-accent" to="/orders">Orders</Link>
-          <Link className="rounded-lg px-3 py-2 hover:bg-secondary hover:text-accent" to="/shipping">Shipping</Link>
-          <Link className="rounded-lg px-3 py-2 hover:bg-secondary hover:text-accent" to="/offers">Offers</Link>
-          <button type="button" onClick={logout} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-text hover:border-primary hover:text-accent">
-            <FiLogOut size={18} />
-            Logout
-          </button>
-        </nav>
-      </div>
-    </header>
-  );
-};
-
-const DashboardFooter = () => (
-  <footer className="border-t border-gray-200 bg-white">
-    <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-      <p>Seller Admin</p>
-      <p>Built around seller routes for products, shipping, and offers.</p>
-    </div>
-  </footer>
-);
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -129,7 +85,6 @@ const DashboardPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-text">
-      <DashboardTopBar />
       <main className="flex-1">
         <section className="border-b border-gray-200 bg-white">
           <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 lg:flex-row lg:items-end lg:justify-between">
@@ -260,7 +215,6 @@ const DashboardPage = () => {
           </div>
         </section>
       </main>
-      <DashboardFooter />
     </div>
   );
 };

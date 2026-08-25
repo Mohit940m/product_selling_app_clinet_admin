@@ -4,6 +4,8 @@ import "react-toastify/dist/ReactToastify.css"
 
 import { ThemeProvider } from "./theme/ThemeProvider"
 import { useTheme } from "./theme/useTheme"
+import AdminLayout from "./components/layout/AdminLayout"
+import RequireSellerAuth from "./components/layout/RequireSellerAuth"
 import LoginPage from "./pages/LoginPage"
 import SignUpPage from "./pages/SignUpPage"
 import DashboardPage from "./pages/DashboardPage"
@@ -24,14 +26,19 @@ const AppRoutes = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/products" element={<ProductListPage />} />
-        <Route path="/products/new" element={<AddProductPage />} />
-        <Route path="/products/:productId" element={<ProductDetailsPage />} />
-        <Route path="/products/:productId/edit" element={<EditProductPage />} />
-        <Route path="/orders" element={<OrderListPage />} />
-        <Route path="/shipping" element={<ShippingConfigPage />} />
-        <Route path="/offers" element={<OffersPage />} />
+
+        <Route element={<RequireSellerAuth />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/products" element={<ProductListPage />} />
+            <Route path="/products/new" element={<AddProductPage />} />
+            <Route path="/products/:productId" element={<ProductDetailsPage />} />
+            <Route path="/products/:productId/edit" element={<EditProductPage />} />
+            <Route path="/orders" element={<OrderListPage />} />
+            <Route path="/shipping" element={<ShippingConfigPage />} />
+            <Route path="/offers" element={<OffersPage />} />
+          </Route>
+        </Route>
       </Routes>
       <ToastContainer
         position="top-right"

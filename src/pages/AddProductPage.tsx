@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FiArrowLeft, FiImage, FiPlus, FiTrash2, FiUploadCloud } from 'react-icons/fi';
 import Button from '../components/Button';
-import Header from '../components/Header';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages, type UploadedProductImage } from '../api/cloudinaryApi';
 
@@ -182,7 +181,6 @@ const AddProductPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-text">
-      <Header />
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

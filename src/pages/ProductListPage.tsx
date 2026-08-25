@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FiEdit2, FiPackage, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi';
-import Header from '../components/Header';
 import Button from '../components/Button';
 import sellerApi from '../api/sellerApi';
 
@@ -107,7 +106,6 @@ const ProductListPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-text">
-      <Header />
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>

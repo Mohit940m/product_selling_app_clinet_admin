@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { FiClock, FiPackage, FiSearch } from 'react-icons/fi';
-import Header from '../components/Header';
-
 type OrderStatus = 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -29,7 +27,6 @@ const OrderListPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-text">
-      <Header />
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>

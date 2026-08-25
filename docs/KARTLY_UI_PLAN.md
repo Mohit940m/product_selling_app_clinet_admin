@@ -24,7 +24,7 @@ Phases 1 and 2 below are **the same token layer and the same primitives** as the
 | 0 | Audit & prerequisites | 6 | ✅ |
 | 1 | Design foundation (tokens, motion, theme) | 29 | ☐ |
 | 2 | Primitive component library | 30 | ✅ |
-| 3 | Admin shell (sidebar, topbar, mobile nav) | 20 | ☐ |
+| 3 | Admin shell (sidebar, topbar, mobile nav) | 20 | ✅ |
 | 4 | Page migrations | 96 | ☐ |
 | 5 | Motion & interaction pass | 13 | ☐ |
 | 6 | Responsive QA matrix | 12 | ☐ |
@@ -216,34 +216,34 @@ This is the biggest structural change in the app. Today every page renders a hor
 
 ## 3.1 Desktop sidebar — `src/components/layout/Sidebar.tsx`
 
-- [ ] **3.1.1** Create the file. Shell: `w-[236px] shrink-0 border-r border-line bg-soft2 px-5 py-7 flex flex-col gap-1.5 h-screen sticky top-0`.
-- [ ] **3.1.2** Brand block: extract `src/components/layout/BrandMark.tsx` — a `28×28 rounded-[10px] bg-ink` tile with a `12×12 rounded-full bg-accent` dot at `-3px/-3px`, wordmark at `font-extrabold text-[15px]`, and a mono `admin` sub-label at `text-[9px] text-muted`. Identical construction to the storefront's `BrandMark`.
-- [ ] **3.1.3** Nav items: `rounded-[13px] px-3.5 py-3 font-semibold text-[13px] text-muted t-fast`, hover `bg-card text-ink slide-x`, **active** `bg-ink text-card font-extrabold`. Note the admin's active state is *ink*, not accent — that is deliberate and differs from the storefront's account nav.
-- [ ] **3.1.4** Nav list mapped to real routes: `Overview → /dashboard`, `Products → /products`, `Orders → /orders`, `Shipping → /shipping`, `Offers → /offers`. The prototype also lists `Customers`, `Fulfilment` and `Discounts` — **omit any nav item with no route behind it.** Do not ship dead links.
-- [ ] **3.1.5** Footer card: `mt-auto rounded-tile bg-card border border-line p-3.5` showing the signed-in seller's name and store from `localStorage.sellerProfile`, with a `Logout` ghost Button.
-- [ ] **3.1.6** Theme toggle sits directly above the footer card: a row with a `Switch` and a `Dark mode` label.
-- [ ] **3.1.7** Hidden below `lg` (`hidden lg:flex`).
+- [x] **3.1.1** Create the file. Shell: `w-[236px] shrink-0 border-r border-line bg-soft2 px-5 py-7 flex flex-col gap-1.5 h-screen sticky top-0`.
+- [x] **3.1.2** Brand block: extract `src/components/layout/BrandMark.tsx` — a `28×28 rounded-[10px] bg-ink` tile with a `12×12 rounded-full bg-accent` dot at `-3px/-3px`, wordmark at `font-extrabold text-[15px]`, and a mono `admin` sub-label at `text-[9px] text-muted`. Identical construction to the storefront's `BrandMark`.
+- [x] **3.1.3** Nav items: `rounded-[13px] px-3.5 py-3 font-semibold text-[13px] text-muted t-fast`, hover `bg-card text-ink slide-x`, **active** `bg-ink text-card font-extrabold`. Note the admin's active state is *ink*, not accent — that is deliberate and differs from the storefront's account nav.
+- [x] **3.1.4** Nav list mapped to real routes: `Overview → /dashboard`, `Products → /products`, `Orders → /orders`, `Shipping → /shipping`, `Offers → /offers`. The prototype also lists `Customers`, `Fulfilment` and `Discounts` — **omit any nav item with no route behind it.** Do not ship dead links.
+- [x] **3.1.5** Footer card: `mt-auto rounded-tile bg-card border border-line p-3.5` showing the signed-in seller's name and store from `localStorage.sellerProfile`, with a `Logout` ghost Button.
+- [x] **3.1.6** Theme toggle sits directly above the footer card: a row with a `Switch` and a `Dark mode` label.
+- [x] **3.1.7** Hidden below `lg` (`hidden lg:flex`).
 
 ## 3.2 Mobile navigation
 
 The prototype has no mobile admin design. This is the specified behaviour.
 
-- [ ] **3.2.1** Create `src/components/layout/MobileTopBar.tsx`: `lg:hidden sticky top-0 z-50 border-b border-line bg-card px-5 py-3.5 flex items-center gap-3` — hamburger tile (`40×40 rounded-[13px] border border-edge`), `BrandMark` compact, and a right-side page-action slot.
-- [ ] **3.2.2** The hamburger opens the sidebar as a left-anchored `Sheet` (`w-[280px]`, slides in from `-translate-x-full`, backdrop `bg-ink/40 backdrop-blur-sm`). Reuse the **same** `Sidebar` nav item components — do not build a second nav.
-- [ ] **3.2.3** The drawer closes on route change and on `Esc`; focus returns to the hamburger.
-- [ ] **3.2.4** Add `src/components/layout/MobileActionBar.tsx` — a fixed bottom bar (`lg:hidden`, `border-t border-line bg-card pb-[env(safe-area-inset-bottom)]`) that pages use for their primary CTA (`Publish`, `Save changes`, `Create offer`). This keeps destructive-adjacent primary actions thumb-reachable instead of stranded at the bottom of a long form.
+- [x] **3.2.1** Create `src/components/layout/MobileTopBar.tsx`: `lg:hidden sticky top-0 z-50 border-b border-line bg-card px-5 py-3.5 flex items-center gap-3` — hamburger tile (`40×40 rounded-[13px] border border-edge`), `BrandMark` compact, and a right-side page-action slot.
+- [x] **3.2.2** The hamburger opens the sidebar as a left-anchored `Sheet` (`w-[280px]`, slides in from `-translate-x-full`, backdrop `bg-ink/40 backdrop-blur-sm`). Reuse the **same** `Sidebar` nav item components — do not build a second nav.
+- [x] **3.2.3** The drawer closes on route change and on `Esc`; focus returns to the hamburger.
+- [x] **3.2.4** Add `src/components/layout/MobileActionBar.tsx` — a fixed bottom bar (`lg:hidden`, `border-t border-line bg-card pb-[env(safe-area-inset-bottom)]`) that pages use for their primary CTA (`Publish`, `Save changes`, `Create offer`). This keeps destructive-adjacent primary actions thumb-reachable instead of stranded at the bottom of a long form.
 - [ ] **3.2.5** Pages that render a `MobileActionBar` add `pb-28 lg:pb-0` to their content container.
 
 ## 3.3 Layout wrapper
 
-- [ ] **3.3.1** Create `src/components/layout/AdminLayout.tsx`: `flex min-h-screen bg-bg text-ink` with `<Sidebar />`, then a `flex-1 flex flex-col min-w-0` column containing `<MobileTopBar />`, `<main className="flex-1">`, and the drawer portal. **`min-w-0` is required** — without it the flex child refuses to shrink and every table forces page-level horizontal scroll.
-- [ ] **3.3.2** Create `src/components/layout/PageHeader.tsx` from the prototype's content header (lines 727–737): greeting/title block at `font-black text-[26px] leading-[1.1] tracking-[-.03em]`, sub-line `text-[12.5px] text-muted font-semibold`, and a right-aligned action cluster. Props: `title`, `subtitle`, `actions`. Stacks vertically below `sm`.
-- [ ] **3.3.3** Convert `src/App.tsx` to nested routes: a parent `<Route element={<AdminLayout />}>` with `<Outlet />` for all authenticated routes, so the shell is not re-mounted on navigation.
-- [ ] **3.3.4** Keep `/login` and `/signup` **outside** `AdminLayout` — they use a brand-only centred layout (4.9).
-- [ ] **3.3.5** Add a scroll-to-top effect on pathname change.
-- [ ] **3.3.6** **Delete `src/components/Header.tsx`** and the private `DashboardTopBar` in `DashboardPage.tsx` and both `AuthTopBar` copies in `LoginPage.tsx` / `SignUpPage.tsx` once every page renders inside `AdminLayout`.
-- [ ] **3.3.7** Extract the auth guard repeated in all ten pages (`localStorage.getItem('sellerToken')` → redirect) into `src/components/layout/RequireSellerAuth.tsx` and wrap the `AdminLayout` route with it. Pages stop doing their own guarding.
-- [ ] **3.3.8** Add a shared `src/components/layout/Footer.tsx` for the desktop content column (muted, `border-t border-line`), replacing the per-page `DashboardFooter`-style inline footers.
+- [x] **3.3.1** Create `src/components/layout/AdminLayout.tsx`: `flex min-h-screen bg-bg text-ink` with `<Sidebar />`, then a `flex-1 flex flex-col min-w-0` column containing `<MobileTopBar />`, `<main className="flex-1">`, and the drawer portal. **`min-w-0` is required** — without it the flex child refuses to shrink and every table forces page-level horizontal scroll.
+- [x] **3.3.2** Create `src/components/layout/PageHeader.tsx` from the prototype's content header (lines 727–737): greeting/title block at `font-black text-[26px] leading-[1.1] tracking-[-.03em]`, sub-line `text-[12.5px] text-muted font-semibold`, and a right-aligned action cluster. Props: `title`, `subtitle`, `actions`. Stacks vertically below `sm`.
+- [x] **3.3.3** Convert `src/App.tsx` to nested routes: a parent `<Route element={<AdminLayout />}>` with `<Outlet />` for all authenticated routes, so the shell is not re-mounted on navigation.
+- [x] **3.3.4** Keep `/login` and `/signup` **outside** `AdminLayout` — they use a brand-only centred layout (4.9).
+- [x] **3.3.5** Add a scroll-to-top effect on pathname change.
+- [x] **3.3.6** **Delete `src/components/Header.tsx`** and the private `DashboardTopBar` in `DashboardPage.tsx` and both `AuthTopBar` copies in `LoginPage.tsx` / `SignUpPage.tsx` once every page renders inside `AdminLayout`.
+- [x] **3.3.7** Extract the auth guard repeated in all ten pages (`localStorage.getItem('sellerToken')` → redirect) into `src/components/layout/RequireSellerAuth.tsx` and wrap the `AdminLayout` route with it. Pages stop doing their own guarding.
+- [x] **3.3.8** Add a shared `src/components/layout/Footer.tsx` for the desktop content column (muted, `border-t border-line`), replacing the per-page `DashboardFooter`-style inline footers.
 
 ---
 

@@ -4,7 +4,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FiArrowLeft, FiImage, FiSave, FiTrash2, FiUploadCloud } from 'react-icons/fi';
-import Header from '../components/Header';
 import Button from '../components/Button';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages } from '../api/cloudinaryApi';
@@ -140,7 +139,6 @@ const EditProductPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-text">
-      <Header />
       <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <Link to={`/products/${productId}`} className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
           <FiArrowLeft size={18} />
