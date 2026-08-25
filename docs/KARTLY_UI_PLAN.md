@@ -450,7 +450,7 @@ Do this once every page is structurally converted, so timings stay consistent.
 - [x] **5.5** All buttons: `t-base`, hover `lift` + matching shadow, `active:translate-y-0 active:shadow-none`.
 - [x] **5.6** All inputs and chips: `t-fast`, hover/focus `border-accent`.
 - [x] **5.7** `BarChart` bars run `animate-bar` on mount and on data change; hover dims to `opacity-75` and reveals a value tooltip.
-- [ ] **5.8** Stat values count up from 0 over 600ms on first load (skip entirely under reduced motion).
+- [x] **5.8** Stat values count up from 0 over 600ms on first load (skip entirely under reduced motion).
 - [x] **5.9** Grid entrance stagger: product and offer grids reveal with `Reveal` at `index * 40ms`, capped at 400ms total.
 - [x] **5.10** Sheets and drawers: 250ms `cubic-bezier(.2,.8,.2,1)` translate; backdrops fade at 200ms. The sidebar drawer slides from `-translate-x-full`.
 - [x] **5.11** Skeletons: `animate-shim` everywhere. Confirm `grep -rn "animate-pulse" src/` returns nothing.
