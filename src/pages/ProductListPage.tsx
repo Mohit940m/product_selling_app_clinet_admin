@@ -5,6 +5,7 @@ import axios from 'axios';
 import { FiEdit2, FiPackage, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi';
 import Container from '../components/layout/Container';
 import PageHeader from '../components/layout/PageHeader';
+import MobileActionBar from '../components/layout/MobileActionBar';
 import Button from '../components/ui/Button';
 import Chip from '../components/ui/Chip';
 import Badge from '../components/ui/Badge';
@@ -178,16 +179,22 @@ const ProductListPage = () => {
   ];
 
   return (
-    <Container className="py-6 lg:py-8">
+    <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
       <PageHeader
         title="Products"
         subtitle={`${products.length} products · ${products.filter((p) => p.isActive).length} active`}
         actions={
-          <Button variant="primary" icon={<FiPlus size={16} />} onClick={() => navigate('/products/new')}>
+          <Button variant="primary" icon={<FiPlus size={16} />} onClick={() => navigate('/products/new')} className="hidden lg:inline-flex">
             New product
           </Button>
         }
       />
+
+      <MobileActionBar>
+        <Button variant="primary" fullWidth icon={<FiPlus size={16} />} onClick={() => navigate('/products/new')}>
+          New product
+        </Button>
+      </MobileActionBar>
 
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-full border border-line px-4 py-2.5 t-fast focus-within:border-accent focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent lg:max-w-[340px]">

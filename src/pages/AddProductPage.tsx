@@ -12,6 +12,7 @@ import Button from '../components/ui/Button';
 import FileDrop from '../components/ui/FileDrop';
 import ProgressBar from '../components/ui/ProgressBar';
 import { showKartlyToast } from '../components/ui/showKartlyToast';
+import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages, type UploadedProductImage } from '../api/cloudinaryApi';
 
@@ -178,7 +179,7 @@ const AddProductPage = () => {
   };
 
   return (
-    <Container className="py-6 lg:py-8">
+    <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
       <div className="mb-6">
         <Link to="/products" className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
           <FiArrowLeft size={16} />
@@ -190,7 +191,7 @@ const AddProductPage = () => {
         </p>
       </div>
 
-      <form className="grid gap-5 lg:grid-cols-[1.6fr_1fr]" onSubmit={submitProduct}>
+      <form id="add-product-form" className="grid gap-5 lg:grid-cols-[1.6fr_1fr]" onSubmit={submitProduct}>
         <section className="space-y-5">
           <Panel>
             <h2 className="text-[16px] font-extrabold text-ink">Basics</h2>
@@ -325,12 +326,18 @@ const AddProductPage = () => {
             {uploadedImages.length > 0 && (
               <p className="mt-3 text-[12.5px] font-semibold text-muted">{uploadedImages.length} image URLs ready for metadata save.</p>
             )}
-            <Button type="submit" variant="primary" fullWidth loading={isSubmitting} icon={<FiPlus size={16} />} className="mt-4">
+            <Button type="submit" variant="primary" fullWidth loading={isSubmitting} icon={<FiPlus size={16} />} className="mt-4 hidden lg:inline-flex">
               Publish
             </Button>
           </Panel>
         </aside>
       </form>
+
+      <MobileActionBar>
+        <Button type="submit" form="add-product-form" variant="primary" fullWidth loading={isSubmitting} icon={<FiPlus size={16} />}>
+          Publish
+        </Button>
+      </MobileActionBar>
     </Container>
   );
 };

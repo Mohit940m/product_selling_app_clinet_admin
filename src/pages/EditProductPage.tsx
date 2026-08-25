@@ -13,6 +13,7 @@ import FileDrop from '../components/ui/FileDrop';
 import Skeleton from '../components/ui/Skeleton';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { showKartlyToast } from '../components/ui/showKartlyToast';
+import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages } from '../api/cloudinaryApi';
 
@@ -157,7 +158,7 @@ const EditProductPage = () => {
   const totalImageCount = existingImages.length - imagesToDelete.length + newImages.length;
 
   return (
-    <Container className="max-w-3xl! py-6 lg:py-8">
+    <Container className="max-w-3xl! py-6 pb-28 lg:pb-8 lg:py-8">
       <Link to={`/products/${productId}`} className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
         <FiArrowLeft size={16} />
         Product details
@@ -171,7 +172,7 @@ const EditProductPage = () => {
           <Skeleton className="h-40" />
         </div>
       ) : (
-        <form className="mt-6 space-y-5" onSubmit={saveProduct}>
+        <form id="edit-product-form" className="mt-6 space-y-5" onSubmit={saveProduct}>
           <Panel>
             <h2 className="text-[16px] font-extrabold text-ink">Basics</h2>
             <div className="mt-4 space-y-3.5">
@@ -262,7 +263,7 @@ const EditProductPage = () => {
             <div className="rounded-btn border border-accent bg-soft2 p-3 text-[12.5px] font-semibold text-accent">{uploadStatus}</div>
           )}
 
-          <Button type="submit" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />}>
+          <Button type="submit" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />} className="hidden lg:inline-flex">
             Save changes
           </Button>
 
@@ -270,6 +271,14 @@ const EditProductPage = () => {
             Delete product
           </Button>
         </form>
+      )}
+
+      {!isLoading && (
+        <MobileActionBar>
+          <Button type="submit" form="edit-product-form" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />}>
+            Save changes
+          </Button>
+        </MobileActionBar>
       )}
 
       <ConfirmDialog

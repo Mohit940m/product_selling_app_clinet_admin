@@ -8,6 +8,7 @@ import Panel from '../components/ui/Panel';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Skeleton from '../components/ui/Skeleton';
+import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
 
 type ShippingRate = {
@@ -138,7 +139,7 @@ const ShippingConfigPage = () => {
   };
 
   return (
-    <Container className="max-w-3xl! py-6 lg:py-8">
+    <Container className="max-w-3xl! py-6 pb-28 lg:pb-8 lg:py-8">
       <div className="mb-6">
         <p className="font-mono text-[11px] font-bold text-muted">LOGISTICS</p>
         <h1 className="mt-1.5 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">Shipping</h1>
@@ -155,7 +156,7 @@ const ShippingConfigPage = () => {
           <Skeleton className="h-64" />
         </div>
       ) : (
-        <form onSubmit={saveConfig} className="space-y-5">
+        <form id="shipping-config-form" onSubmit={saveConfig} className="space-y-5">
           <Panel>
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-tile bg-soft text-[var(--k-on-soft)]">
@@ -222,10 +223,18 @@ const ShippingConfigPage = () => {
             </div>
           </Panel>
 
-          <Button type="submit" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />}>
+          <Button type="submit" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />} className="hidden lg:inline-flex">
             {hasConfig ? 'Update configuration' : 'Create configuration'}
           </Button>
         </form>
+      )}
+
+      {!isLoading && (
+        <MobileActionBar>
+          <Button type="submit" form="shipping-config-form" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />}>
+            {hasConfig ? 'Update configuration' : 'Create configuration'}
+          </Button>
+        </MobileActionBar>
       )}
     </Container>
   );

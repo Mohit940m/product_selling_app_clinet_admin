@@ -12,6 +12,7 @@ import ProgressBar from '../components/ui/ProgressBar';
 import Skeleton from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
 
 const LOW_STOCK_THRESHOLD = 5;
@@ -100,7 +101,7 @@ const ProductDetailsPage = () => {
   };
 
   return (
-    <Container className="py-6 lg:py-8">
+    <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link to="/products" className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
@@ -112,7 +113,7 @@ const ProductDetailsPage = () => {
         </div>
         {product && (
           <div className="flex gap-2.5">
-            <Button variant="primary" icon={<FiEdit2 size={16} />} onClick={() => navigate(`/products/${product._id}/edit`)}>
+            <Button variant="primary" icon={<FiEdit2 size={16} />} onClick={() => navigate(`/products/${product._id}/edit`)} className="hidden lg:inline-flex">
               Edit
             </Button>
             <Button variant="danger" icon={<FiTrash2 size={16} />} onClick={() => setShowDeleteConfirm(true)}>
@@ -121,6 +122,14 @@ const ProductDetailsPage = () => {
           </div>
         )}
       </div>
+
+      {product && (
+        <MobileActionBar>
+          <Button variant="primary" fullWidth icon={<FiEdit2 size={16} />} onClick={() => navigate(`/products/${product._id}/edit`)}>
+            Edit
+          </Button>
+        </MobileActionBar>
+      )}
 
       {isLoading && (
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.2fr]">

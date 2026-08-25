@@ -5,6 +5,7 @@ import axios from 'axios';
 import sellerApi from '../api/sellerApi';
 import Container from '../components/layout/Container';
 import PageHeader from '../components/layout/PageHeader';
+import MobileActionBar from '../components/layout/MobileActionBar';
 import Button from '../components/ui/Button';
 import Panel from '../components/ui/Panel';
 import StatCard from '../components/ui/StatCard';
@@ -88,7 +89,7 @@ const DashboardPage = () => {
   const hasProducts = products.length > 0;
 
   return (
-    <Container className="py-6 lg:py-8">
+    <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
       <PageHeader
         title="Dashboard"
         subtitle="Track your seller catalog, stock health, shipping setup, and the next actions from one calm workspace."
@@ -96,17 +97,26 @@ const DashboardPage = () => {
           <>
             <Link
               to="/products"
-              className="flex items-center gap-2 rounded-btn border border-line bg-card px-4.5 py-3 text-[12.5px] font-bold text-ink t-fast hover:border-accent hover:text-accent"
+              className="hidden items-center gap-2 rounded-btn border border-line bg-card px-4.5 py-3 text-[12.5px] font-bold text-ink t-fast hover:border-accent hover:text-accent lg:flex"
             >
               <FiPackage size={16} />
               Products
             </Link>
-            <Button variant="primary" icon={<FiPlus size={16} />} onClick={() => navigate('/products/new')}>
+            <Button variant="primary" icon={<FiPlus size={16} />} onClick={() => navigate('/products/new')} className="hidden lg:inline-flex">
               New product
             </Button>
           </>
         }
       />
+
+      <MobileActionBar>
+        <Button variant="outline" fullWidth onClick={() => navigate('/products')} icon={<FiPackage size={16} />}>
+          Products
+        </Button>
+        <Button variant="primary" fullWidth icon={<FiPlus size={16} />} onClick={() => navigate('/products/new')}>
+          New product
+        </Button>
+      </MobileActionBar>
 
       {notice && (
         <div className="mb-6 rounded-btn border border-warn-fg/30 bg-warn-bg p-4 text-sm font-semibold text-warn-fg">{notice}</div>

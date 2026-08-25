@@ -347,3 +347,29 @@ bar). Recommend a manual device/browser pass before shipping.
   `aria-label` summary plus a visually-hidden `<table>` of the values.
 - **7.2.10 keyboard-only pass** — needs a live browser; not performed in
   this session for the same reason as Phase 6.
+
+## Post-Phase-7 follow-up — wire up MobileActionBar
+
+`layout/MobileActionBar.tsx` was built in Phase 3 but never actually used
+by any page — every page kept its primary action in the `PageHeader`
+instead, reachable but not thumb-pinned on mobile. Wired it into the six
+pages the plan named it for:
+
+- `DashboardPage` — Products / New product.
+- `ProductListPage` — New product.
+- `AddProductPage` — Publish (submits via `form="add-product-form"` so the
+  fixed-position action bar's button still participates in the page's
+  `<form>`; `Save draft` stays out, no draft-status field exists).
+- `EditProductPage` — Save changes (same `form` attribute pattern); Delete
+  stays in the page body, not the action bar, so it can't be hit by
+  accident from a thumb-reachable position.
+- `ProductDetailsPage` — Edit; Delete likewise stays in the page body.
+- `ShippingConfigPage` — Update/Create configuration.
+
+Each page's header/in-form action button is now `hidden lg:inline-flex`
+(desktop only) with the `MobileActionBar` copy taking over below `lg`,
+and each page's `Container` got `pb-28 lg:pb-8` so content clears the
+fixed bar. Confirmed the `form`-attribute submit pattern actually works:
+`Button` already spreads native `ButtonHTMLAttributes`, so `form="..."` on
+a button rendered outside its `<form>` in the DOM still submits it — no
+component change needed.

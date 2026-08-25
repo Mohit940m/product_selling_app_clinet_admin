@@ -236,7 +236,7 @@ The prototype has no mobile admin design. This is the specified behaviour.
 - [x] **3.2.2** The hamburger opens the sidebar as a left-anchored `Sheet` (`w-[280px]`, slides in from `-translate-x-full`, backdrop `bg-ink/40 backdrop-blur-sm`). Reuse the **same** `Sidebar` nav item components — do not build a second nav.
 - [x] **3.2.3** The drawer closes on route change and on `Esc`; focus returns to the hamburger.
 - [x] **3.2.4** Add `src/components/layout/MobileActionBar.tsx` — a fixed bottom bar (`lg:hidden`, `border-t border-line bg-card pb-[env(safe-area-inset-bottom)]`) that pages use for their primary CTA (`Publish`, `Save changes`, `Create offer`). This keeps destructive-adjacent primary actions thumb-reachable instead of stranded at the bottom of a long form.
-- [ ] **3.2.5** Pages that render a `MobileActionBar` add `pb-28 lg:pb-0` to their content container.
+- [x] **3.2.5** Pages that render a `MobileActionBar` add `pb-28 lg:pb-0` to their content container.
 
 ## 3.3 Layout wrapper
 
@@ -292,7 +292,7 @@ The prototype's admin artboard is essentially this page. Match it closely.
 - [x] **4.1.12** Fulfilment queue stacks below the chart, full width.
 - [ ] **4.1.13** Recent orders renders as the `DataTable` mobile card list: order id + status `Badge` on the first line, customer and items on the second, total right-aligned and bold.
 - [ ] **4.1.14** The quick add-product form collapses to a single `Panel` with a `Open full form →` link to `/products/new` rather than a cramped inline form.
-- [ ] **4.1.15** `+ New product` moves into `MobileActionBar`.
+- [x] **4.1.15** `+ New product` moves into `MobileActionBar`.
 
 ## 4.2 `ProductListPage.tsx` — catalog
 
@@ -311,7 +311,7 @@ The prototype's admin artboard is essentially this page. Match it closely.
 - [x] **4.2.8** `DataTable` mobile mode: one `Card` per product — hatched `64×64` thumb left, name `font-bold text-[13px]`, category muted, price bold, status `Badge` top-right.
 - [x] **4.2.9** Search moves into a sticky sub-bar under `MobileTopBar`; the status filter becomes a horizontal `Chip` rail (`no-scrollbar`).
 - [x] **4.2.10** Card tap → detail; edit/delete live inside the detail page rather than as hidden hover actions.
-- [ ] **4.2.11** `+ New product` in `MobileActionBar`.
+- [x] **4.2.11** `+ New product` in `MobileActionBar`.
 
 ## 4.3 `AddProductPage.tsx` — create product
 
@@ -334,7 +334,7 @@ The prototype's admin artboard is essentially this page. Match it closely.
 - [x] **4.3.10** `FileDrop` becomes a tap-to-browse tile — drag-and-drop text is meaningless on touch; swap the copy to `Add product images`.
 - [ ] **4.3.11** Staged thumbnails become a horizontal `no-scrollbar` rail at `72×72`.
 - [ ] **4.3.12** Variant rows stack their fields two-up instead of four-across.
-- [ ] **4.3.13** `Save draft` / `Publish` move into `MobileActionBar` (`Publish` primary and full-width, `Save draft` as a ghost beside it).
+- [x] **4.3.13** `Save draft` / `Publish` move into `MobileActionBar` (`Publish` primary and full-width, `Save draft` as a ghost beside it).
 
 ## 4.4 `EditProductPage.tsx` — edit product
 
@@ -343,7 +343,7 @@ The prototype's admin artboard is essentially this page. Match it closely.
 - [x] **4.4.3** Existing images render in the same thumbnail strip as staged ones, visually distinguished by a muted `Uploaded` label; removal marks them for deletion on save.
 - [x] **4.4.4** Add a `danger` `Delete product` action at the bottom of the Status panel, behind `ConfirmDialog`.
 - [ ] **4.4.5** Unsaved-changes guard: warn on navigation away when the form is dirty.
-- [ ] **4.4.6** **Mobile:** identical to 4.3.9–4.3.13, with `Save changes` as the `MobileActionBar` primary.
+- [x] **4.4.6** **Mobile:** identical to 4.3.9–4.3.13, with `Save changes` as the `MobileActionBar` primary.
 
 ## 4.5 `ProductDetailsPage.tsx` — product view
 
@@ -359,7 +359,7 @@ The prototype's admin artboard is essentially this page. Match it closely.
 
 - [ ] **4.5.6** Gallery full-bleed at `h-[280px]` with a dot pager; thumbnails become a horizontal rail beneath it.
 - [x] **4.5.7** Info stacks under the gallery; the variant table becomes a stacked card list.
-- [ ] **4.5.8** `Edit` in `MobileActionBar`; `Delete` stays inside the page body so it cannot be hit by accident.
+- [x] **4.5.8** `Edit` in `MobileActionBar`; `Delete` stays inside the page body so it cannot be hit by accident.
 
 ## 4.6 `OrderListPage.tsx` — orders
 
@@ -398,7 +398,7 @@ The current page is 131 lines and thin. This is where the prototype's table desi
 
 - [ ] **4.7.8** Single column; rate rows stack cost below the name rather than right-aligned.
 - [ ] **4.7.9** Inline rate editing becomes a `Sheet` — inline two-field editing is too cramped at 375px.
-- [ ] **4.7.10** `Save` in `MobileActionBar`.
+- [x] **4.7.10** `Save` in `MobileActionBar`.
 
 ## 4.8 `OffersPage.tsx` — offers
 
