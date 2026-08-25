@@ -34,23 +34,18 @@ type ShippingConfig = {
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
 
-const hasToken = () => !!localStorage.getItem('sellerToken');
-
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [shippingConfig, setShippingConfig] = useState<ShippingConfig | null>(null);
-  // Lazy initializers instead of setState-in-effect for the "no token" case
-  // (react-hooks/set-state-in-effect flags synchronous setState in an
-  // effect body — deriving the initial value avoids it entirely).
-  const [isLoading, setIsLoading] = useState(hasToken);
-  const [notice, setNotice] = useState(() =>
-    hasToken() ? '' : 'Login to connect this dashboard to your seller account.',
-  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [notice, setNotice] = useState('');
 
+  // RequireSellerAuth already guarantees a sellerToken exists for every
+  // route inside AdminLayout, so this effect no longer needs to guard for
+  // one — that removes the setState-in-effect branch the earlier fix
+  // worked around.
   useEffect(() => {
-    if (!hasToken()) return;
-
     const loadDashboard = async () => {
       try {
         const [productsResponse, shippingResponse] = await Promise.all([

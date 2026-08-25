@@ -493,14 +493,14 @@ Pass criteria applied at every width:
 
 ## 7.1 Removal of the old system
 
-- [ ] **7.1.1** Re-run the Phase 0.1.2 grep. Zero matches for the legacy `bg-primary` / `text-text` / `bg-secondary` / `bg-background` / `text-accent` meanings.
-- [ ] **7.1.2** Delete `product_selling_app_clinet_admin/tailwind.config.js` — Tailwind v4 does not read it.
-- [ ] **7.1.3** Delete `src/components/Header.tsx`, `src/components/Card.tsx`, `src/components/MetricCard.tsx` (superseded by `Sidebar`/`MobileTopBar`, `Panel`, `StatCard`).
-- [ ] **7.1.4** Remove the private `DashboardTopBar` and both `AuthTopBar` definitions.
-- [ ] **7.1.5** Remove the per-page auth-guard `useEffect`s now that `RequireSellerAuth` handles it (3.3.7).
-- [ ] **7.1.6** Remove unused assets: `src/assets/react.svg`, `src/assets/vite.svg`, and any of `src/assets/icons/*.tsx` no longer referenced (the app mostly uses `react-icons` Feather).
-- [ ] **7.1.7** Mark `docs/design_language.md` as superseded — add a header line pointing at this file, or delete it. Leaving two conflicting design docs in `docs/` is the failure mode that produced the dead-token situation in the first place.
-- [ ] **7.1.8** Delete the stray `vite-dev.log` and `vite-dev.err.log` at the project root and add them to `.gitignore`.
+- [x] **7.1.1** Re-run the Phase 0.1.2 grep. Zero matches for the legacy `bg-primary` / `text-text` / `bg-secondary` / `bg-background` / `text-accent` meanings.
+- [x] **7.1.2** Delete `product_selling_app_clinet_admin/tailwind.config.js` — Tailwind v4 does not read it.
+- [x] **7.1.3** Delete `src/components/Header.tsx`, `src/components/Card.tsx`, `src/components/MetricCard.tsx` (superseded by `Sidebar`/`MobileTopBar`, `Panel`, `StatCard`).
+- [x] **7.1.4** Remove the private `DashboardTopBar` and both `AuthTopBar` definitions.
+- [x] **7.1.5** Remove the per-page auth-guard `useEffect`s now that `RequireSellerAuth` handles it (3.3.7).
+- [x] **7.1.6** Remove unused assets: `src/assets/react.svg`, `src/assets/vite.svg`, and any of `src/assets/icons/*.tsx` no longer referenced (the app mostly uses `react-icons` Feather).
+- [x] **7.1.7** Mark `docs/design_language.md` as superseded — add a header line pointing at this file, or delete it. Leaving two conflicting design docs in `docs/` is the failure mode that produced the dead-token situation in the first place.
+- [x] **7.1.8** Delete the stray `vite-dev.log` and `vite-dev.err.log` at the project root and add them to `.gitignore`.
 
 ## 7.2 Accessibility
 

@@ -119,12 +119,8 @@ const AddProductPage = () => {
   const submitProduct = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!localStorage.getItem('sellerToken')) {
-      toast.error('Login before creating a product.');
-      navigate('/login');
-      return;
-    }
-
+    // RequireSellerAuth already guarantees a sellerToken exists for every
+    // route inside AdminLayout, so this page-local check is no longer needed.
     if (images.length === 0) {
       toast.error('Add at least one product image.');
       return;

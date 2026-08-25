@@ -1,5 +1,13 @@
 # Design Language Documentation
 
+> **Superseded.** This documents the pre-Kartly `primary`/`secondary`/`accent`
+> token set defined in `tailwind.config.js` — which Tailwind v4 never read in
+> the first place (no `@config` directive), and which has since been deleted.
+> The live design system is the Kartly token layer in `src/index.css` (`--k-*`
+> custom properties + the Tailwind `@theme` block). See
+> `docs/KARTLY_UI_PLAN.md` and `docs/KARTLY_MIGRATION_NOTES.md` for the
+> current source of truth. Kept for historical reference only.
+
 ## Overview
 This document outlines the design language and guidelines for the project. It serves as a reference for maintaining consistency in the design and user interface across the application.
 
