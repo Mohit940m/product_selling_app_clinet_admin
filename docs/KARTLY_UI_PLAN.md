@@ -294,19 +294,19 @@ The prototype's admin artboard is essentially this page. Match it closely.
 
 ### Desktop
 
-- [ ] **4.2.1** `PageHeader`: title `Products`, subtitle `{n} products · {m} active`, actions `outline` Export + `primary` `+ New product`.
-- [ ] **4.2.2** Toolbar row: search `Input` (`max-w-[340px] rounded-full`), status filter `Chip`s (`All` / `Active` / `Inactive`), and a sort `Select`. Wire to the existing search + status filter state.
-- [ ] **4.2.3** Body as `DataTable`: columns `PRODUCT` (hatched `48×48` thumb + name + mono SKU), `CATEGORY`, `VARIANTS`, `STOCK`, `PRICE`, `STATUS` (`Badge`). Row click → `/products/:id`.
-- [ ] **4.2.4** Row-hover action cluster on the right: ghost `Edit` and `danger` `Delete` icon buttons, appearing on `group-hover`.
-- [ ] **4.2.5** Delete goes through `ConfirmDialog` (2.5.3), never `window.confirm`.
-- [ ] **4.2.6** Loading state: five `Skeleton` rows. Empty state: `EmptyState` with a `Create your first product` CTA.
+- [x] **4.2.1** `PageHeader`: title `Products`, subtitle `{n} products · {m} active`, actions `outline` Export + `primary` `+ New product`.
+- [x] **4.2.2** Toolbar row: search `Input` (`max-w-[340px] rounded-full`), status filter `Chip`s (`All` / `Active` / `Inactive`), and a sort `Select`. Wire to the existing search + status filter state.
+- [x] **4.2.3** Body as `DataTable`: columns `PRODUCT` (hatched `48×48` thumb + name + mono SKU), `CATEGORY`, `VARIANTS`, `STOCK`, `PRICE`, `STATUS` (`Badge`). Row click → `/products/:id`.
+- [x] **4.2.4** Row-hover action cluster on the right: ghost `Edit` and `danger` `Delete` icon buttons, appearing on `group-hover`.
+- [x] **4.2.5** Delete goes through `ConfirmDialog` (2.5.3), never `window.confirm`.
+- [x] **4.2.6** Loading state: five `Skeleton` rows. Empty state: `EmptyState` with a `Create your first product` CTA.
 - [ ] **4.2.7** Pagination as `outline` Buttons with `Page {n} of {m}` in `text-muted` between them.
 
 ### Mobile
 
-- [ ] **4.2.8** `DataTable` mobile mode: one `Card` per product — hatched `64×64` thumb left, name `font-bold text-[13px]`, category muted, price bold, status `Badge` top-right.
-- [ ] **4.2.9** Search moves into a sticky sub-bar under `MobileTopBar`; the status filter becomes a horizontal `Chip` rail (`no-scrollbar`).
-- [ ] **4.2.10** Card tap → detail; edit/delete live inside the detail page rather than as hidden hover actions.
+- [x] **4.2.8** `DataTable` mobile mode: one `Card` per product — hatched `64×64` thumb left, name `font-bold text-[13px]`, category muted, price bold, status `Badge` top-right.
+- [x] **4.2.9** Search moves into a sticky sub-bar under `MobileTopBar`; the status filter becomes a horizontal `Chip` rail (`no-scrollbar`).
+- [x] **4.2.10** Card tap → detail; edit/delete live inside the detail page rather than as hidden hover actions.
 - [ ] **4.2.11** `+ New product` in `MobileActionBar`.
 
 ## 4.3 `AddProductPage.tsx` — create product

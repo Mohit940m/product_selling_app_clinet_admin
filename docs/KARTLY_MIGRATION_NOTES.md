@@ -131,3 +131,20 @@ Deliberately **not** built:
 - **4.1.15 "+New product" in MobileActionBar** — kept as an always-visible
   PageHeader action instead (reachable at every width, just not pinned to
   a bottom bar).
+
+### 4.2 ProductListPage
+
+Implemented: PageHeader with real counts, search + status Chip filters,
+the responsive DataTable (real `<table>` at `lg+`, stacked cards below),
+row actions (Activate/Deactivate, Edit, Delete) kept always-visible on
+both breakpoints rather than hover-gated, `ConfirmDialog` replacing the
+page's own hand-rolled delete modal, `EmptyState`/skeleton loading via
+`DataTable`. Fixed the pre-existing `exhaustive-deps` baseline warning
+with the same `eslint-disable-next-line` pattern already used elsewhere
+in this codebase for the identical intentional-omission case.
+
+Not built: **4.2.2 sort Select** (no sort query param confirmed on the
+backend), **4.2.7 pagination** (the endpoint is called with a flat
+`limit: 50`, no page param wired — pre-existing scope, not added), and
+**4.2.11 MobileActionBar** for "+New product" (kept as an always-visible
+`PageHeader` action instead, matching the Dashboard note above).
