@@ -197,3 +197,20 @@ page; kept a plain image grid instead. **Not built:** an "Offers" section
 (no per-product offers-lookup endpoint verified from this page), a
 "Preview in store" link (no confirmed public storefront base URL exposed
 to this app), and a `MobileActionBar` for Edit.
+
+### 4.6 OrderListPage
+
+Kept the page's existing honest stance — "Order management API routes
+coming soon" — since the seller routes (`product_selling_app_server/src/routes/seller.routes/`)
+have no order-listing endpoint at all. Restyled the shell: `PageHeader`,
+`Chip`-based status filter rail (using the **real** backend order-status
+enum from `order.model.ts` — `CREATED/CONFIRMED/SHIPPED/OUT FOR
+DELIVERY/DELIVERED/CANCELLED` — replacing the page's previous invented
+`pending/processing/shipped/delivered/cancelled` set that didn't match the
+schema), `EmptyState`, and `Badge`+`statusTone` for the status-legend row.
+
+The `DataTable` (4.6.3), row-click detail `Sheet` (4.6.5), date-range
+filter (4.6.6), and the mobile card-list equivalents (4.6.8-4.6.11) are
+not built — there is no order data to populate them with, and a table
+that always renders its own empty state would just be this page's
+`EmptyState` with extra steps.

@@ -363,8 +363,8 @@ The current page is 131 lines and thin. This is where the prototype's table desi
 
 ### Desktop
 
-- [ ] **4.6.1** `PageHeader`: title `Orders`, subtitle `{n} orders · {m} awaiting fulfilment`.
-- [ ] **4.6.2** Status filter `Chip` rail: `All` / `Pending` / `Packed` / `In transit` / `Delivered` / `Refund`, selected = `bg-ink text-card` per the prototype.
+- [x] **4.6.1** `PageHeader`: title `Orders`, subtitle `{n} orders · {m} awaiting fulfilment`.
+- [x] **4.6.2** Status filter `Chip` rail: `All` / `Pending` / `Packed` / `In transit` / `Delivered` / `Refund`, selected = `bg-ink text-card` per the prototype.
 - [ ] **4.6.3** `DataTable` with the prototype's exact grid `1.1fr 1.6fr 1.2fr .9fr .9fr` and mono headers `ORDER / CUSTOMER / ITEMS / TOTAL / STATUS`.
 - [ ] **4.6.4** Order id in `font-mono font-extrabold`; customer `font-semibold`; items `text-muted font-medium`; total `font-extrabold`; status via `Badge` + `statusTone`.
 - [ ] **4.6.5** Row hover `bg-soft2`; row click opens an order detail `Sheet` (right drawer) with line items, address, payment reference and a status-advance control if the backend supports it.

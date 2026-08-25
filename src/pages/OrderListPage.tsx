@@ -1,127 +1,95 @@
 import { useState } from 'react';
 import { FiClock, FiPackage, FiSearch } from 'react-icons/fi';
-type OrderStatus = 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+import Container from '../components/layout/Container';
+import PageHeader from '../components/layout/PageHeader';
+import Chip from '../components/ui/Chip';
+import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
+import statusTone from '../components/ui/statusTone';
+
+// Matches product_selling_app_server/src/models/orderModels/order.model.ts ORDER_STATUS.
+type OrderStatus = 'all' | 'CREATED' | 'CONFIRMED' | 'SHIPPED' | 'OUT FOR DELIVERY' | 'DELIVERED' | 'CANCELLED';
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   all: 'All',
-  pending: 'Pending',
-  processing: 'Processing',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
+  CREATED: 'Created',
+  CONFIRMED: 'Confirmed',
+  SHIPPED: 'Shipped',
+  'OUT FOR DELIVERY': 'Out for delivery',
+  DELIVERED: 'Delivered',
+  CANCELLED: 'Cancelled',
 };
 
-const STATUS_STYLES: Record<Exclude<OrderStatus, 'all'>, string> = {
-  pending: 'bg-yellow-50 text-yellow-700',
-  processing: 'bg-blue-50 text-blue-700',
-  shipped: 'bg-purple-50 text-purple-700',
-  delivered: 'bg-green-50 text-green-700',
-  cancelled: 'bg-gray-100 text-gray-600',
-};
+const FILTER_TABS: OrderStatus[] = ['all', 'CREATED', 'CONFIRMED', 'SHIPPED', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED'];
 
-const FILTER_TABS: OrderStatus[] = ['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-
+/**
+ * There is currently no seller endpoint to list orders — the seller
+ * routes (product_selling_app_server/src/routes/seller.routes/) only
+ * cover auth, products, shipping, and offers. This stays an honest
+ * EmptyState rather than fabricating order rows. The status vocabulary
+ * above is real (read from the Order model) so the UI is ready to wire
+ * up the moment a list-orders endpoint exists.
+ */
 const OrderListPage = () => {
   const [search, setSearch] = useState('');
   const [activeStatus, setActiveStatus] = useState<OrderStatus>('all');
 
   return (
-    <div className="min-h-screen bg-background text-text">
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-accent">Fulfillment</p>
-            <h1 className="mt-2 text-2xl font-bold text-text">Orders</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Track and manage customer orders, update statuses, and review order details.
-            </p>
-          </div>
-        </div>
+    <Container className="py-6 lg:py-8">
+      <PageHeader
+        title="Orders"
+        subtitle="Track and manage customer orders, update statuses, and review order details."
+      />
 
-        <section className="rounded-lg border border-gray-200 bg-white shadow-md">
-          <div className="border-b border-gray-200 p-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex min-w-0 flex-1 items-center rounded-lg border border-gray-200 bg-white px-3 shadow-sm focus-within:ring-2 focus-within:ring-primary">
-                <FiSearch className="text-primary" size={20} />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  className="w-full px-3 py-3 text-sm outline-none"
-                  placeholder="Search by order ID or customer name"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {FILTER_TABS.map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    onClick={() => setActiveStatus(status)}
-                    className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors ${
-                      activeStatus === status
-                        ? 'bg-primary text-white'
-                        : 'border border-gray-200 text-gray-600 hover:border-primary hover:text-accent'
-                    }`}
-                  >
-                    {STATUS_LABELS[status]}
-                  </button>
-                ))}
-              </div>
+      <div className="rounded-panel border border-line bg-card">
+        <div className="border-b border-line p-4">
+          <div className="flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-full border border-line px-4 py-2.5 t-fast focus-within:border-accent lg:max-w-[340px]">
+              <FiSearch className="shrink-0 text-muted" size={16} />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                className="w-full bg-transparent text-base outline-none placeholder:text-muted sm:text-[12.5px]"
+                placeholder="Search by order ID or customer name"
+              />
             </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px] border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
-                  <th className="py-3 pr-4 pl-4 font-semibold">Order ID</th>
-                  <th className="px-4 py-3 font-semibold">Customer</th>
-                  <th className="px-4 py-3 font-semibold">Items</th>
-                  <th className="px-4 py-3 font-semibold">Total</th>
-                  <th className="px-4 py-3 font-semibold">Date</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="py-3 pr-4 pl-4 text-right font-semibold">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={7} className="py-16 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <span className="flex h-16 w-16 items-center justify-center rounded-lg bg-secondary text-primary">
-                        <FiPackage size={32} />
-                      </span>
-                      <div>
-                        <p className="font-semibold text-text">No orders yet</p>
-                        <p className="mt-1 text-sm text-gray-600">
-                          Orders placed by customers will appear here.
-                        </p>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2 rounded-lg border border-gray-200 bg-secondary px-4 py-2 text-xs text-gray-600">
-                        <FiClock size={14} className="text-primary" />
-                        Order management API routes coming soon
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
-            <p className="text-sm text-gray-600">
-              {activeStatus === 'all' ? 'Showing all orders' : `Filtered by: ${STATUS_LABELS[activeStatus]}`}
-              {search && ` · Search: "${search}"`}
-            </p>
-            <div className="flex gap-2">
-              {Object.entries(STATUS_STYLES).map(([status, style]) => (
-                <span key={status} className={`rounded-lg px-2 py-1 text-xs font-bold ${style}`}>
-                  {STATUS_LABELS[status as Exclude<OrderStatus, 'all'>]}
-                </span>
+            <div className="flex flex-wrap gap-2 overflow-x-auto no-scrollbar">
+              {FILTER_TABS.map((status) => (
+                <Chip key={status} selected={activeStatus === status} onClick={() => setActiveStatus(status)}>
+                  {STATUS_LABELS[status]}
+                </Chip>
               ))}
             </div>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+
+        <div className="p-4 sm:p-8">
+          <EmptyState
+            icon={<FiPackage size={30} />}
+            title="No orders yet"
+            description="Orders placed by customers will appear here."
+            action={
+              <span className="flex items-center gap-2 rounded-full border border-line bg-soft2 px-4 py-2 text-xs font-semibold text-muted">
+                <FiClock size={14} className="text-accent" />
+                Order management API routes coming soon
+              </span>
+            }
+          />
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-line px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[12.5px] font-medium text-muted">
+            {activeStatus === 'all' ? 'Showing all orders' : `Filtered by: ${STATUS_LABELS[activeStatus]}`}
+            {search && ` · Search: "${search}"`}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {(['CONFIRMED', 'OUT FOR DELIVERY', 'DELIVERED', 'CANCELLED'] as const).map((status) => (
+              <Badge key={status} tone={statusTone(status)}>{STATUS_LABELS[status]}</Badge>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Container>
   );
 };
 
