@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
+import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FiArrowLeft, FiImage, FiPlus, FiTrash2, FiUploadCloud } from 'react-icons/fi';
-import Button from '../components/Button';
+import { FiArrowLeft, FiImage, FiPlus, FiTrash2 } from 'react-icons/fi';
+import Container from '../components/layout/Container';
+import Panel from '../components/ui/Panel';
+import Input from '../components/ui/Input';
+import Textarea from '../components/ui/Textarea';
+import Button from '../components/ui/Button';
+import FileDrop from '../components/ui/FileDrop';
+import ProgressBar from '../components/ui/ProgressBar';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages, type UploadedProductImage } from '../api/cloudinaryApi';
 
@@ -22,13 +28,13 @@ type SelectedProductImage = {
   previewUrl: string;
 };
 
-const defaultVariant: VariantRow = {
-  id: Date.now(),
+const makeVariant = (): VariantRow => ({
+  id: Date.now() + Math.floor(Math.random() * 1000),
   optionOne: '',
   optionTwo: '',
   price: '',
   stock: '',
-};
+});
 
 const getErrorMessage = (err: unknown, fallback: string) => {
   if (axios.isAxiosError(err)) {
@@ -45,7 +51,9 @@ const AddProductPage = () => {
   const [category, setCategory] = useState('');
   const [variantTypeOne, setVariantTypeOne] = useState('Size');
   const [variantTypeTwo, setVariantTypeTwo] = useState('Color');
-  const [variants, setVariants] = useState<VariantRow[]>([defaultVariant]);
+  // Lazy initializer avoids calling the impure Date.now() during render
+  // (react-hooks/purity flagged the previous `useState([{ id: Date.now() ... }])`).
+  const [variants, setVariants] = useState<VariantRow[]>(() => [makeVariant()]);
   const [images, setImages] = useState<SelectedProductImage[]>([]);
   const [uploadedImages, setUploadedImages] = useState<UploadedProductImage[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,21 +71,14 @@ const AddProductPage = () => {
   };
 
   const addVariant = () => {
-    setVariants((current) => [...current, { ...defaultVariant, id: Date.now() }]);
+    setVariants((current) => [...current, makeVariant()]);
   };
 
   const removeVariant = (id: number) => {
     setVariants((current) => current.length === 1 ? current : current.filter((variant) => variant.id !== id));
   };
 
-  const handleImages = (event: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files ?? []);
-    event.target.value = '';
-
-    if (selectedFiles.length === 0) {
-      return;
-    }
-
+  const handleImages = (files: File[]) => {
     setUploadedImages([]);
     setImages((current) => {
       const availableSlots = 5 - current.length;
@@ -87,11 +88,11 @@ const AddProductPage = () => {
         return current;
       }
 
-      if (selectedFiles.length > availableSlots) {
+      if (files.length > availableSlots) {
         toast.info(`Only ${availableSlots} more image${availableSlots === 1 ? '' : 's'} can be added.`);
       }
 
-      const nextImages = selectedFiles.slice(0, availableSlots).map((file) => ({
+      const nextImages = files.slice(0, availableSlots).map((file) => ({
         id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
         file,
         previewUrl: URL.createObjectURL(file),
@@ -180,205 +181,160 @@ const AddProductPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text">
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Link to="/products" className="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
-              <FiArrowLeft size={18} />
-              Products
-            </Link>
-            <h1 className="mt-2 text-2xl font-bold text-text">Add Product</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Upload images to Cloudinary first, then save product metadata to the seller API.
-            </p>
-          </div>
-        </div>
+    <Container className="py-6 lg:py-8">
+      <div className="mb-6">
+        <Link to="/products" className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
+          <FiArrowLeft size={16} />
+          Products
+        </Link>
+        <h1 className="mt-2 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">New product</h1>
+        <p className="mt-1 text-[12.5px] font-semibold text-muted">
+          Upload images to Cloudinary first, then save product metadata to the seller API.
+        </p>
+      </div>
 
-        <form className="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]" onSubmit={submitProduct}>
-          <section className="space-y-6">
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <h2 className="text-lg font-bold text-text">Product Details</h2>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="product-name" className="block text-sm font-medium text-text">Name</label>
-                  <input
-                    id="product-name"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Classic T-Shirt"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-text">Category</label>
-                  <input
-                    id="category"
-                    value={category}
-                    onChange={(event) => setCategory(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Men's Clothing"
-                    required
-                  />
-                </div>
+      <form className="grid gap-5 lg:grid-cols-[1.6fr_1fr]" onSubmit={submitProduct}>
+        <section className="space-y-5">
+          <Panel>
+            <h2 className="text-[16px] font-extrabold text-ink">Basics</h2>
+            <div className="mt-4 grid gap-3.5 sm:grid-cols-2">
+              <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Classic T-Shirt" required />
+              <Input label="Category" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Men's Clothing" required />
+            </div>
+            <Textarea
+              label="Description"
+              wrapperClassName="mt-3.5"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-32"
+              placeholder="Describe material, fit, use case, and seller notes."
+              required
+            />
+          </Panel>
+
+          <Panel>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-[16px] font-extrabold text-ink">Variants</h2>
+                <p className="text-[12.5px] font-semibold text-muted">The backend supports up to two variant types.</p>
               </div>
-              <div className="mt-4">
-                <label htmlFor="description" className="block text-sm font-medium text-text">Description</label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  className="mt-1 min-h-32 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Describe material, fit, use case, and seller notes."
-                  required
-                />
-              </div>
+              <Button type="button" variant="outline" icon={<FiPlus size={16} />} onClick={addVariant}>
+                Add variant
+              </Button>
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-bold text-text">Variants</h2>
-                  <p className="text-sm text-gray-600">The backend supports up to two variant types.</p>
-                </div>
-                <Button type="button" label="Add variant" icon={<FiPlus size={18} />} onClick={addVariant} />
-              </div>
+            <div className="mt-4 grid gap-3.5 sm:grid-cols-2">
+              <Input label="Variant Type 1" value={variantTypeOne} onChange={(e) => setVariantTypeOne(e.target.value)} required />
+              <Input label="Variant Type 2" value={variantTypeTwo} onChange={(e) => setVariantTypeTwo(e.target.value)} placeholder="Optional" />
+            </div>
 
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="variant-type-one" className="block text-sm font-medium text-text">Variant Type 1</label>
+            <div className="mt-4 space-y-2.5">
+              {variants.map((variant, index) => (
+                <div key={variant.id} className="grid gap-2.5 rounded-tile border border-line p-3.5 md:grid-cols-[1fr_1fr_110px_110px_40px]">
                   <input
-                    id="variant-type-one"
-                    value={variantTypeOne}
-                    onChange={(event) => setVariantTypeOne(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
+                    value={variant.optionOne}
+                    onChange={(event) => updateVariant(variant.id, 'optionOne', event.target.value)}
+                    className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"
+                    placeholder={`${variantTypeOne || 'Option'} value`}
                     required
                   />
-                </div>
-                <div>
-                  <label htmlFor="variant-type-two" className="block text-sm font-medium text-text">Variant Type 2</label>
                   <input
-                    id="variant-type-two"
-                    value={variantTypeTwo}
-                    onChange={(event) => setVariantTypeTwo(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Optional"
+                    value={variant.optionTwo}
+                    onChange={(event) => updateVariant(variant.id, 'optionTwo', event.target.value)}
+                    className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"
+                    placeholder={`${variantTypeTwo || 'Option'} value`}
+                    required={Boolean(variantTypeTwo.trim())}
                   />
+                  <input
+                    type="number"
+                    min="0"
+                    value={variant.price}
+                    onChange={(event) => updateVariant(variant.id, 'price', event.target.value)}
+                    className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"
+                    placeholder="Price"
+                    required
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    value={variant.stock}
+                    onChange={(event) => updateVariant(variant.id, 'stock', event.target.value)}
+                    className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"
+                    placeholder="Stock"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeVariant(variant.id)}
+                    aria-label={`Remove variant ${index + 1}`}
+                    className="flex h-10 w-10 items-center justify-center rounded-btn border border-line text-muted t-fast hover:border-danger hover:text-danger"
+                  >
+                    <FiTrash2 size={16} />
+                  </button>
                 </div>
-              </div>
+              ))}
+            </div>
+          </Panel>
+        </section>
 
-              <div className="mt-4 space-y-3">
-                {variants.map((variant, index) => (
-                  <div key={variant.id} className="grid gap-3 rounded-lg border border-gray-200 p-3 md:grid-cols-[1fr_1fr_120px_120px_44px]">
-                    <input
-                      value={variant.optionOne}
-                      onChange={(event) => updateVariant(variant.id, 'optionOne', event.target.value)}
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      placeholder={`${variantTypeOne || 'Option'} value`}
-                      required
-                    />
-                    <input
-                      value={variant.optionTwo}
-                      onChange={(event) => updateVariant(variant.id, 'optionTwo', event.target.value)}
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      placeholder={`${variantTypeTwo || 'Option'} value`}
-                      required={Boolean(variantTypeTwo.trim())}
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      value={variant.price}
-                      onChange={(event) => updateVariant(variant.id, 'price', event.target.value)}
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Price"
-                      required
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      value={variant.stock}
-                      onChange={(event) => updateVariant(variant.id, 'stock', event.target.value)}
-                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Stock"
-                      required
-                    />
+        <aside className="space-y-5">
+          <Panel>
+            <h2 className="text-[16px] font-extrabold text-ink">Images</h2>
+            <FileDrop
+              onFiles={handleImages}
+              label={`Add product images here — ${images.length}/5 selected`}
+              disabled={images.length >= 5}
+            />
+
+            <div className="mt-4 grid grid-cols-2 gap-2.5">
+              {images.map((image, idx) => (
+                <div key={image.id} className="overflow-hidden rounded-tile border border-line bg-card">
+                  <div className="relative">
+                    <img src={image.previewUrl} alt={image.file.name} className="aspect-square w-full object-cover" />
+                    {idx === 0 && (
+                      <span className="absolute left-1.5 top-1.5 rounded-full bg-ink px-2 py-0.5 text-[9px] font-extrabold text-card">
+                        Cover
+                      </span>
+                    )}
                     <button
                       type="button"
-                      onClick={() => removeVariant(variant.id)}
-                      aria-label={`Remove variant ${index + 1}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-600"
+                      onClick={() => removeImage(image.id)}
+                      aria-label={`Remove ${image.file.name}`}
+                      className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-card text-muted shadow-kartly hover:text-danger"
                     >
-                      <FiTrash2 size={18} />
+                      <FiTrash2 size={14} />
                     </button>
                   </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <aside className="space-y-6">
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <h2 className="text-lg font-bold text-text">Images</h2>
-              <label htmlFor="product-images" className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-secondary p-6 text-center hover:border-primary">
-                <FiUploadCloud className="text-primary" size={30} />
-                <span className="mt-3 text-sm font-semibold text-text">Upload product images</span>
-                <span className="mt-1 text-xs text-gray-600">{images.length}/5 selected. You can add more later.</span>
-                <input
-                  id="product-images"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImages}
-                  className="sr-only"
-                  required={images.length === 0}
-                />
-              </label>
-
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                {images.map((image) => (
-                  <div key={image.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                    <div className="relative">
-                      <img src={image.previewUrl} alt={image.file.name} className="aspect-square w-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(image.id)}
-                        aria-label={`Remove ${image.file.name}`}
-                        className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white text-gray-700 shadow-md hover:text-red-600"
-                      >
-                        <FiTrash2 size={16} />
-                      </button>
-                    </div>
-                    <p className="truncate px-2 py-2 text-xs text-gray-600">{image.file.name}</p>
-                  </div>
-                ))}
-                {images.length === 0 && (
-                  <div className="col-span-2 rounded-lg border border-gray-200 p-4 text-center text-sm text-gray-600">
-                    <FiImage className="mx-auto text-primary" size={24} />
-                    <p className="mt-2">No images selected.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <h2 className="text-lg font-bold text-text">Publish</h2>
-              {uploadStatus && <p className="mt-3 rounded-lg bg-secondary p-3 text-sm text-accent">{uploadStatus}</p>}
-              {uploadedImages.length > 0 && (
-                <p className="mt-3 text-sm text-gray-600">{uploadedImages.length} image URLs ready for metadata save.</p>
+                  <p className="truncate px-2 py-1.5 text-[10.5px] text-muted">{image.file.name}</p>
+                </div>
+              ))}
+              {images.length === 0 && (
+                <div className="col-span-2 rounded-tile border border-line p-4 text-center text-[12.5px] text-muted">
+                  <FiImage className="mx-auto text-accent" size={22} />
+                  <p className="mt-2">No images selected.</p>
+                </div>
               )}
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                label={isSubmitting ? 'Creating product...' : 'Create product'}
-                icon={<FiPlus size={18} />}
-                className="mt-4 w-full py-3"
-              />
             </div>
-          </aside>
-        </form>
-      </main>
-    </div>
+          </Panel>
+
+          <Panel>
+            <h2 className="text-[16px] font-extrabold text-ink">Publish</h2>
+            {uploadStatus && (
+              <>
+                <p className="mt-3 rounded-btn bg-soft2 p-3 text-[12.5px] font-semibold text-accent">{uploadStatus}</p>
+                <ProgressBar percent={isSubmitting ? 60 : 0} className="mt-2.5" />
+              </>
+            )}
+            {uploadedImages.length > 0 && (
+              <p className="mt-3 text-[12.5px] font-semibold text-muted">{uploadedImages.length} image URLs ready for metadata save.</p>
+            )}
+            <Button type="submit" variant="primary" fullWidth loading={isSubmitting} icon={<FiPlus size={16} />} className="mt-4">
+              Publish
+            </Button>
+          </Panel>
+        </aside>
+      </form>
+    </Container>
   );
 };
 

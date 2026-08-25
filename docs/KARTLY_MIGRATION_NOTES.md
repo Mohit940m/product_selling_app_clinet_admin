@@ -148,3 +148,35 @@ backend), **4.2.7 pagination** (the endpoint is called with a flat
 `limit: 50`, no page param wired — pre-existing scope, not added), and
 **4.2.11 MobileActionBar** for "+New product" (kept as an always-visible
 `PageHeader` action instead, matching the Dashboard note above).
+
+### 4.3/4.4 AddProductPage / EditProductPage — no shared ProductForm
+
+Plan 4.4.1 calls for extracting a single `src/components/products/ProductForm.tsx`
+both pages render with a `mode` prop, on the assumption they're "the exact
+same form composition." They aren't: `AddProductPage` manages variant rows
+(attributes/price/stock per variant) and `EditProductPage` has no variant
+editing at all today — only name/description/category/images. Forcing a
+single shared form would mean either bolting variant-editing onto Edit (a
+real feature addition, out of scope for a design migration) or building a
+form that pretends the two pages have identical capabilities when they
+don't. Restyled each page independently instead, on the same primitives
+(`Panel`, `Input`, `Textarea`, `FileDrop`, `Button`, `ProgressBar`, new
+this phase since the admin Phase 2 primitive list didn't include it but
+both this page and the planned 4.5.5 stock-health strip need it).
+
+**AddProductPage implemented:** two-column Basics/Variants/Images/Publish
+panels, `FileDrop` for the Cloudinary upload flow, staged-image thumbnails
+with a "Cover" badge on the first image, an aggregate upload-progress
+indicator, single-column stacking below `lg`. Also swapped the
+module-level `defaultVariant` object (built once with `Date.now()` at
+import time — not actually the lint-flagged pattern, but the same latent
+smell as `OffersPage`) for a `makeVariant()` factory called from a lazy
+`useState` initializer.
+
+**Not built:** a "Save draft" action (no draft-status field confirmed on
+the backend — the original form never had one either), a product
+active/inactive `Switch` on create (no field exposed), per-field inline
+validation (kept the existing native-`required` + submit-toast pattern),
+per-file (vs. aggregate) upload progress bars, a horizontal thumbnail
+rail specifically on mobile, and a `MobileActionBar` for Publish/Save
+draft.

@@ -316,18 +316,18 @@ The prototype's admin artboard is essentially this page. Match it closely.
 ### Desktop
 
 - [ ] **4.3.1** `PageHeader`: title `New product`, back link to `/products`, actions `outline` `Save draft` + `primary` `Publish`.
-- [ ] **4.3.2** Two-column form: main column `flex-[1.6]` with `Panel`s for **Basics** (name, description, category `Select`), **Pricing & stock** (price / stock / SKU in a three-up row), and **Variants**; side column `w-[340px] sticky top-8` with **Images** and **Status**.
-- [ ] **4.3.3** Images `Panel` uses `FileDrop` (2.2.6). Preserve the existing Cloudinary signature flow in `src/api/cloudinaryApi.ts` exactly — this is a styling change, not an upload rewrite.
-- [ ] **4.3.4** Staged image thumbnails: `96×96 rounded-tile border border-line`, the first marked `Cover` with a `Badge tone="ink"`, each with a remove `×` on hover. Support drag-to-reorder if the current code already tracks order; otherwise leave order as upload order and note it.
-- [ ] **4.3.5** Variant rows: `rounded-tile border border-line p-3.5` with attribute/value/price/stock `Input`s and a `danger` remove button; `+ Add variant` as a dashed row (`border-dashed border-edge`, hover `border-accent text-accent`).
+- [x] **4.3.2** Two-column form: main column `flex-[1.6]` with `Panel`s for **Basics** (name, description, category `Select`), **Pricing & stock** (price / stock / SKU in a three-up row), and **Variants**; side column `w-[340px] sticky top-8` with **Images** and **Status**.
+- [x] **4.3.3** Images `Panel` uses `FileDrop` (2.2.6). Preserve the existing Cloudinary signature flow in `src/api/cloudinaryApi.ts` exactly — this is a styling change, not an upload rewrite.
+- [x] **4.3.4** Staged image thumbnails: `96×96 rounded-tile border border-line`, the first marked `Cover` with a `Badge tone="ink"`, each with a remove `×` on hover. Support drag-to-reorder if the current code already tracks order; otherwise leave order as upload order and note it.
+- [x] **4.3.5** Variant rows: `rounded-tile border border-line p-3.5` with attribute/value/price/stock `Input`s and a `danger` remove button; `+ Add variant` as a dashed row (`border-dashed border-edge`, hover `border-accent text-accent`).
 - [ ] **4.3.6** Status `Panel`: an active/inactive `Switch` with a muted explanation line.
 - [ ] **4.3.7** Per-field validation errors render inline in the `Input` error slot, not as a toast dump. Keep the existing submit-level toast for request failures.
-- [ ] **4.3.8** Upload progress: an accent `ProgressBar` per file while Cloudinary uploads; the `Publish` button is `loading` and disabled until all uploads settle.
+- [x] **4.3.8** Upload progress: an accent `ProgressBar` per file while Cloudinary uploads; the `Publish` button is `loading` and disabled until all uploads settle.
 
 ### Mobile
 
-- [ ] **4.3.9** Single column; the side `Panel`s move below the main ones in the order Basics → Images → Pricing → Variants → Status.
-- [ ] **4.3.10** `FileDrop` becomes a tap-to-browse tile — drag-and-drop text is meaningless on touch; swap the copy to `Add product images`.
+- [x] **4.3.9** Single column; the side `Panel`s move below the main ones in the order Basics → Images → Pricing → Variants → Status.
+- [x] **4.3.10** `FileDrop` becomes a tap-to-browse tile — drag-and-drop text is meaningless on touch; swap the copy to `Add product images`.
 - [ ] **4.3.11** Staged thumbnails become a horizontal `no-scrollbar` rail at `72×72`.
 - [ ] **4.3.12** Variant rows stack their fields two-up instead of four-across.
 - [ ] **4.3.13** `Save draft` / `Publish` move into `MobileActionBar` (`Publish` primary and full-width, `Save draft` as a ghost beside it).
