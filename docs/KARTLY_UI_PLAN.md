@@ -474,17 +474,17 @@ Test every route at every width, in **both themes**. Tick a route only when all 
 
 Pass criteria applied at every width:
 
-- [ ] **6.1** No page-level horizontal scroll. Verify on every route with `document.documentElement.scrollWidth <= window.innerWidth`. The orders and products tables are the likely offenders — check them first.
-- [ ] **6.2** Every table renders as a real table at `lg+` and as a card list below `lg`; no table is ever squeezed into an unreadable 375px grid.
-- [ ] **6.3** Sidebar is persistent at `lg+` and a drawer below; the drawer closes on route change.
-- [ ] **6.4** `MobileActionBar` visible below `lg` on the pages that declare one, with no content trapped underneath it.
-- [ ] **6.5** All modals present as bottom sheets below `lg`.
+- [x] **6.1** No page-level horizontal scroll. Verify on every route with `document.documentElement.scrollWidth <= window.innerWidth`. The orders and products tables are the likely offenders — check them first.
+- [x] **6.2** Every table renders as a real table at `lg+` and as a card list below `lg`; no table is ever squeezed into an unreadable 375px grid.
+- [x] **6.3** Sidebar is persistent at `lg+` and a drawer below; the drawer closes on route change.
+- [x] **6.4** `MobileActionBar` visible below `lg` on the pages that declare one, with no content trapped underneath it.
+- [x] **6.5** All modals present as bottom sheets below `lg`.
 - [ ] **6.6** Every tap target ≥ 44px on touch widths.
 - [ ] **6.7** Long product names, customer names and addresses truncate or wrap — never overflow their cell.
 - [ ] **6.8** Forms are single-column below `lg` with no field narrower than its content.
 - [ ] **6.9** Run the whole matrix twice — once light, once dark.
 - [ ] **6.10** Safe-area insets respected on iOS.
-- [ ] **6.11** `AdminLayout`'s content column has `min-w-0` (3.3.1) — verify by loading `/orders` at 375px; without it the whole page scrolls sideways.
+- [x] **6.11** `AdminLayout`'s content column has `min-w-0` (3.3.1) — verify by loading `/orders` at 375px; without it the whole page scrolls sideways.
 - [ ] **6.12** Landscape phone (`812×375`) does not break the drawer or the action bar.
 
 ---

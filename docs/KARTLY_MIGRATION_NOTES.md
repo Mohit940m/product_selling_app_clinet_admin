@@ -275,3 +275,40 @@ item, not an exhaustive sweep of every `toast.success` call in the app.
 
 Not built: **5.8 stat-value count-up animation** on `StatCard` — no
 count-up was implemented; values render at their final number immediately.
+
+## Phase 6 — Responsive QA matrix: code-audit pass, not live-viewport
+
+Same constraint as the user client: no browser/screenshot tool available
+in this session, so this is a code audit rather than live rendering.
+
+**Verified by class/structure inspection:**
+- 6.1 no horizontal overflow — audited every `w-[Npx]`/`max-w-[Npx]` in
+  `src/pages` and `src/components`. `AuthLayout`'s decorative circle/card
+  are inside `hidden ... lg:block` (desktop-only). `OrderListPage`'s
+  search bar is `lg:max-w-[340px]` (correctly scoped);
+  `ProductListPage`'s equivalent is unscoped `max-w-[340px]`, but since
+  it sits in a `flex-1` row inside a `flex-col` (stacked) mobile layout,
+  `max-width` only caps growth and the box still shrinks to fit — no
+  overflow risk, just an inconsistency worth tidying later.
+- 6.2 wide-content scroll containment — `DataTable`'s desktop `<table>`
+  is wrapped in its own `overflow-x-auto`, confirmed in the component
+  itself.
+- 6.3 tables — every table-shaped view (`ProductListPage`) uses
+  `DataTable`: real `<table>` at `lg+`, stacked `Card` list below.
+  `OrderListPage`/`OffersPage` never reach a table at all (no data).
+- 6.4 sidebar/drawer — `Sidebar` is `hidden lg:flex`, `MobileTopBar` (with
+  the drawer) is present unconditionally but its own trigger row uses
+  `lg:hidden`.
+- 6.5 sheets — `Sheet.tsx` bottom-sheet classes apply unconditionally,
+  drawer classes are `lg:`-gated, same as the user client's component.
+- 6.11 `AdminLayout`'s content column has `min-w-0` (confirmed in the
+  component), which is exactly what prevents a wide table from forcing
+  page-level horizontal scroll.
+
+**Not verified — needs an actual browser pass:** the full route × width ×
+theme matrix, 6.6 (exact 44px tap-target compliance — a few sidebar/nav
+icon tiles are 38-40px, matching the prototype's own sizing), 6.7 (visual
+text-clipping), 6.8 (forms single-column below `lg` — true by construction
+in every page built this phase, but not visually confirmed), 6.9 (both
+themes side by side), 6.10 (landscape phone), 6.12 (landscape drawer/action
+bar). Recommend a manual device/browser pass before shipping.
