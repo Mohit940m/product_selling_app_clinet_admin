@@ -67,18 +67,18 @@ Consequence: every `bg-primary`, `text-text`, `bg-secondary`, `text-accent`, `bg
 
 ## 1.1 Typography — Montserrat
 
-- [ ] **1.1.1** In `index.html`, add the Google Fonts preconnect + Montserrat stylesheet link (weights `400;500;600;700;800;900`) to `<head>`.
-- [ ] **1.1.2** Set `<title>` to the seller-admin brand.
-- [ ] **1.1.3** In `src/index.css`, set `body { font-family: Montserrat, "Helvetica Neue", Helvetica, sans-serif; -webkit-font-smoothing: antialiased; background: var(--k-bg); color: var(--k-ink); }` and zero out `html, body` margin/padding.
-- [ ] **1.1.4** Register `--font-mono: ui-monospace, SFMono-Regular, Menlo, monospace` in `@theme` — the admin uses mono heavily for SKUs, order IDs, and table column headers.
+- [x] **1.1.1** In `index.html`, add the Google Fonts preconnect + Montserrat stylesheet link (weights `400;500;600;700;800;900`) to `<head>`.
+- [x] **1.1.2** Set `<title>` to the seller-admin brand.
+- [x] **1.1.3** In `src/index.css`, set `body { font-family: Montserrat, "Helvetica Neue", Helvetica, sans-serif; -webkit-font-smoothing: antialiased; background: var(--k-bg); color: var(--k-ink); }` and zero out `html, body` margin/padding.
+- [x] **1.1.4** Register `--font-mono: ui-monospace, SFMono-Regular, Menlo, monospace` in `@theme` — the admin uses mono heavily for SKUs, order IDs, and table column headers.
 
 ## 1.2 Colour tokens — `src/index.css`
 
 `DESIGN REF` `.dc.html` lines 19–20.
 
-- [ ] **1.2.1** Add the light `--k-*` palette on `:root` (bg `#ECECEE`, card `#FFFFFF`, ink `#171A22`, muted `#767C8C`, edge `#1B1F2A`, line `#E4E4EA`, soft `#F6E8FF`, soft2 `#FAF3FF`, accent `#A87BF5`, onAcc `#FFFFFF`, shadow `0 24px 60px rgba(20,20,30,.10)`).
-- [ ] **1.2.2** Add the dark palette on `[data-theme="dark"]` (bg `#0D0F14`, card `#181B23`, ink `#F1F0F4`, muted `#9AA0B0`, edge `#39404F`, line `#262B36`, soft `#2A2138`, soft2 `#201B2B`, accent `#B999F7`, onAcc `#14101C`, shadow `0 24px 60px rgba(0,0,0,.45)`).
-- [ ] **1.2.3** Add the **fixed** status palette. The admin uses it far more than the storefront does — it is the order-status vocabulary:
+- [x] **1.2.1** Add the light `--k-*` palette on `:root` (bg `#ECECEE`, card `#FFFFFF`, ink `#171A22`, muted `#767C8C`, edge `#1B1F2A`, line `#E4E4EA`, soft `#F6E8FF`, soft2 `#FAF3FF`, accent `#A87BF5`, onAcc `#FFFFFF`, shadow `0 24px 60px rgba(20,20,30,.10)`).
+- [x] **1.2.2** Add the dark palette on `[data-theme="dark"]` (bg `#0D0F14`, card `#181B23`, ink `#F1F0F4`, muted `#9AA0B0`, edge `#39404F`, line `#262B36`, soft `#2A2138`, soft2 `#201B2B`, accent `#B999F7`, onAcc `#14101C`, shadow `0 24px 60px rgba(0,0,0,.45)`).
+- [x] **1.2.3** Add the **fixed** status palette. The admin uses it far more than the storefront does — it is the order-status vocabulary:
   ```css
   :root {
     --k-ok-bg:   #E6F6EE; --k-ok-fg:   #1E7A52;  /* Delivered            */
@@ -89,37 +89,37 @@ Consequence: every `bg-primary`, `text-text`, `bg-secondary`, `text-accent`, `bg
     --k-on-soft: #171A22;
   }
   ```
-- [ ] **1.2.4** Map every token into `@theme` as `--color-*` so `bg-card`, `text-ink`, `border-line`, `bg-ok-bg` etc. generate. Add `--font-sans` and `--font-mono`.
-- [ ] **1.2.5** Add the radius scale: `--radius-ctl 12px`, `--radius-btn 14px`, `--radius-tile 16px`, `--radius-card 20px`, `--radius-panel 22px`, `--radius-hero 26px`, `--radius-sheet 28px`. Admin panels and the data table use `--radius-panel`; sidebar nav items use `13px` (`rounded-[13px]`).
-- [ ] **1.2.6** Add the elevation utilities: `.shadow-kartly`, `.shadow-lift-accent` (`0 18px 34px rgba(168,123,245,.24)`), `.shadow-lift-accent-lg` (`0 26px 46px`), `.shadow-lift-accent-cta` (`0 16px 32px rgba(168,123,245,.45)`), `.shadow-lift-ink` (`0 16px 32px rgba(20,20,30,.30)`), and the admin-specific stat-card hover `.shadow-lift-stat` (`0 20px 38px rgba(168,123,245,.18)`).
-- [ ] **1.2.7** Add `.bg-hatch` / `.bg-hatch2` (the 45° repeating-linear-gradient placeholders) — used for every product thumbnail with no image.
-- [ ] **1.2.8** Add `.no-scrollbar` for the horizontal filter rails and the mobile order-table scroller.
+- [x] **1.2.4** Map every token into `@theme` as `--color-*` so `bg-card`, `text-ink`, `border-line`, `bg-ok-bg` etc. generate. Add `--font-sans` and `--font-mono`.
+- [x] **1.2.5** Add the radius scale: `--radius-ctl 12px`, `--radius-btn 14px`, `--radius-tile 16px`, `--radius-card 20px`, `--radius-panel 22px`, `--radius-hero 26px`, `--radius-sheet 28px`. Admin panels and the data table use `--radius-panel`; sidebar nav items use `13px` (`rounded-[13px]`).
+- [x] **1.2.6** Add the elevation utilities: `.shadow-kartly`, `.shadow-lift-accent` (`0 18px 34px rgba(168,123,245,.24)`), `.shadow-lift-accent-lg` (`0 26px 46px`), `.shadow-lift-accent-cta` (`0 16px 32px rgba(168,123,245,.45)`), `.shadow-lift-ink` (`0 16px 32px rgba(20,20,30,.30)`), and the admin-specific stat-card hover `.shadow-lift-stat` (`0 20px 38px rgba(168,123,245,.18)`).
+- [x] **1.2.7** Add `.bg-hatch` / `.bg-hatch2` (the 45° repeating-linear-gradient placeholders) — used for every product thumbnail with no image.
+- [x] **1.2.8** Add `.no-scrollbar` for the horizontal filter rails and the mobile order-table scroller.
 
 ## 1.3 Motion layer
 
-- [ ] **1.3.1** Port all ten keyframes (`kfPop`, `kfDraw`, `kfRing`, `kfUp`, `kfFloat`, `kfRoll`, `kfDot`, `kfShim`, `kfConf`, `kfBar`) into `src/index.css`. **`kfBar` is the one the admin genuinely needs** — it drives the revenue chart.
-- [ ] **1.3.2** Register `--animate-pop`, `--animate-up`, `--animate-dot`, `--animate-shim`, `--animate-bar` in `@theme`.
-- [ ] **1.3.3** Add the transition presets `.t-fast` (`.2s`), `.t-base` (`.25s cubic-bezier(.2,.8,.2,1)`), `.t-card` (`.28s`), `.t-slow` (`.3s`).
-- [ ] **1.3.4** Add the hover-lift utilities `.lift-sm`, `.lift`, `.lift-card`, `.lift-lg`, `.slide-x`, `.pop-icon`. The admin sidebar uses `.slide-x` on nav rows; stat cards use `translateY(-5px)` — add `.lift-stat:hover { transform: translateY(-5px); }`.
-- [ ] **1.3.5** Add the `prefers-reduced-motion` global guard (identical to the storefront).
-- [ ] **1.3.6** Create `src/components/motion/Reveal.tsx` and `src/components/motion/Shimmer.tsx` (copy from the storefront).
+- [x] **1.3.1** Port all ten keyframes (`kfPop`, `kfDraw`, `kfRing`, `kfUp`, `kfFloat`, `kfRoll`, `kfDot`, `kfShim`, `kfConf`, `kfBar`) into `src/index.css`. **`kfBar` is the one the admin genuinely needs** — it drives the revenue chart.
+- [x] **1.3.2** Register `--animate-pop`, `--animate-up`, `--animate-dot`, `--animate-shim`, `--animate-bar` in `@theme`.
+- [x] **1.3.3** Add the transition presets `.t-fast` (`.2s`), `.t-base` (`.25s cubic-bezier(.2,.8,.2,1)`), `.t-card` (`.28s`), `.t-slow` (`.3s`).
+- [x] **1.3.4** Add the hover-lift utilities `.lift-sm`, `.lift`, `.lift-card`, `.lift-lg`, `.slide-x`, `.pop-icon`. The admin sidebar uses `.slide-x` on nav rows; stat cards use `translateY(-5px)` — add `.lift-stat:hover { transform: translateY(-5px); }`.
+- [x] **1.3.5** Add the `prefers-reduced-motion` global guard (identical to the storefront).
+- [x] **1.3.6** Create `src/components/motion/Reveal.tsx` and `src/components/motion/Shimmer.tsx` (copy from the storefront).
 
 ## 1.4 Theme controller (light / dark)
 
 An admin dashboard is a long-session tool — dark mode matters more here than on the storefront.
 
-- [ ] **1.4.1** Copy `src/theme/ThemeProvider.tsx` from the storefront, changing only the storage key to `kartlyAdminTheme`.
-- [ ] **1.4.2** Add the no-flash inline `data-theme` script to `index.html` `<head>`.
-- [ ] **1.4.3** Wrap `<Router>` in `src/App.tsx` with `<ThemeProvider>`.
-- [ ] **1.4.4** Add `<meta name="color-scheme" content="light dark">`.
-- [ ] **1.4.5** Retheme `<ToastContainer>` in `src/App.tsx`: replace `toastClassName="... bg-white text-[#1F2937] ..."` with `bg-card text-ink border-line rounded-[var(--radius-tile)] shadow-kartly`, `progressClassName="bg-accent"`, and pass `theme` from `useTheme()`.
-- [ ] **1.4.6** Put the theme toggle in the sidebar footer (3.1.6), not buried in a settings page.
+- [x] **1.4.1** Copy `src/theme/ThemeProvider.tsx` from the storefront, changing only the storage key to `kartlyAdminTheme`.
+- [x] **1.4.2** Add the no-flash inline `data-theme` script to `index.html` `<head>`.
+- [x] **1.4.3** Wrap `<Router>` in `src/App.tsx` with `<ThemeProvider>`.
+- [x] **1.4.4** Add `<meta name="color-scheme" content="light dark">`.
+- [x] **1.4.5** Retheme `<ToastContainer>` in `src/App.tsx`: replace `toastClassName="... bg-white text-[#1F2937] ..."` with `bg-card text-ink border-line rounded-[var(--radius-tile)] shadow-kartly`, `progressClassName="bg-accent"`, and pass `theme` from `useTheme()`.
+- [x] **1.4.6** Put the theme toggle in the sidebar footer (3.1.6), not buried in a settings page.
 
 ## 1.5 The responsive contract (binding for all of Phase 4)
 
 The prototype's admin panel is a single 1280×840 desktop artboard — **it gives you no mobile design**. That is the biggest gap in this plan, and the rules below are how it gets closed. A seller checking orders from a phone is a real use case; every screen must work at 375px.
 
-- [ ] **1.5.1** Record and honour these breakpoints:
+- [x] **1.5.1** Record and honour these breakpoints:
 
   | Range | Name | Composition |
   |---|---|---|
@@ -128,7 +128,7 @@ The prototype's admin panel is a single 1280×840 desktop artboard — **it give
   | `≥ 1024px` (`lg`) | desktop | persistent `236px` sidebar; 4-col stat grid; real tables |
   | `≥ 1280px` (`xl`) | wide | content capped at `1280px`; side-by-side panel pairs |
 
-- [ ] **1.5.2** Create `src/components/layout/Container.tsx`: `mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-9`. Replace every ad-hoc `mx-auto max-w-7xl px-4 sm:px-6` in the app with it during Phase 4.
+- [x] **1.5.2** Create `src/components/layout/Container.tsx`: `mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-9`. Replace every ad-hoc `mx-auto max-w-7xl px-4 sm:px-6` in the app with it during Phase 4.
 - [ ] **1.5.3** **Table rule (applies to orders, products, offers, low stock):** at `lg+` render a real `<table>` in a `rounded-panel border border-line overflow-hidden` shell with an `overflow-x-auto` wrapper. Below `lg` render the *same data* as a stacked `Card` list — one card per row, label/value pairs. Build this once as `src/components/ui/DataTable.tsx` with a `mobileCard` render prop; do **not** hand-roll the pattern per page.
 - [ ] **1.5.4** Rule: every tap target ≥ 44×44 CSS px on touch widths.
 - [ ] **1.5.5** Rule: no page-level horizontal scroll at any width. Wide content scrolls inside its own container.
