@@ -103,3 +103,31 @@ component alongside a helper function/type and tripped it:
 
 `npm run lint` is clean after these splits except the three pre-existing
 baseline issues above.
+
+## Phase 4 — deliberate deviations
+
+### 4.1 DashboardPage
+
+Implemented: PageHeader, responsive 2/4-col StatCard grid (with a
+mobile-sized value variant added to StatCard itself), an honest
+EmptyState-based revenue panel and fulfilment-queue block (no fabricated
+$4,820/+12.4%/18-orders numbers), the real recent-products list restyled
+on Panel/ImageFrame/Badge, and the shipping/next-actions panels. Also
+fixed the pre-existing `react-hooks/set-state-in-effect` baseline error by
+deriving `isLoading`/`notice`'s initial values from lazy `useState`
+initializers instead of setting them inside the effect body.
+
+Deliberately **not** built:
+
+- **4.1.6 recent-orders DataTable** — no orders endpoint on the seller API
+  (same root cause as `OrderListPage`, see below).
+- **4.1.7 quick add-product form + low-stock panel** — kept the existing
+  "Next Actions" tips panel in that slot instead. A real low-stock panel
+  is plausible later (product variants already carry `stock`), but wasn't
+  built this pass; noted as a follow-up.
+- **4.1.11/4.1.13/4.1.14 mobile-specific revenue-chart/orders-table/quick-form
+  treatments** — not applicable, since none of those desktop elements were
+  built to begin with.
+- **4.1.15 "+New product" in MobileActionBar** — kept as an always-visible
+  PageHeader action instead (reachable at every width, just not pinned to
+  a bottom bar).

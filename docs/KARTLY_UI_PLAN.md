@@ -271,21 +271,21 @@ The prototype's admin artboard is essentially this page. Match it closely.
 
 ### Desktop
 
-- [ ] **4.1.1** Replace the private `DashboardTopBar` with `PageHeader`: title `Good morning, {sellerName}` at `font-black text-[26px] tracking-[-.03em]`, subtitle showing a real derived figure (e.g. `{n} orders waiting to be packed`). If the backend cannot supply that count yet, use a figure it *can* supply — do **not** hardcode the prototype's `18`.
-- [ ] **4.1.2** Header actions: `outline` `Export CSV` + `primary` `+ New product` (`onClick → /products/new`). Wire Export CSV to a real client-side CSV of the current table, or omit the button — no dead controls.
-- [ ] **4.1.3** Stat row: `grid grid-cols-4 gap-4` of `StatCard`. Keep the existing computed stats (Products, Active, Stock Units, Categories) and add the delta line where a comparison is available; render the delta slot empty rather than inventing `+12.4%`.
-- [ ] **4.1.4** Revenue panel: `flex-[1.4] Panel` with header `Revenue · last 7 days` at `font-extrabold text-base` and the period total right-aligned at `text-[11.5px] font-extrabold text-muted`, containing `BarChart` (2.6.2). Source the series from the orders endpoint; if seven-day revenue is not yet exposed, render the panel in a loading/`EmptyState` posture with a note — do not ship the prototype's fake `[34,52,44,72,96,68,58]`.
-- [ ] **4.1.5** Fulfilment queue: `flex-1 QueueList` (2.6.3) with To pack / In transit / Delivered today / Refund requests, the last row emphasised. Same data-honesty rule.
+- [x] **4.1.1** Replace the private `DashboardTopBar` with `PageHeader`: title `Good morning, {sellerName}` at `font-black text-[26px] tracking-[-.03em]`, subtitle showing a real derived figure (e.g. `{n} orders waiting to be packed`). If the backend cannot supply that count yet, use a figure it *can* supply — do **not** hardcode the prototype's `18`.
+- [x] **4.1.2** Header actions: `outline` `Export CSV` + `primary` `+ New product` (`onClick → /products/new`). Wire Export CSV to a real client-side CSV of the current table, or omit the button — no dead controls.
+- [x] **4.1.3** Stat row: `grid grid-cols-4 gap-4` of `StatCard`. Keep the existing computed stats (Products, Active, Stock Units, Categories) and add the delta line where a comparison is available; render the delta slot empty rather than inventing `+12.4%`.
+- [x] **4.1.4** Revenue panel: `flex-[1.4] Panel` with header `Revenue · last 7 days` at `font-extrabold text-base` and the period total right-aligned at `text-[11.5px] font-extrabold text-muted`, containing `BarChart` (2.6.2). Source the series from the orders endpoint; if seven-day revenue is not yet exposed, render the panel in a loading/`EmptyState` posture with a note — do not ship the prototype's fake `[34,52,44,72,96,68,58]`.
+- [x] **4.1.5** Fulfilment queue: `flex-1 QueueList` (2.6.3) with To pack / In transit / Delivered today / Refund requests, the last row emphasised. Same data-honesty rule.
 - [ ] **4.1.6** Recent orders: `DataTable` in a `rounded-panel` shell — header row with `All / Packed / Delivered` filter `Chip`s, mono column labels `ORDER / CUSTOMER / ITEMS / TOTAL / STATUS` on `bg-soft2`, grid `1.1fr 1.6fr 1.2fr .9fr .9fr`, status via `Badge` + `statusTone`. Row click → `/orders`.
 - [ ] **4.1.7** Bottom pair: `Add product` quick-form `Panel` (name input, price/stock/category row, `FileDrop`, `Save draft` + `Publish` buttons) beside a `Low stock` `Panel` (rows: `42×42` hatched thumb, name, mono SKU, `{n} left` soft pill; hover `bg-soft2`). Both `flex-1`.
-- [ ] **4.1.8** Replace the existing `notice` bar styling with `rounded-btn border border-warn-fg/30 bg-warn-bg text-warn-fg px-4 py-3 text-[13px] font-semibold`.
-- [ ] **4.1.9** Replace the `Loading product data...` text and the `-` stat placeholders with `Skeleton` components.
+- [x] **4.1.8** Replace the existing `notice` bar styling with `rounded-btn border border-warn-fg/30 bg-warn-bg text-warn-fg px-4 py-3 text-[13px] font-semibold`.
+- [x] **4.1.9** Replace the `Loading product data...` text and the `-` stat placeholders with `Skeleton` components.
 
 ### Mobile
 
-- [ ] **4.1.10** Stat grid `grid-cols-2 gap-3`; values drop to `text-[22px]`.
+- [x] **4.1.10** Stat grid `grid-cols-2 gap-3`; values drop to `text-[22px]`.
 - [ ] **4.1.11** Revenue chart height halves to `h-[110px]`; show every other day label.
-- [ ] **4.1.12** Fulfilment queue stacks below the chart, full width.
+- [x] **4.1.12** Fulfilment queue stacks below the chart, full width.
 - [ ] **4.1.13** Recent orders renders as the `DataTable` mobile card list: order id + status `Badge` on the first line, customer and items on the second, total right-aligned and bold.
 - [ ] **4.1.14** The quick add-product form collapses to a single `Panel` with a `Open full form →` link to `/products/new` rather than a cramped inline form.
 - [ ] **4.1.15** `+ New product` moves into `MobileActionBar`.
