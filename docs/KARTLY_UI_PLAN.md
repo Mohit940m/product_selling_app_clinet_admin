@@ -23,7 +23,7 @@ Phases 1 and 2 below are **the same token layer and the same primitives** as the
 |---|---|---|---|
 | 0 | Audit & prerequisites | 6 | ✅ |
 | 1 | Design foundation (tokens, motion, theme) | 29 | ☐ |
-| 2 | Primitive component library | 30 | ☐ |
+| 2 | Primitive component library | 30 | ✅ |
 | 3 | Admin shell (sidebar, topbar, mobile nav) | 20 | ☐ |
 | 4 | Page migrations | 96 | ☐ |
 | 5 | Motion & interaction pass | 13 | ☐ |
@@ -145,27 +145,27 @@ All new files under `src/components/ui/`. Copy from the storefront where noted; 
 
 Replaces the existing `src/components/Button.tsx` (26 lines, hardcoded `bg-[#A78BFA]`, `label`-prop API).
 
-- [ ] **2.1.1** Implement the variants: `primary` (`bg-accent text-onacc`), `dark` (`bg-ink text-card`), `outline` (`border border-edge`, hover inverts to `bg-ink text-card`), `soft` (`bg-soft text-[var(--k-on-soft)]`), `ghost` (`text-accent`, hover `bg-soft2`), `pill`, `icon`, `danger` (`bg-bad-bg text-bad-fg`, hover `border-danger`) — the admin needs a destructive variant the storefront does not.
-- [ ] **2.1.2** Sizes `sm` / `md` / `lg`. The admin's toolbar buttons are `px-4.5 py-3 text-[12.5px]` — that is `sm`.
-- [ ] **2.1.3** Props: `variant`, `size`, `icon`, `iconPosition`, `loading`, `fullWidth` + native `ButtonHTMLAttributes`. `loading` swaps children for the three-dot `animate-dot` cluster.
-- [ ] **2.1.4** Keep the existing `label`-prop signature working with a deprecation comment so the ten pages migrate one at a time. `DashboardPage.tsx`, `AddProductPage.tsx`, `EditProductPage.tsx`, `OffersPage.tsx`, `ShippingConfigPage.tsx`, `LoginPage.tsx` and `SignUpPage.tsx` all use it today.
+- [x] **2.1.1** Implement the variants: `primary` (`bg-accent text-onacc`), `dark` (`bg-ink text-card`), `outline` (`border border-edge`, hover inverts to `bg-ink text-card`), `soft` (`bg-soft text-[var(--k-on-soft)]`), `ghost` (`text-accent`, hover `bg-soft2`), `pill`, `icon`, `danger` (`bg-bad-bg text-bad-fg`, hover `border-danger`) — the admin needs a destructive variant the storefront does not.
+- [x] **2.1.2** Sizes `sm` / `md` / `lg`. The admin's toolbar buttons are `px-4.5 py-3 text-[12.5px]` — that is `sm`.
+- [x] **2.1.3** Props: `variant`, `size`, `icon`, `iconPosition`, `loading`, `fullWidth` + native `ButtonHTMLAttributes`. `loading` swaps children for the three-dot `animate-dot` cluster.
+- [x] **2.1.4** Keep the existing `label`-prop signature working with a deprecation comment so the ten pages migrate one at a time. `DashboardPage.tsx`, `AddProductPage.tsx`, `EditProductPage.tsx`, `OffersPage.tsx`, `ShippingConfigPage.tsx`, `LoginPage.tsx` and `SignUpPage.tsx` all use it today.
 
 ## 2.2 Form controls — `Input.tsx`, `Select.tsx`, `Textarea.tsx`, `FileDrop.tsx`
 
 `DESIGN REF` lines 892–898 (inputs) and 793 (the product-image drop zone).
 
-- [ ] **2.2.1** `Input` base `rounded-btn border border-line bg-transparent px-4 py-3.5 text-[12.5px] font-medium text-ink placeholder:text-muted t-fast`, hover/focus `border-accent`.
-- [ ] **2.2.2** Error state `border-danger text-danger` with the message below at `text-[11px] font-bold text-danger`.
-- [ ] **2.2.3** Filled state `border-accent font-semibold` (the prototype's "Oversized Linen Shirt" field).
-- [ ] **2.2.4** `label` above the field at `font-extrabold text-[12px] mb-2.5`.
-- [ ] **2.2.5** `Select` matches `Input` with a `▾` affordance; native `<select>` underneath for mobile ergonomics.
-- [ ] **2.2.6** `FileDrop` — the dashed drop zone: `rounded-tile border border-dashed border-edge p-6.5 text-center text-[12px] font-bold text-muted t-base`, hover `border-accent text-accent bg-soft2`. Supports click-to-browse, drag-over highlight, multi-file, and a thumbnail strip of staged files with per-file remove. This is what `AddProductPage` and `EditProductPage` use for Cloudinary uploads.
-- [ ] **2.2.7** Mobile: `<input>` font-size ≥ 16px on iOS (`text-base sm:text-[12.5px]`).
+- [x] **2.2.1** `Input` base `rounded-btn border border-line bg-transparent px-4 py-3.5 text-[12.5px] font-medium text-ink placeholder:text-muted t-fast`, hover/focus `border-accent`.
+- [x] **2.2.2** Error state `border-danger text-danger` with the message below at `text-[11px] font-bold text-danger`.
+- [x] **2.2.3** Filled state `border-accent font-semibold` (the prototype's "Oversized Linen Shirt" field).
+- [x] **2.2.4** `label` above the field at `font-extrabold text-[12px] mb-2.5`.
+- [x] **2.2.5** `Select` matches `Input` with a `▾` affordance; native `<select>` underneath for mobile ergonomics.
+- [x] **2.2.6** `FileDrop` — the dashed drop zone: `rounded-tile border border-dashed border-edge p-6.5 text-center text-[12px] font-bold text-muted t-base`, hover `border-accent text-accent bg-soft2`. Supports click-to-browse, drag-over highlight, multi-file, and a thumbnail strip of staged files with per-file remove. This is what `AddProductPage` and `EditProductPage` use for Cloudinary uploads.
+- [x] **2.2.7** Mobile: `<input>` font-size ≥ 16px on iOS (`text-base sm:text-[12.5px]`).
 
 ## 2.3 Chips & badges — `Chip.tsx`, `Badge.tsx`
 
-- [ ] **2.3.1** `Chip`: `rounded-full px-3.5 py-2 text-[11px] font-bold border border-line t-fast`, hover `border-accent text-accent`, selected `bg-ink text-card` (the admin uses ink, not accent, for its selected table filter — see `.dc.html` line 774).
-- [ ] **2.3.2** `Badge` — the **order-status vocabulary**, mapped exactly to the prototype's `orders` dataset:
+- [x] **2.3.1** `Chip`: `rounded-full px-3.5 py-2 text-[11px] font-bold border border-line t-fast`, hover `border-accent text-accent`, selected `bg-ink text-card` (the admin uses ink, not accent, for its selected table filter — see `.dc.html` line 774).
+- [x] **2.3.2** `Badge` — the **order-status vocabulary**, mapped exactly to the prototype's `orders` dataset:
 
   | Status | Classes |
   |---|---|
@@ -176,35 +176,35 @@ Replaces the existing `src/components/Button.tsx` (26 lines, hardcoded `bg-[#A78
   | Active / discount tag | `bg-ink text-card` |
 
   All `rounded-full px-3 py-1.5 text-[10.5px] font-extrabold`.
-- [ ] **2.3.3** Create `src/components/ui/statusTone.ts` — one function mapping a raw backend status string to a `Badge` tone, with a documented fallback. Every page uses it; no page hand-maps statuses.
+- [x] **2.3.3** Create `src/components/ui/statusTone.ts` — one function mapping a raw backend status string to a `Badge` tone, with a documented fallback. Every page uses it; no page hand-maps statuses.
 
 ## 2.4 Cards & surfaces
 
-- [ ] **2.4.1** `Card.tsx` — `rounded-card border border-line bg-card overflow-hidden t-card`, hover (when `interactive`) `lift-card border-accent shadow-lift-accent`.
-- [ ] **2.4.2** `Panel.tsx` — `rounded-panel border border-line bg-card p-6`. This is the admin's workhorse container: revenue chart, add-product form, low stock, shipping rates all sit in one.
-- [ ] **2.4.3** `StatCard.tsx` — `rounded-card border border-line p-5 t-card`, hover `lift-stat border-accent shadow-lift-stat`. Content: mono label `text-[11px] font-extrabold text-muted`, value `font-black text-[27px] leading-none tracking-[-.03em] my-2.75`, delta `text-[11.5px] font-extrabold text-accent`. **Replaces `src/components/MetricCard.tsx`.**
-- [ ] **2.4.4** `Skeleton.tsx` wrapping `Shimmer`, with `line` / `block` / `card` / `row` presets. `row` is the table-row skeleton.
-- [ ] **2.4.5** `EmptyState.tsx` — dashed `border border-dashed border-edge rounded-card p-12 text-center`, accent icon, `font-extrabold` title, muted sub, optional CTA.
-- [ ] **2.4.6** `ImageFrame.tsx` — image with `object-cover`, falling back to `bg-hatch` + a mono caption. Every product thumbnail goes through it.
-- [ ] **2.4.7** `Switch.tsx` — `48×27 rounded-full` track (`bg-line` → `bg-accent`), `21×21 rounded-full bg-card` knob, `t-base`. Used for the theme toggle, product active/inactive, and offer enable/disable.
-- [ ] **2.4.8** **Delete `src/components/Card.tsx` and `src/components/MetricCard.tsx`** once `Panel` and `StatCard` land — they are superseded, not restyled.
+- [x] **2.4.1** `Card.tsx` — `rounded-card border border-line bg-card overflow-hidden t-card`, hover (when `interactive`) `lift-card border-accent shadow-lift-accent`.
+- [x] **2.4.2** `Panel.tsx` — `rounded-panel border border-line bg-card p-6`. This is the admin's workhorse container: revenue chart, add-product form, low stock, shipping rates all sit in one.
+- [x] **2.4.3** `StatCard.tsx` — `rounded-card border border-line p-5 t-card`, hover `lift-stat border-accent shadow-lift-stat`. Content: mono label `text-[11px] font-extrabold text-muted`, value `font-black text-[27px] leading-none tracking-[-.03em] my-2.75`, delta `text-[11.5px] font-extrabold text-accent`. **Replaces `src/components/MetricCard.tsx`.**
+- [x] **2.4.4** `Skeleton.tsx` wrapping `Shimmer`, with `line` / `block` / `card` / `row` presets. `row` is the table-row skeleton.
+- [x] **2.4.5** `EmptyState.tsx` — dashed `border border-dashed border-edge rounded-card p-12 text-center`, accent icon, `font-extrabold` title, muted sub, optional CTA.
+- [x] **2.4.6** `ImageFrame.tsx` — image with `object-cover`, falling back to `bg-hatch` + a mono caption. Every product thumbnail goes through it.
+- [x] **2.4.7** `Switch.tsx` — `48×27 rounded-full` track (`bg-line` → `bg-accent`), `21×21 rounded-full bg-card` knob, `t-base`. Used for the theme toggle, product active/inactive, and offer enable/disable.
+- [x] **2.4.8** **Delete `src/components/Card.tsx` and `src/components/MetricCard.tsx`** once `Panel` and `StatCard` land — they are superseded, not restyled.
 
 ## 2.5 Overlays
 
-- [ ] **2.5.1** `Sheet.tsx` — bottom sheet below `lg`, right drawer at `lg+`. Focus trap, `Esc` to close, backdrop click, body-scroll lock. Used for mobile filters and the sidebar drawer.
-- [ ] **2.5.2** `Modal.tsx` — `rounded-hero bg-card shadow-kartly max-w-lg` on a `bg-ink/40 backdrop-blur-sm` backdrop. Used for offer create/edit and every destructive confirmation.
-- [ ] **2.5.3** `ConfirmDialog.tsx` — a thin `Modal` wrapper with a `danger` Button. **Every `window.confirm` in the app is replaced by this** — grep for it during Phase 4.
-- [ ] **2.5.4** `Toast.tsx` — the dark inline toast (`rounded-[18px] bg-ink text-card`, accent dot, title, sub, accent action). Wire `react-toastify` to render it.
+- [x] **2.5.1** `Sheet.tsx` — bottom sheet below `lg`, right drawer at `lg+`. Focus trap, `Esc` to close, backdrop click, body-scroll lock. Used for mobile filters and the sidebar drawer.
+- [x] **2.5.2** `Modal.tsx` — `rounded-hero bg-card shadow-kartly max-w-lg` on a `bg-ink/40 backdrop-blur-sm` backdrop. Used for offer create/edit and every destructive confirmation.
+- [x] **2.5.3** `ConfirmDialog.tsx` — a thin `Modal` wrapper with a `danger` Button. **Every `window.confirm` in the app is replaced by this** — grep for it during Phase 4.
+- [x] **2.5.4** `Toast.tsx` — the dark inline toast (`rounded-[18px] bg-ink text-card`, accent dot, title, sub, accent action). Wire `react-toastify` to render it.
 
 ## 2.6 Admin-only primitives
 
-- [ ] **2.6.1** `src/components/ui/DataTable.tsx` — the responsive table from 1.5.3.
+- [x] **2.6.1** `src/components/ui/DataTable.tsx` — the responsive table from 1.5.3.
   - Desktop: header row `grid` with mono `text-[10.5px] font-extrabold text-muted` labels on `bg-soft2`, body rows `border-t border-line px-6 py-4 text-[12.5px]`, row hover `bg-soft2`, whole row clickable.
   - Mobile: `mobileCard` render prop produces one `Card` per row.
   - Props: `columns` (with `gridTemplate` fractions matching the prototype's `1.1fr 1.6fr 1.2fr .9fr .9fr`), `rows`, `onRowClick`, `loading`, `empty`.
-- [ ] **2.6.2** `src/components/ui/BarChart.tsx` — the revenue chart. `flex items-end gap-3.5 h-[150px]`, each bar `flex-1 rounded-[9px]` with `height` as a percentage, `bg-soft` normally and `bg-accent` for the max bar, `animate-bar` on mount, hover `opacity-75`. Day label below at `text-[10px] font-bold text-muted`. Below `sm`, halve the height and drop to every-other label. Pure SVG-free CSS, no chart library.
-- [ ] **2.6.3** `src/components/ui/QueueList.tsx` — the fulfilment-queue card: `rounded-panel bg-soft p-6 text-[var(--k-on-soft)]`, rows `rounded-[15px] bg-white/70 px-3.75 py-3.25 flex justify-between`, the emphasised final row `bg-ink text-white`. Props: `title`, `rows: {label, value, emphasis?}[]`.
-- [ ] **2.6.4** `src/components/ui/Toolbar.tsx` — the page-header action row: title block left, actions right, wrapping to a stacked layout below `sm` with the primary action becoming full-width.
+- [x] **2.6.2** `src/components/ui/BarChart.tsx` — the revenue chart. `flex items-end gap-3.5 h-[150px]`, each bar `flex-1 rounded-[9px]` with `height` as a percentage, `bg-soft` normally and `bg-accent` for the max bar, `animate-bar` on mount, hover `opacity-75`. Day label below at `text-[10px] font-bold text-muted`. Below `sm`, halve the height and drop to every-other label. Pure SVG-free CSS, no chart library.
+- [x] **2.6.3** `src/components/ui/QueueList.tsx` — the fulfilment-queue card: `rounded-panel bg-soft p-6 text-[var(--k-on-soft)]`, rows `rounded-[15px] bg-white/70 px-3.75 py-3.25 flex justify-between`, the emphasised final row `bg-ink text-white`. Props: `title`, `rows: {label, value, emphasis?}[]`.
+- [x] **2.6.4** `src/components/ui/Toolbar.tsx` — the page-header action row: title block left, actions right, wrapping to a stacked layout below `sm` with the primary action becoming full-width.
 
 ---
 

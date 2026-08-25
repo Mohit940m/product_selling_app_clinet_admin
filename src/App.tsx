@@ -2,7 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
-import { ThemeProvider, useTheme } from "./theme/ThemeProvider"
+import { ThemeProvider } from "./theme/ThemeProvider"
+import { useTheme } from "./theme/useTheme"
 import LoginPage from "./pages/LoginPage"
 import SignUpPage from "./pages/SignUpPage"
 import DashboardPage from "./pages/DashboardPage"

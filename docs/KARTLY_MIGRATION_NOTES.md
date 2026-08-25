@@ -54,7 +54,13 @@ alone can't be the check once the new `--color-accent` token exists).
   ✓ built in 1.59s
   ```
 - Baseline `npm run lint` — **not** clean, pre-existing and unrelated to
-  this migration:
+  this migration (the initial capture via `tail -20` cut off the first of
+  these three — corrected here after Phase 2 re-ran a full, untruncated
+  lint):
+  - `DashboardPage.tsx:84` — calls `setNotice(...)` synchronously inside a
+    `useEffect` body (the "not logged in" early-return branch), which
+    `react-hooks/set-state-in-effect` flags. Pre-existing, not introduced
+    by this migration. Will fix opportunistically in Phase 4.1.
   - `OffersPage.tsx:57` — `useState<BundleItem[]>([{ id: Date.now(), ... }])`
     calls `Date.now()` directly in the initializer expression, which the
     React Compiler / eslint-plugin-react-hooks purity rule flags as an
@@ -77,3 +83,23 @@ plan authoring, plus reused from the user client's Phase 0 read of the
 full prototype (tokens, keyframes, `renderVals()` data block).
 
 Phase 0 complete.
+
+
+## Phase 2 — a fast-refresh rule surfaced as `error` here (not just a warning)
+
+This app's ESLint config (`eslint-plugin-react-refresh`) treats
+`only-export-components` as an **error**, unlike the user client's oxlint
+config where the same rule is a warning. Two Phase 2 files co-exported a
+component alongside a helper function/type and tripped it:
+
+- `src/theme/ThemeProvider.tsx` originally exported both `ThemeProvider`
+  and a `useTheme` hook. Split `useTheme` into `src/theme/useTheme.ts` and
+  the shared context into `src/theme/ThemeContext.ts`; `ThemeProvider.tsx`
+  now exports only the component.
+- `src/components/ui/Toast.tsx` originally exported both the `Toast`
+  component and a `showKartlyToast` helper. Split the helper into
+  `src/components/ui/showKartlyToast.tsx`; `Toast.tsx` now exports only
+  the component (plus its prop type, which the rule doesn't flag).
+
+`npm run lint` is clean after these splits except the three pre-existing
+baseline issues above.
