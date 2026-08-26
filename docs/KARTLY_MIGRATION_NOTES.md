@@ -121,10 +121,12 @@ Deliberately **not** built:
 
 - **4.1.6 recent-orders DataTable** — no orders endpoint on the seller API
   (same root cause as `OrderListPage`, see below).
-- **4.1.7 quick add-product form + low-stock panel** — kept the existing
-  "Next Actions" tips panel in that slot instead. A real low-stock panel
-  is plausible later (product variants already carry `stock`), but wasn't
-  built this pass; noted as a follow-up.
+- **4.1.7 low-stock panel** — built in a post-Phase-7 follow-up (see
+  below), replacing the "Next Actions" tips panel. The **quick add-product
+  form** half stays out deliberately: `/products/new` (`AddProductPage`)
+  is a complete, fully-built form already one click away — a shortened
+  duplicate inline on the dashboard would be redundant, not a genuine
+  convenience, and risks drifting out of sync with the real form.
 - **4.1.11/4.1.13/4.1.14 mobile-specific revenue-chart/orders-table/quick-form
   treatments** — not applicable, since none of those desktop elements were
   built to begin with.
@@ -373,3 +375,16 @@ fixed bar. Confirmed the `form`-attribute submit pattern actually works:
 `Button` already spreads native `ButtonHTMLAttributes`, so `form="..."` on
 a button rendered outside its `<form>` in the DOM still submits it — no
 component change needed.
+
+
+## Post-Phase-7 follow-up — Dashboard low-stock panel
+
+Replaced the static "Next Actions" tips panel with a real **Low stock**
+panel, computed from the same `products` array the dashboard already
+fetches (`limit: 6`, so honestly scoped as "among your N most recent
+products," not the full catalog — building a true full-catalog scan would
+need a separate, larger fetch this pass didn't add). Flattens each
+product's variants, filters `stock <= 5`, and renders up to 4 rows with a
+thumbnail, product name, SKU, and a `{n} left` `Badge`. Shows a skeleton
+while loading and an honest "nothing low on stock" message when the list
+is empty — never a fabricated count.

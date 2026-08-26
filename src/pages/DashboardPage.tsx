@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiBarChart2, FiBox, FiMapPin, FiPackage, FiPlus, FiShoppingBag, FiTag, FiTruck } from 'react-icons/fi';
+import { FiAlertTriangle, FiBarChart2, FiBox, FiPackage, FiPlus, FiShoppingBag, FiTag, FiTruck } from 'react-icons/fi';
 import axios from 'axios';
 import sellerApi from '../api/sellerApi';
 import Container from '../components/layout/Container';
@@ -14,13 +14,15 @@ import ImageFrame from '../components/ui/ImageFrame';
 import EmptyState from '../components/ui/EmptyState';
 import Skeleton from '../components/ui/Skeleton';
 
+const LOW_STOCK_THRESHOLD = 5;
+
 type Product = {
   _id: string;
   name: string;
   category?: string;
   isActive?: boolean;
   images?: string[];
-  variants?: Array<{ stock?: number; price?: number }>;
+  variants?: Array<{ sku?: string; attributes?: Record<string, string>; stock?: number; price?: number }>;
 };
 
 type ShippingConfig = {
@@ -87,6 +89,20 @@ const DashboardPage = () => {
 
   const shippingRates = shippingConfig?.shippingRates ? Object.entries(shippingConfig.shippingRates) : [];
   const hasProducts = products.length > 0;
+
+  const lowStockVariants = useMemo(() => {
+    return products.flatMap((product) =>
+      (product.variants ?? [])
+        .filter((variant) => (variant.stock ?? 0) <= LOW_STOCK_THRESHOLD)
+        .map((variant) => ({
+          key: `${product._id}-${variant.sku ?? Object.values(variant.attributes ?? {}).join('-')}`,
+          productName: product.name,
+          image: product.images?.[0],
+          sku: variant.sku,
+          left: variant.stock ?? 0,
+        })),
+    );
+  }, [products]);
 
   return (
     <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
@@ -214,20 +230,30 @@ const DashboardPage = () => {
           <Panel>
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-tile bg-soft text-[var(--k-on-soft)]">
-                <FiMapPin size={20} />
+                <FiAlertTriangle size={20} />
               </span>
               <div>
-                <h2 className="text-[16px] font-extrabold text-ink">Next Actions</h2>
-                <p className="text-[12.5px] font-semibold text-muted">Keep the seller setup moving.</p>
+                <h2 className="text-[16px] font-extrabold text-ink">Low stock</h2>
+                <p className="text-[12.5px] font-semibold text-muted">
+                  Among your {products.length} most recent product{products.length === 1 ? '' : 's'} — not the full catalog.
+                </p>
               </div>
             </div>
             <div className="mt-4 space-y-2.5">
-              {['Add product images and variants', 'Review inactive products', 'Configure shipping rates', 'Create product offers'].map((action, index) => (
-                <div key={action} className="flex items-center gap-3 rounded-tile bg-soft2 p-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[11px] bg-card text-sm font-extrabold text-accent">
-                    {index + 1}
-                  </span>
-                  <p className="text-[12.5px] font-semibold text-ink">{action}</p>
+              {!isLoading && lowStockVariants.length === 0 && (
+                <p className="rounded-tile bg-soft2 p-4 text-[12.5px] font-medium text-muted">
+                  Nothing low on stock among your recent products.
+                </p>
+              )}
+              {isLoading && Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} preset="row" />)}
+              {!isLoading && lowStockVariants.slice(0, 4).map((item) => (
+                <div key={item.key} className="flex items-center gap-3 rounded-tile p-3 t-fast hover:bg-soft2">
+                  <ImageFrame src={item.image} alt={item.productName} className="h-10.5 w-10.5 shrink-0 rounded-[12px]" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[12.5px] font-bold text-ink">{item.productName}</p>
+                    {item.sku && <p className="mt-0.5 truncate font-mono text-[10.5px] text-muted">{item.sku}</p>}
+                  </div>
+                  <Badge tone="plum">{item.left} left</Badge>
                 </div>
               ))}
             </div>
