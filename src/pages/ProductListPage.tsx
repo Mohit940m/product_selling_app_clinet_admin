@@ -49,20 +49,24 @@ const getErrorMessage = (err: unknown, fallback: string) => {
 const ProductListPage = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<ProductListItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
   const [busyProductId, setBusyProductId] = useState('');
+  const limit = 10;
 
   const loadProducts = async () => {
     setIsLoading(true);
 
     try {
       const { data } = await sellerApi.get('/products/get-all-products', {
-        params: { limit: 50, search: search || undefined },
+        params: { page, limit, search: search || undefined },
       });
       setProducts(data.data?.products ?? []);
+      setTotal(data.data?.total ?? 0);
     } catch (err) {
       toast.error(getErrorMessage(err, 'Unable to load products.'));
     } finally {
@@ -74,8 +78,18 @@ const ProductListPage = () => {
     const timeout = window.setTimeout(loadProducts, 250);
     return () => window.clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, page]);
 
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  // The seller products endpoint has no isActive filter param, so this
+  // still filters only the current page's already-fetched products —
+  // same page-scoped limitation as before pagination was wired in.
   const visibleProducts = useMemo(() => products.filter((product) => {
     if (statusFilter === 'active') return product.isActive;
     if (statusFilter === 'inactive') return !product.isActive;
@@ -182,7 +196,7 @@ const ProductListPage = () => {
     <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
       <PageHeader
         title="Products"
-        subtitle={`${products.length} products · ${products.filter((p) => p.isActive).length} active`}
+        subtitle={`${total} product${total === 1 ? '' : 's'}`}
         actions={
           <Button variant="primary" icon={<FiPlus size={16} />} onClick={() => navigate('/products/new')} className="hidden lg:inline-flex">
             New product
@@ -201,7 +215,7 @@ const ProductListPage = () => {
           <FiSearch className="shrink-0 text-muted" size={16} />
           <input
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => handleSearchChange(event.target.value)}
             className="w-full bg-transparent text-base outline-none placeholder:text-muted sm:text-[12.5px]"
             placeholder="Search by product name"
           />
@@ -243,6 +257,25 @@ const ProductListPage = () => {
           </div>
         )}
       />
+
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
+            Previous
+          </Button>
+          <span className="text-[13px] font-semibold text-muted">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
 
       <ConfirmDialog
         open={!!deleteTarget}

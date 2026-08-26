@@ -304,7 +304,7 @@ The prototype's admin artboard is essentially this page. Match it closely.
 - [x] **4.2.4** Row-hover action cluster on the right: ghost `Edit` and `danger` `Delete` icon buttons, appearing on `group-hover`.
 - [x] **4.2.5** Delete goes through `ConfirmDialog` (2.5.3), never `window.confirm`.
 - [x] **4.2.6** Loading state: five `Skeleton` rows. Empty state: `EmptyState` with a `Create your first product` CTA.
-- [ ] **4.2.7** Pagination as `outline` Buttons with `Page {n} of {m}` in `text-muted` between them.
+- [x] **4.2.7** Pagination as `outline` Buttons with `Page {n} of {m}` in `text-muted` between them.
 
 ### Mobile
 

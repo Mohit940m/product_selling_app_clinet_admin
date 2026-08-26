@@ -388,3 +388,24 @@ product's variants, filters `stock <= 5`, and renders up to 4 rows with a
 thumbnail, product name, SKU, and a `{n} left` `Badge`. Shows a skeleton
 while loading and an honest "nothing low on stock" message when the list
 is empty — never a fabricated count.
+
+## Post-Phase-7 follow-up — ProductListPage pagination (4.2.7)
+
+`ProductListPage` previously fetched a flat `limit: 50` with no page
+controls. The seller `/products/get-all-products` endpoint already
+supports `page`/`limit`/`total` (confirmed in
+`product.controller.ts`), so switched to `limit: 10` with real
+`page` state and `outline` Previous/Next `Button`s + `Page {n} of {m}`,
+matching the storefront's `ProductListPage` pattern exactly.
+
+Two honesty-driven side effects worth noting:
+- The `PageHeader` subtitle changed from `{n} products · {m} active` to
+  `{total} products`. The endpoint has no `isActive` filter param, so an
+  "active" count can only ever reflect the currently-fetched page — with
+  a 50-item page that was a reasonable approximation for most sellers,
+  but shrinking to a 10-item page would make it visibly wrong. Dropping
+  it is more honest than downsizing its accuracy.
+- The `All/Active/Inactive` status `Chip`s (4.2.2) still filter only the
+  current page's fetched products, same limitation as before — now
+  called out explicitly in a code comment since it's more noticeable at
+  a 10-item page size.
