@@ -409,3 +409,26 @@ Two honesty-driven side effects worth noting:
   current page's fetched products, same limitation as before — now
   called out explicitly in a code comment since it's more noticeable at
   a 10-item page size.
+
+## Post-Phase-7 follow-up — ShippingConfigPage header + layout (4.7.1/4.7.2/4.7.7)
+
+Replaced the page's bespoke header markup with the shared `PageHeader`
+component (every other admin page already uses it), with a dynamic
+subtitle showing the configured origin city/state once set. Moved the
+desktop Save button into `PageHeader`'s actions via the `form="shipping-
+config-form"` attribute pattern already used for `MobileActionBar`, and
+switched the form body to the spec's two-column layout (`Origin` Panel
+`flex-[1.2]` left, `Rates` Panel right, `lg:grid-cols-[1.2fr_1fr]`) —
+stacked on mobile as before.
+
+Left `4.7.4`/`4.7.9` (per-row inline-edit toggle, mobile edit `Sheet`)
+and `4.7.5`/`4.7.6`/`4.7.8` (add/remove rate zones, free-shipping
+threshold, mobile stacked-cost layout) deferred:
+`sellerShipping.model.ts` hard-codes exactly five rate zones with no
+threshold field and no add/remove support, so `4.7.5`/`4.7.6` are
+genuine backend blockers (confirmed by reading the model). `4.7.4`/
+`4.7.9`/`4.7.8` would mean rewriting the rate rows from "always editable
+inline" (current, working) into a view/edit-toggle flow — a real
+behavioral rewrite with no browser available this session to verify it
+didn't regress, so left as-is rather than risk shipping something
+untested.

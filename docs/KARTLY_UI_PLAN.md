@@ -386,13 +386,13 @@ The current page is 131 lines and thin. This is where the prototype's table desi
 
 ### Desktop
 
-- [ ] **4.7.1** `PageHeader`: title `Shipping`, subtitle showing the configured origin city/state.
-- [ ] **4.7.2** Two-column: **Origin address** `Panel` (`Input` grid) left at `flex-[1.2]`, **Rates** `Panel` right.
+- [x] **4.7.1** `PageHeader`: title `Shipping`, subtitle showing the configured origin city/state.
+- [x] **4.7.2** Two-column: **Origin address** `Panel` (`Input` grid) left at `flex-[1.2]`, **Rates** `Panel` right.
 - [x] **4.7.3** Rate rows: `rounded-tile border border-line p-3.5 flex items-center justify-between` — name (capitalised from camelCase, as the current code already does), delivery time muted below, cost `font-extrabold text-accent` right. Hover `border-accent`.
 - [ ] **4.7.4** Editing a rate switches the row inline into two `Input`s (cost, time) with `Save` / `Cancel` ghost buttons.
 - [ ] **4.7.5** `+ Add rate` as a dashed row.
 - [ ] **4.7.6** Free-shipping threshold gets its own `Panel` with a `Switch` and an amount `Input`.
-- [ ] **4.7.7** Save action in `PageHeader` as `primary`, `loading` while saving.
+- [x] **4.7.7** Save action in `PageHeader` as `primary`, `loading` while saving.
 
 ### Mobile
 

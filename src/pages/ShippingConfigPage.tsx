@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FiMapPin, FiSave, FiTruck } from 'react-icons/fi';
 import Container from '../components/layout/Container';
+import PageHeader from '../components/layout/PageHeader';
 import Panel from '../components/ui/Panel';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -139,16 +140,29 @@ const ShippingConfigPage = () => {
   };
 
   return (
-    <Container className="max-w-3xl! py-6 pb-28 lg:pb-8 lg:py-8">
-      <div className="mb-6">
-        <p className="font-mono text-[11px] font-bold text-muted">LOGISTICS</p>
-        <h1 className="mt-1.5 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">Shipping</h1>
-        <p className="mt-1 text-[12.5px] font-semibold text-muted">
-          {hasConfig
-            ? 'Update your shipping origin and delivery rates per zone.'
-            : 'Set up your shipping origin and delivery rates to start selling.'}
-        </p>
-      </div>
+    <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
+      <PageHeader
+        title="Shipping"
+        subtitle={
+          hasConfig && form.city && form.state
+            ? `Shipping from ${form.city}, ${form.state}`
+            : hasConfig
+              ? 'Update your shipping origin and delivery rates per zone.'
+              : 'Set up your shipping origin and delivery rates to start selling.'
+        }
+        actions={
+          <Button
+            type="submit"
+            form="shipping-config-form"
+            variant="primary"
+            loading={isSaving}
+            icon={<FiSave size={16} />}
+            className="hidden lg:inline-flex"
+          >
+            {hasConfig ? 'Update configuration' : 'Create configuration'}
+          </Button>
+        }
+      />
 
       {isLoading ? (
         <div className="space-y-4">
@@ -156,7 +170,7 @@ const ShippingConfigPage = () => {
           <Skeleton className="h-64" />
         </div>
       ) : (
-        <form id="shipping-config-form" onSubmit={saveConfig} className="space-y-5">
+        <form id="shipping-config-form" onSubmit={saveConfig} className="grid gap-5 lg:grid-cols-[1.2fr_1fr] lg:items-start">
           <Panel>
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-tile bg-soft text-[var(--k-on-soft)]">
@@ -222,10 +236,6 @@ const ShippingConfigPage = () => {
               ))}
             </div>
           </Panel>
-
-          <Button type="submit" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />} className="hidden lg:inline-flex">
-            {hasConfig ? 'Update configuration' : 'Create configuration'}
-          </Button>
         </form>
       )}
 
