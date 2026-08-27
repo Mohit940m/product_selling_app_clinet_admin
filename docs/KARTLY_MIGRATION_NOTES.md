@@ -958,3 +958,19 @@ in its own effect rather than inline during render — assigning
 `ref.current` in the render body trips the `react-hooks/refs` lint rule
 (refs may only be read/written from effects, event handlers, or other
 refs' cleanups, never during render).
+
+## Post-Phase-7 follow-up — ProductListPage pagination left stale after delete
+
+`softDeleteProduct` removed the deleted row from local `products` state
+but never touched `total`, and never adjusted `page`. Two consequences:
+the pager's "Page X of Y" (computed from `total`) went stale by one
+product per delete, and — the concrete bug — deleting the last remaining
+product on any page past the first left the seller looking at e.g. "Page
+3 of 3" with zero rows showing, since neither `page` nor `total` moved to
+reflect that page 3 no longer exists. Fixed by decrementing `total` on
+every successful delete, and stepping `page` back by one specifically
+when the deleted row was the only one left on a page beyond the first
+(captured as `wasLastOnPage` before the state update, from the pre-delete
+`products.length`) — which lands the pager on the new-last page and lets
+the existing `[search, page]` debounce effect's dependency on `page`
+trigger a refetch automatically.

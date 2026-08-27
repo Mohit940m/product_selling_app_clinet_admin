@@ -129,7 +129,13 @@ const ProductListPage = () => {
 
     try {
       await sellerApi.delete(`/products/delete-product/${deleteTarget.id}`);
+      // Deleting the last product on a page beyond the first would
+      // otherwise leave the pager reading e.g. "Page 3 of 3" with zero
+      // rows showing — step back a page so it lands somewhere with data.
+      const wasLastOnPage = products.length === 1 && page > 1;
       setProducts((current) => current.filter((product) => product._id !== deleteTarget.id));
+      setTotal((current) => Math.max(0, current - 1));
+      if (wasLastOnPage) setPage((p) => Math.max(1, p - 1));
       toast.success(`${deleteTarget.name} moved out of active catalog.`);
       setDeleteTarget(null);
     } catch (err) {
