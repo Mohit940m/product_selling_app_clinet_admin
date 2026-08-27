@@ -459,6 +459,7 @@ const OffersPage = () => {
                 value={productSearch}
                 onChange={(e) => setProductSearch(e.target.value)}
                 placeholder="Search products by name"
+                aria-label="Search products to target with this offer"
                 className="w-full bg-transparent text-[12.5px] outline-none placeholder:text-muted"
               />
             </div>

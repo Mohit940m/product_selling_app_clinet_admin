@@ -218,6 +218,7 @@ const ProductListPage = () => {
             onChange={(event) => handleSearchChange(event.target.value)}
             className="w-full bg-transparent text-base outline-none placeholder:text-muted sm:text-[12.5px]"
             placeholder="Search by product name"
+            aria-label="Search products"
           />
         </div>
         <div className="flex gap-2">

@@ -211,17 +211,30 @@ MobileActionBar" follow-up further down.
 Kept the page's existing honest stance — "Order management API routes
 coming soon" — since the seller routes (`product_selling_app_server/src/routes/seller.routes/`)
 have no order-listing endpoint at all. Restyled the shell: `PageHeader`,
-`Chip`-based status filter rail (using the **real** backend order-status
-enum from `order.model.ts` — `CREATED/CONFIRMED/SHIPPED/OUT FOR
-DELIVERY/DELIVERED/CANCELLED` — replacing the page's previous invented
-`pending/processing/shipped/delivered/cancelled` set that didn't match the
-schema), `EmptyState`, and `Badge`+`statusTone` for the status-legend row.
+`EmptyState`, and `Badge`+`statusTone` for the status-legend row (using
+the **real** backend order-status enum from `order.model.ts` —
+`CREATED/CONFIRMED/SHIPPED/OUT FOR DELIVERY/DELIVERED/CANCELLED` —
+replacing the page's previous invented
+`pending/processing/shipped/delivered/cancelled` set that didn't match
+the schema).
 
 The `DataTable` (4.6.3), row-click detail `Sheet` (4.6.5), date-range
 filter (4.6.6), and the mobile card-list equivalents (4.6.8-4.6.11) are
 not built — there is no order data to populate them with, and a table
 that always renders its own empty state would just be this page's
 `EmptyState` with extra steps.
+
+**Post-Phase-7 correction:** an earlier version of this page also shipped
+a search `Input` and a `Chip`-based status-filter rail above the
+`EmptyState` — both updated real local state (`search`/`activeStatus`)
+but had zero effect on what rendered, since the `EmptyState` shows
+unconditionally regardless of either. That's the exact "dead control"
+anti-pattern the paragraph above correctly reasoned about for the
+`DataTable`, just not applied consistently to the search/filter UI sitting
+right next to it — a seller could type a search term or tap a status
+chip and get no indication their input did anything. Removed both;
+kept only the non-interactive status-badge legend, now showing all six
+real statuses instead of an arbitrary four.
 
 ### 4.7 ShippingConfigPage
 
