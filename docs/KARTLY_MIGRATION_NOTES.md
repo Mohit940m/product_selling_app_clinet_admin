@@ -432,3 +432,22 @@ inline" (current, working) into a view/edit-toggle flow — a real
 behavioral rewrite with no browser available this session to verify it
 didn't regress, so left as-is rather than risk shipping something
 untested.
+
+## Post-Phase-7 follow-up — tap-target audit + DataTable rule ticks (1.5.3, 1.5.4, 1.5.5, 6.6)
+
+Two items were already fully satisfied by earlier work and just hadn't
+been ticked: **1.5.3** (the table rule) is exactly what
+`src/components/ui/DataTable.tsx` already implements — real `<table>`
+in a `rounded-panel border overflow-hidden` shell with its own
+`overflow-x-auto`, `mobileCard` render prop, used by products/offers/
+dashboard low-stock. **1.5.5** (no page-level horizontal scroll) is the
+same rule Phase 6's `6.1` already verified.
+
+For **1.5.4**/**6.6** (44×44px tap targets), the same class-name audit
+as the storefront found two sub-44px icon-only buttons: the staged
+product-image remove (`FiTrash2`) buttons on `AddProductPage.tsx` and
+`EditProductPage.tsx`, both 28px visible circles in a tight
+`grid-cols-3 gap-2.5` thumbnail grid. Fixed with the same invisible
+`before:absolute before:-inset-2` hit-area expansion used on the
+storefront — the visible circle and grid layout are unchanged, only the
+actual clickable box grows to 44px+.

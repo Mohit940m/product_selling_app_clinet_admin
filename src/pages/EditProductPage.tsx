@@ -246,7 +246,7 @@ const EditProductPage = () => {
                           type="button"
                           onClick={() => removeNewImage(image.id)}
                           aria-label={`Remove ${image.file.name}`}
-                          className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-card text-muted shadow-kartly t-fast hover:text-danger"
+                          className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-card text-muted shadow-kartly t-fast before:absolute before:-inset-2 before:content-[''] hover:text-danger"
                         >
                           <FiTrash2 size={14} />
                         </button>

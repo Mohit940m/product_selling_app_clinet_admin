@@ -133,9 +133,9 @@ The prototype's admin panel is a single 1280×840 desktop artboard — **it give
   | `≥ 1280px` (`xl`) | wide | content capped at `1280px`; side-by-side panel pairs |
 
 - [x] **1.5.2** Create `src/components/layout/Container.tsx`: `mx-auto w-full max-w-[1280px] px-5 sm:px-8 lg:px-9`. Replace every ad-hoc `mx-auto max-w-7xl px-4 sm:px-6` in the app with it during Phase 4.
-- [ ] **1.5.3** **Table rule (applies to orders, products, offers, low stock):** at `lg+` render a real `<table>` in a `rounded-panel border border-line overflow-hidden` shell with an `overflow-x-auto` wrapper. Below `lg` render the *same data* as a stacked `Card` list — one card per row, label/value pairs. Build this once as `src/components/ui/DataTable.tsx` with a `mobileCard` render prop; do **not** hand-roll the pattern per page.
-- [ ] **1.5.4** Rule: every tap target ≥ 44×44 CSS px on touch widths.
-- [ ] **1.5.5** Rule: no page-level horizontal scroll at any width. Wide content scrolls inside its own container.
+- [x] **1.5.3** **Table rule (applies to orders, products, offers, low stock):** at `lg+` render a real `<table>` in a `rounded-panel border border-line overflow-hidden` shell with an `overflow-x-auto` wrapper. Below `lg` render the *same data* as a stacked `Card` list — one card per row, label/value pairs. Build this once as `src/components/ui/DataTable.tsx` with a `mobileCard` render prop; do **not** hand-roll the pattern per page.
+- [x] **1.5.4** Rule: every tap target ≥ 44×44 CSS px on touch widths.
+- [x] **1.5.5** Rule: no page-level horizontal scroll at any width. Wide content scrolls inside its own container.
 
 ---
 
@@ -483,7 +483,7 @@ Pass criteria applied at every width:
 - [x] **6.3** Sidebar is persistent at `lg+` and a drawer below; the drawer closes on route change.
 - [x] **6.4** `MobileActionBar` visible below `lg` on the pages that declare one, with no content trapped underneath it.
 - [x] **6.5** All modals present as bottom sheets below `lg`.
-- [ ] **6.6** Every tap target ≥ 44px on touch widths.
+- [x] **6.6** Every tap target ≥ 44px on touch widths.
 - [ ] **6.7** Long product names, customer names and addresses truncate or wrap — never overflow their cell.
 - [ ] **6.8** Forms are single-column below `lg` with no field narrower than its content.
 - [ ] **6.9** Run the whole matrix twice — once light, once dark.
