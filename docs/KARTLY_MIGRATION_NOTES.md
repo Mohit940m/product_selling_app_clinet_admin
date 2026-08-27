@@ -649,3 +649,14 @@ since there's no backend draft concept (the same `create-product` call
 would just create the same live product either way), a "Save draft"
 button would be indistinguishable from "Publish" and thus a misleading
 control. Not built.
+
+## Post-Phase-7 follow-up — EditProductPage PageHeader (4.4.2)
+
+Same conversion as `AddProductPage`: swapped the bespoke `<h1>` block
+for the shared `PageHeader`, with `Save changes` moved into its actions
+via `form="edit-product-form"`. Subtitle shows the live product name
+(falling back to a plain description while it's still loading) plus
+the product's mono id, per spec. `PageHeader`'s `subtitle` prop type
+widened from `string` to `ReactNode` to allow the mixed plain-text +
+`font-mono` styling — backward compatible, every other page's plain-
+string subtitle still works unchanged.

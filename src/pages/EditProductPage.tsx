@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FiArrowLeft, FiImage, FiSave, FiTrash2 } from 'react-icons/fi';
 import Container from '../components/layout/Container';
+import PageHeader from '../components/layout/PageHeader';
 import Panel from '../components/ui/Panel';
 import Input from '../components/ui/Input';
 import Textarea from '../components/ui/Textarea';
@@ -159,12 +160,32 @@ const EditProductPage = () => {
 
   return (
     <Container className="max-w-3xl! py-6 pb-28 lg:pb-8 lg:py-8">
-      <Link to={`/products/${productId}`} className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
+      <Link to={`/products/${productId}`} className="mb-3 inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
         <FiArrowLeft size={16} />
         Product details
       </Link>
-      <h1 className="mt-2 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">Edit product</h1>
-      <p className="mt-1 text-[12.5px] font-semibold text-muted">Update product information and images.</p>
+      <PageHeader
+        title="Edit product"
+        subtitle={
+          <>
+            {name || 'Update product information and images'} <span className="font-mono text-[11px]">{productId}</span>
+          </>
+        }
+        actions={
+          !isLoading && (
+            <Button
+              type="submit"
+              form="edit-product-form"
+              variant="primary"
+              loading={isSaving}
+              icon={<FiSave size={16} />}
+              className="hidden lg:inline-flex"
+            >
+              Save changes
+            </Button>
+          )
+        }
+      />
 
       {isLoading ? (
         <div className="mt-6 space-y-3">
@@ -262,10 +283,6 @@ const EditProductPage = () => {
           {uploadStatus && (
             <div className="rounded-btn border border-accent bg-soft2 p-3 text-[12.5px] font-semibold text-accent">{uploadStatus}</div>
           )}
-
-          <Button type="submit" variant="primary" fullWidth loading={isSaving} icon={<FiSave size={16} />} className="hidden lg:inline-flex">
-            Save changes
-          </Button>
 
           <Button type="button" variant="danger" fullWidth icon={<FiTrash2 size={16} />} onClick={() => setShowDeleteConfirm(true)}>
             Delete product
