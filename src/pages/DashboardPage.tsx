@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiAlertTriangle, FiBarChart2, FiBox, FiPackage, FiPlus, FiShoppingBag, FiTag, FiTruck } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import sellerApi from '../api/sellerApi';
 import Container from '../components/layout/Container';
@@ -13,8 +14,12 @@ import Badge from '../components/ui/Badge';
 import ImageFrame from '../components/ui/ImageFrame';
 import EmptyState from '../components/ui/EmptyState';
 import Skeleton from '../components/ui/Skeleton';
+import Modal from '../components/ui/Modal';
+import Input from '../components/ui/Input';
 
 const LOW_STOCK_THRESHOLD = 5;
+
+type Variant = { _id: string; sku?: string; attributes?: Record<string, string>; stock?: number; price?: number };
 
 type Product = {
   _id: string;
@@ -22,7 +27,11 @@ type Product = {
   category?: string;
   isActive?: boolean;
   images?: string[];
-  variants?: Array<{ sku?: string; attributes?: Record<string, string>; stock?: number; price?: number }>;
+  // NOT returned by /products/get-all-products (it only flattens the
+  // first variant's sku/price at the top level) — populated separately
+  // below via a per-product /products/get-product/:id fetch, since that's
+  // the only endpoint that actually returns each variant's stock.
+  variants?: Variant[];
 };
 
 type ShippingConfig = {
@@ -43,6 +52,9 @@ const DashboardPage = () => {
   const [shippingConfig, setShippingConfig] = useState<ShippingConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notice, setNotice] = useState('');
+  const [restockTarget, setRestockTarget] = useState<{ productId: string; variantId: string; productName: string; sku?: string } | null>(null);
+  const [restockAmount, setRestockAmount] = useState('');
+  const [isRestocking, setIsRestocking] = useState(false);
 
   // RequireSellerAuth already guarantees a sellerToken exists for every
   // route inside AdminLayout, so this effect no longer needs to guard for
@@ -56,8 +68,25 @@ const DashboardPage = () => {
           sellerApi.get('/shipping/get-shipping-config'),
         ]);
 
-        setProducts(productsResponse.data.data?.products ?? []);
+        const baseProducts: Product[] = productsResponse.data.data?.products ?? [];
+        setProducts(baseProducts);
         setShippingConfig(shippingResponse.data.data ?? null);
+
+        // The list endpoint doesn't include variant stock, only a
+        // flattened first-variant sku/price — fetch each product's detail
+        // in parallel to get real stock numbers for the stat card and the
+        // low-stock panel. A failed detail fetch just leaves that one
+        // product without variants rather than failing the whole page.
+        const detailResults = await Promise.allSettled(
+          baseProducts.map((p) => sellerApi.get(`/products/get-product/${p._id}`)),
+        );
+        setProducts((current) =>
+          current.map((product, i) => {
+            const result = detailResults[i];
+            if (result.status !== 'fulfilled') return product;
+            return { ...product, variants: result.value.data.data?.variants ?? [] };
+          }),
+        );
       } catch (err) {
         const fallbackNotice = axios.isAxiosError(err) && err.response?.status
           ? 'Some dashboard data is not available yet.'
@@ -95,7 +124,9 @@ const DashboardPage = () => {
       (product.variants ?? [])
         .filter((variant) => (variant.stock ?? 0) <= LOW_STOCK_THRESHOLD)
         .map((variant) => ({
-          key: `${product._id}-${variant.sku ?? Object.values(variant.attributes ?? {}).join('-')}`,
+          key: `${product._id}-${variant._id}`,
+          productId: product._id,
+          variantId: variant._id,
           productName: product.name,
           image: product.images?.[0],
           sku: variant.sku,
@@ -103,6 +134,44 @@ const DashboardPage = () => {
         })),
     );
   }, [products]);
+
+  const submitRestock = async () => {
+    if (!restockTarget) return;
+    const addedStock = Number(restockAmount);
+    if (!Number.isFinite(addedStock) || addedStock <= 0) {
+      toast.error('Enter a positive quantity to add.');
+      return;
+    }
+
+    setIsRestocking(true);
+    try {
+      const { data } = await sellerApi.patch(`/products/increase-stock/${restockTarget.productId}`, {
+        variantId: restockTarget.variantId,
+        addedStock,
+      });
+      const newStock = data.data?.stock;
+      setProducts((current) =>
+        current.map((product) =>
+          product._id !== restockTarget.productId
+            ? product
+            : {
+                ...product,
+                variants: product.variants?.map((variant) =>
+                  variant._id !== restockTarget.variantId ? variant : { ...variant, stock: newStock ?? (variant.stock ?? 0) + addedStock },
+                ),
+              },
+        ),
+      );
+      toast.success(`Added ${addedStock} unit${addedStock === 1 ? '' : 's'} to ${restockTarget.productName}.`);
+      setRestockTarget(null);
+      setRestockAmount('');
+    } catch (err) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.message ?? 'Unable to update stock.' : 'Unable to update stock.';
+      toast.error(msg);
+    } finally {
+      setIsRestocking(false);
+    }
+  };
 
   return (
     <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
@@ -254,12 +323,42 @@ const DashboardPage = () => {
                     {item.sku && <p className="mt-0.5 truncate font-mono text-[10.5px] text-muted">{item.sku}</p>}
                   </div>
                   <Badge tone="plum">{item.left} left</Badge>
+                  <button
+                    type="button"
+                    onClick={() => setRestockTarget({ productId: item.productId, variantId: item.variantId, productName: item.productName, sku: item.sku })}
+                    className="shrink-0 rounded-full border border-line px-3 py-1.5 text-[11px] font-bold text-ink t-fast hover:border-accent hover:text-accent"
+                  >
+                    Restock
+                  </button>
                 </div>
               ))}
             </div>
           </Panel>
         </div>
       </div>
+
+      <Modal open={!!restockTarget} onClose={() => setRestockTarget(null)} title="Add stock">
+        {restockTarget && (
+          <div className="space-y-4">
+            <div>
+              <p className="text-[13px] font-bold text-ink">{restockTarget.productName}</p>
+              {restockTarget.sku && <p className="mt-0.5 font-mono text-[11px] text-muted">{restockTarget.sku}</p>}
+            </div>
+            <Input
+              label="Units to add"
+              type="number"
+              min="1"
+              value={restockAmount}
+              onChange={(e) => setRestockAmount(e.target.value)}
+              placeholder="10"
+              autoFocus
+            />
+            <Button variant="primary" fullWidth loading={isRestocking} onClick={submitRestock}>
+              Add stock
+            </Button>
+          </div>
+        )}
+      </Modal>
     </Container>
   );
 };

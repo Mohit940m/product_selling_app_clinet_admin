@@ -481,3 +481,30 @@ session or by anyone else) and 4.8.2/4.8.4/4.8.6/4.8.7/4.8.10-4.8.12
 (extracting `OfferForm`, edit/delete/enable-disable, the target picker,
 filter chips, mobile `Sheet` form) remain deferred for the same reason
 as before — no endpoints to back edit/delete/list-filtering.
+
+## Post-Phase-7 follow-up — dashboard stock-data bug fix + real Restock action
+
+Found a real bug while investigating another endpoint: `GET
+/products/get-all-products` (used by `DashboardPage`) does **not**
+return a `variants` array at all — it only flattens the *first*
+variant's `sku`/`price` onto the product object (confirmed by reading
+`getAllProducts` in `product.controller.ts`). The dashboard's "STOCK
+UNITS" `StatCard` and the "Low stock" panel both read
+`product.variants[].stock`, so both were silently always computing 0 /
+empty — the low-stock panel never had real data to show, regardless of
+actual inventory. This was a genuine defect from earlier this session's
+low-stock panel work, not a documented limitation.
+
+Fixed by fetching each recent product's full detail
+(`GET /products/get-product/:id`, which *does* return real variants with
+stock — confirmed the same way) in parallel via `Promise.allSettled`
+after the initial list loads, merging the results in. A failed detail
+fetch just leaves that one product without variants rather than failing
+the whole dashboard.
+
+While in there: found `PATCH /products/increase-stock/:productId` (body
+`{ variantId, addedStock }`) sitting completely unused — not called
+anywhere in this frontend. Wired a real "Restock" button onto each
+low-stock row, opening a `Modal` with a units-to-add `Input`; on success
+the local `products` state updates from the response's returned stock
+figure so the panel reflects the new count immediately, no full reload.
