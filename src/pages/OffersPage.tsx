@@ -556,6 +556,7 @@ const OffersPage = () => {
                   label={discountType === 'PERCENTAGE' ? 'Percentage (%)' : 'Flat Amount (₹)'}
                   type="number"
                   min="0"
+                  max={discountType === 'PERCENTAGE' ? '100' : undefined}
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
                   placeholder={discountType === 'PERCENTAGE' ? '10' : '500'}

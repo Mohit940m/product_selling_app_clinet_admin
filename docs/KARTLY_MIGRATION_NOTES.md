@@ -1032,3 +1032,20 @@ matching `min` on both `OffersPage.tsx` date inputs (`min={today()}` on
 Valid From, `min={validFrom || today()}` on Valid Till) so the picker
 itself steers a seller away from the invalid range before they ever hit
 submit, mirroring how the numeric fields already use `min="0"`.
+
+## Post-Phase-7 follow-up — cap percentage discounts at 100 on OffersPage
+
+`Offer.model.ts`'s config validator only checks that a `DISCOUNT`
+offer's `value` is a number — no upper bound, for either `PERCENTAGE` or
+`FLAT`. That's correct for `FLAT` (an unbounded rupee amount is fine),
+but a `PERCENTAGE` value over 100 has no real meaning; the checkout-time
+calculation (`offer.util.ts`'s `calculateBestPrice`) already clamps the
+final price at `Math.max(0, ...)`, so this was never a price-goes-negative
+bug — just a silent no-op past 100 (a seller who fat-fingers 150 instead
+of 15 gets an offer indistinguishable from "100% off," with nothing
+telling them their number was ignored). Left the backend model as-is
+(the clamp already makes it safe, and `FLAT`'s legitimate unbounded range
+shares the same `value` field) and added `max="100"` to the discount
+value input, but only while `discountType === 'PERCENTAGE'` — switching
+to `FLAT` drops the cap back to unbounded, mirroring how the label and
+placeholder already branch on `discountType`.
