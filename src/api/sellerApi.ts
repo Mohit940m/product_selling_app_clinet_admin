@@ -24,4 +24,33 @@ sellerApi.interceptors.request.use((config) => {
   return config;
 });
 
+// No global 401 handling existed before this — an expired/invalid token
+// just meant every page's own fetch failed with a generic "unable to
+// load" toast, with no path back to a working state except manually
+// navigating to /login. Only act when a token is actually stored (a 401
+// with no stored token would be unexpected here — every admin route
+// already sits behind RequireSellerAuth) and we're not already on the
+// login/signup screen, so this can't create a redirect loop or clobber
+// a real invalid-OTP error on those pages.
+sellerApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      let hadToken = false;
+      try {
+        hadToken = !!localStorage.getItem('sellerToken');
+        if (hadToken) localStorage.removeItem('sellerToken');
+      } catch {
+        // If storage itself is the problem, there's nothing more to clean up.
+      }
+
+      const onAuthPage = window.location.pathname === '/login' || window.location.pathname === '/signup';
+      if (hadToken && !onAuthPage) {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 export default sellerApi;

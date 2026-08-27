@@ -862,3 +862,16 @@ per-page guards:
   `ErrorBoundary`'s generic fallback; now it's treated the same as "not
   logged in" and redirects to `/login`, a more specific and more useful
   outcome for this exact failure mode.
+
+## Post-Phase-7 follow-up — global 401 handling (expired/invalid token)
+
+Same gap as the user client: no response interceptor existed, so an
+expired/invalid `sellerToken` just meant every page's own fetch failed
+with a generic "unable to load" toast, no path back except manually
+visiting `/login`. Added a response interceptor on `sellerApi` that, on
+a `401`, clears the token and redirects to `/login` — guarded the same
+way: only when a token was actually present, and only when not already
+on `/login`/`/signup`, so it can't loop or clobber a real invalid-OTP
+error on those pages. `RequireSellerAuth` already redirects on page
+*load* when there's no token; this covers the case where the token goes
+stale *during* a session, mid-page.
