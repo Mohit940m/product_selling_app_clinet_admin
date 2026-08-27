@@ -9,6 +9,7 @@ const Chip = ({ selected = false, className = '', type = 'button', children, ...
   return (
     <button
       type={type}
+      aria-pressed={selected}
       className={[
         'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-2 text-[11px] font-bold t-fast',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',

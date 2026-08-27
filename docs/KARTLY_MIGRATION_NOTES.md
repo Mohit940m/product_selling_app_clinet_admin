@@ -814,3 +814,13 @@ validity dates — just scoped to the same session-created set as the
 grid itself (still no listing endpoint to filter a true full catalog
 with). Shows an honest "No {status} offers created this session"
 message rather than an empty grid when a filter matches nothing.
+
+## Post-Phase-7 follow-up — Chip aria-pressed
+
+The shared `Chip` primitive's `selected` prop drove visual state only —
+no ARIA state, so a screen reader had no way to know which chip in a
+filter/selection row was active. Added `aria-pressed={selected}` to the
+component itself, so every existing and future `Chip` usage (status
+filters, category rails, discount-type selectors, offer-type cards)
+picks it up for free. An explicit `aria-pressed`/`aria-selected` passed
+at a call site still overrides it (prop spread order).
