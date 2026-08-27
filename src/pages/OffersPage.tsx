@@ -437,8 +437,8 @@ const OffersPage = () => {
           <div className="mt-4 space-y-3.5">
             <Input label="Offer Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Summer Sale 10% Off" required />
             <div className="grid gap-3.5 sm:grid-cols-2">
-              <Input label="Valid From" type="datetime-local" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} required />
-              <Input label="Valid Till" type="datetime-local" value={validTill} onChange={(e) => setValidTill(e.target.value)} required />
+              <Input label="Valid From" type="datetime-local" min={today()} value={validFrom} onChange={(e) => setValidFrom(e.target.value)} required />
+              <Input label="Valid Till" type="datetime-local" min={validFrom || today()} value={validTill} onChange={(e) => setValidTill(e.target.value)} required />
             </div>
             <div className="flex items-center justify-between rounded-tile border border-line px-4 py-3.5">
               <div>

@@ -1016,3 +1016,19 @@ entirely successful. Fixed server-side by mirroring `createProduct`'s
 existing files-fallback-to-`productImagesURL` handling; verified with
 `npm run build` in the server project. No frontend change was needed —
 `EditProductPage.tsx` was already sending the right payload.
+
+## Backend bug found + fixed — createOffer accepted an inverted date range
+
+`createOffer` validated that `validFrom`/`validTill` weren't in the past
+but never checked `validTill` was actually after `validFrom` — nor does
+the `Offer` Mongoose schema (only `required: true` on each field).
+`OffersPage.tsx`'s `getOfferStatus` and the checkout-time offer resolver
+(`src/utils/offer.util.ts`'s `findApplicableOffers`) both key off `now`
+falling between the two dates, so a seller submitting a reversed range
+(e.g. mis-clicking the date pickers) would get a "created successfully"
+toast for an offer that could never be active — silently broken, no
+error to act on. Added the missing check server-side, and added a
+matching `min` on both `OffersPage.tsx` date inputs (`min={today()}` on
+Valid From, `min={validFrom || today()}` on Valid Till) so the picker
+itself steers a seller away from the invalid range before they ever hit
+submit, mirroring how the numeric fields already use `min="0"`.
