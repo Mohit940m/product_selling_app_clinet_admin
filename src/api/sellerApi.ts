@@ -7,7 +7,15 @@ const sellerApi = axios.create({
 });
 
 sellerApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('sellerToken');
+  // localStorage can throw (privacy mode with storage blocked, some
+  // corporate browser policies) — if it does, every request should still
+  // go out unauthenticated rather than fail outright before it's sent.
+  let token: string | null = null;
+  try {
+    token = localStorage.getItem('sellerToken');
+  } catch {
+    // Fall through with no token.
+  }
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

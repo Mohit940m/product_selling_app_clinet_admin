@@ -846,3 +846,19 @@ Added `src/components/ErrorBoundary.tsx` wrapping `<Routes>` inside
 `<Router>` (kept outside `ToastContainer`), with a themed fallback and a
 "Reload page" button. Not a Kartly-plan item — cross-cutting robustness
 hardening, same spirit as the earlier tap-target/dead-controls audits.
+
+## Post-Phase-7 follow-up — guard localStorage reads at the two real choke points
+
+`localStorage` can throw (privacy-mode storage blocking, some corporate
+browser policies). Unlike the user client, this app funnels auth through
+exactly two places, so both got a real fix rather than scattered
+per-page guards:
+
+- `sellerApi.ts`'s request interceptor — an unguarded throw here would
+  have failed every single API call app-wide. Falls through to an
+  unauthenticated request instead.
+- `RequireSellerAuth.tsx` — the one shared route guard for every admin
+  page. An unguarded throw here (during render) would hit the new
+  `ErrorBoundary`'s generic fallback; now it's treated the same as "not
+  logged in" and redirects to `/login`, a more specific and more useful
+  outcome for this exact failure mode.
