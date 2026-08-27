@@ -25,7 +25,7 @@ Phases 1 and 2 below are **the same token layer and the same primitives** as the
 | 1 | Design foundation (tokens, motion, theme) | 29 / 29 | ✅ |
 | 2 | Primitive component library | 30 / 30 | ✅ |
 | 3 | Admin shell (sidebar, topbar, mobile nav) | 20 / 20 | ✅ |
-| 4 | Page migrations | 55 / 96 | ⚠️ see notes |
+| 4 | Page migrations | 57 / 96 | ⚠️ see notes |
 | 5 | Motion & interaction pass | 13 / 13 | ✅ |
 | 6 | Responsive QA matrix | 8 / 12 | ⚠️ no browser tool |
 | 7 | Cleanup, a11y & verification | 23 / 25 | ✅* |
