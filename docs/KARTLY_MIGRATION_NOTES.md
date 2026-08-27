@@ -837,3 +837,12 @@ component itself, so every existing and future `Chip` usage (status
 filters, category rails, discount-type selectors, offer-type cards)
 picks it up for free. An explicit `aria-pressed`/`aria-selected` passed
 at a call site still overrides it (prop spread order).
+
+## Post-Phase-7 follow-up — top-level ErrorBoundary
+
+Same fix as the user client: neither app had a React error boundary, so
+an unhandled render error anywhere would white-screen the whole app.
+Added `src/components/ErrorBoundary.tsx` wrapping `<Routes>` inside
+`<Router>` (kept outside `ToastContainer`), with a themed fallback and a
+"Reload page" button. Not a Kartly-plan item — cross-cutting robustness
+hardening, same spirit as the earlier tap-target/dead-controls audits.

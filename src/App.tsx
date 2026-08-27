@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css"
 
 import { ThemeProvider } from "./theme/ThemeProvider"
 import { useTheme } from "./theme/useTheme"
+import ErrorBoundary from "./components/ErrorBoundary"
 import AdminLayout from "./components/layout/AdminLayout"
 import RequireSellerAuth from "./components/layout/RequireSellerAuth"
 import LoginPage from "./pages/LoginPage"
@@ -22,24 +23,26 @@ const AppRoutes = () => {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
 
-        <Route element={<RequireSellerAuth />}>
-          <Route element={<AdminLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/products" element={<ProductListPage />} />
-            <Route path="/products/new" element={<AddProductPage />} />
-            <Route path="/products/:productId" element={<ProductDetailsPage />} />
-            <Route path="/products/:productId/edit" element={<EditProductPage />} />
-            <Route path="/orders" element={<OrderListPage />} />
-            <Route path="/shipping" element={<ShippingConfigPage />} />
-            <Route path="/offers" element={<OffersPage />} />
+          <Route element={<RequireSellerAuth />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/products" element={<ProductListPage />} />
+              <Route path="/products/new" element={<AddProductPage />} />
+              <Route path="/products/:productId" element={<ProductDetailsPage />} />
+              <Route path="/products/:productId/edit" element={<EditProductPage />} />
+              <Route path="/orders" element={<OrderListPage />} />
+              <Route path="/shipping" element={<ShippingConfigPage />} />
+              <Route path="/offers" element={<OffersPage />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </ErrorBoundary>
       <ToastContainer
         position="top-right"
         autoClose={5000}
