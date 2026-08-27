@@ -895,3 +895,15 @@ fetch resolved could let a stale response for the *previous* `productId`
 overwrite the correct, newer product's data. Added the same `isCurrent`
 flag guard to both pages' load effects, checked before every `setState`
 in the load path.
+
+## Post-Phase-7 follow-up — same race condition on search-debounced fetches
+
+Same bug class as `ProductDetailsPage`/`EditProductPage`'s fix, on the
+two search-debounced fetches: `ProductListPage`'s search/pagination
+effect and `OffersPage`'s target-picker search. A debounce only cancels
+a still-*pending* timer — two requests can still end up in flight
+together if one fires, then the seller types/clicks again before it
+resolves, letting a stale response land after a newer one and silently
+show wrong results. Added the same `isCurrent` guard to both. Checked
+both apps for any other `window.setTimeout`-based debounce and confirmed
+these were the only two.

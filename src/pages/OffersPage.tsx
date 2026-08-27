@@ -130,22 +130,31 @@ const OffersPage = () => {
   };
 
   // Debounced product search for the target picker (4.8.6) — reuses the
-  // same seller endpoint ProductListPage already searches against.
+  // same seller endpoint ProductListPage already searches against. The
+  // debounce cancels a still-*pending* timer on every keystroke, but two
+  // requests can still end up in flight together if a search actually
+  // fires, then the seller types again before it resolves — isCurrent
+  // guards against the earlier one's response landing after the later
+  // one's and overwriting it with stale results.
   useEffect(() => {
+    let isCurrent = true;
     const timeout = window.setTimeout(async () => {
       setIsSearchingProducts(true);
       try {
         const { data } = await sellerApi.get('/products/get-all-products', {
           params: { limit: 20, search: productSearch || undefined },
         });
-        setSearchResults(data.data?.products ?? []);
+        if (isCurrent) setSearchResults(data.data?.products ?? []);
       } catch {
         // Non-critical — the picker just shows no results this pass.
       } finally {
-        setIsSearchingProducts(false);
+        if (isCurrent) setIsSearchingProducts(false);
       }
     }, 250);
-    return () => window.clearTimeout(timeout);
+    return () => {
+      isCurrent = false;
+      window.clearTimeout(timeout);
+    };
   }, [productSearch]);
 
   const toggleProductTarget = (product: TargetProduct) => {

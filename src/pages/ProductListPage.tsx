@@ -58,25 +58,35 @@ const ProductListPage = () => {
   const [busyProductId, setBusyProductId] = useState('');
   const limit = 10;
 
-  const loadProducts = async () => {
+  const loadProducts = async (isCurrent: () => boolean = () => true) => {
     setIsLoading(true);
 
     try {
       const { data } = await sellerApi.get('/products/get-all-products', {
         params: { page, limit, search: search || undefined },
       });
+      if (!isCurrent()) return;
       setProducts(data.data?.products ?? []);
       setTotal(data.data?.total ?? 0);
     } catch (err) {
-      toast.error(getErrorMessage(err, 'Unable to load products.'));
+      if (isCurrent()) toast.error(getErrorMessage(err, 'Unable to load products.'));
     } finally {
-      setIsLoading(false);
+      if (isCurrent()) setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const timeout = window.setTimeout(loadProducts, 250);
-    return () => window.clearTimeout(timeout);
+    // A search debounce only cancels a still-*pending* timer — two
+    // requests can still end up in flight together if one actually
+    // fires (search or page change), then another fires before it
+    // resolves. isCurrent guards against the earlier one's response
+    // landing after the later one's and overwriting it with stale data.
+    let isCurrent = true;
+    const timeout = window.setTimeout(() => loadProducts(() => isCurrent), 250);
+    return () => {
+      isCurrent = false;
+      window.clearTimeout(timeout);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, page]);
 
