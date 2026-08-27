@@ -17,6 +17,7 @@ import sellerApi from '../api/sellerApi';
 type OfferType = 'DISCOUNT' | 'CASHBACK' | 'BUY_GET' | 'PRODUCT_BUNDLE';
 type DiscountType = 'PERCENTAGE' | 'FLAT';
 type TargetProduct = { _id: string; name: string };
+type TargetVariant = { _id: string; sku?: string; attributes?: Record<string, string> };
 
 type BundleItem = {
   id: number;
@@ -97,6 +98,15 @@ const OffersPage = () => {
   const [isSearchingProducts, setIsSearchingProducts] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Optional per-product variant narrowing (4.8.6's "expandable to
+  // variants"). appliesTo.variantIds is real and confirmed supported by
+  // createOffer — omitting it defaults to all variants of the selected
+  // products, so this stays purely additive.
+  const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
+  const [variantsByProduct, setVariantsByProduct] = useState<Record<string, TargetVariant[]>>({});
+  const [isLoadingVariants, setIsLoadingVariants] = useState(false);
+  const [selectedVariantIds, setSelectedVariantIds] = useState<string[]>([]);
+
   // The seller API has no offer-listing endpoint, so this only tracks
   // offers created in this browser session (not a persisted list) — see
   // the "created this session" note rendered above the grid.
@@ -134,10 +144,40 @@ const OffersPage = () => {
   }, [productSearch]);
 
   const toggleProductTarget = (product: TargetProduct) => {
+    const isSelected = selectedProducts.some((p) => p._id === product._id);
     setSelectedProducts((current) =>
-      current.some((p) => p._id === product._id)
-        ? current.filter((p) => p._id !== product._id)
-        : [...current, product],
+      isSelected ? current.filter((p) => p._id !== product._id) : [...current, product],
+    );
+    // Deselecting a product also drops any variant-level narrowing on it —
+    // an unselected product's variants shouldn't stay in the payload.
+    if (isSelected) {
+      const productVariantIds = new Set((variantsByProduct[product._id] ?? []).map((v) => v._id));
+      setSelectedVariantIds((current) => current.filter((id) => !productVariantIds.has(id)));
+    }
+  };
+
+  const toggleExpandProduct = async (productId: string) => {
+    if (expandedProductId === productId) {
+      setExpandedProductId(null);
+      return;
+    }
+    setExpandedProductId(productId);
+    if (variantsByProduct[productId]) return;
+
+    setIsLoadingVariants(true);
+    try {
+      const { data } = await sellerApi.get(`/products/get-product/${productId}`);
+      setVariantsByProduct((current) => ({ ...current, [productId]: data.data?.variants ?? [] }));
+    } catch {
+      // Non-critical — the expand panel just shows "no variants" this pass.
+    } finally {
+      setIsLoadingVariants(false);
+    }
+  };
+
+  const toggleVariantTarget = (variantId: string) => {
+    setSelectedVariantIds((current) =>
+      current.includes(variantId) ? current.filter((id) => id !== variantId) : [...current, variantId],
     );
   };
 
@@ -157,10 +197,18 @@ const OffersPage = () => {
     setBundlePrice('');
     setSelectedProducts([]);
     setProductSearch('');
+    setSelectedVariantIds([]);
+    setExpandedProductId(null);
   };
 
   const buildPayload = () => {
     const parsedProductIds = selectedProducts.map((p) => p._id);
+    // Omitting variantIds defaults to all variants of the selected
+    // products (confirmed in createOffer's controller) — only include it
+    // when the seller actually narrowed down to specific variants.
+    const appliesTo = selectedVariantIds.length > 0
+      ? { productIds: parsedProductIds, variantIds: selectedVariantIds }
+      : { productIds: parsedProductIds };
 
     const base = {
       name: name.trim(),
@@ -173,7 +221,7 @@ const OffersPage = () => {
     if (offerType === 'DISCOUNT') {
       return {
         ...base,
-        appliesTo: { productIds: parsedProductIds },
+        appliesTo,
         config: { discountType, value: Number(discountValue) },
         ...(maxDiscountAmount ? { maxDiscountAmount: Number(maxDiscountAmount) } : {}),
         ...(minCartValue ? { minCartValue: Number(minCartValue) } : {}),
@@ -183,7 +231,7 @@ const OffersPage = () => {
     if (offerType === 'CASHBACK') {
       return {
         ...base,
-        appliesTo: { productIds: parsedProductIds },
+        appliesTo,
         config: { amount: Number(cashbackAmount) },
       };
     }
@@ -191,7 +239,7 @@ const OffersPage = () => {
     if (offerType === 'BUY_GET') {
       return {
         ...base,
-        appliesTo: { productIds: parsedProductIds },
+        appliesTo,
         config: { buyQty: Number(buyQty), getQty: Number(getQty) },
       };
     }
@@ -222,7 +270,9 @@ const OffersPage = () => {
 
     const targetSummary = offerType === 'PRODUCT_BUNDLE'
       ? `${bundleItems.length} bundle item${bundleItems.length === 1 ? '' : 's'}`
-      : `${parsedProductIds.length} product${parsedProductIds.length === 1 ? '' : 's'}`;
+      : selectedVariantIds.length > 0
+        ? `${selectedVariantIds.length} variant${selectedVariantIds.length === 1 ? '' : 's'}`
+        : `${parsedProductIds.length} product${parsedProductIds.length === 1 ? '' : 's'} (all variants)`;
 
     return {
       id: Date.now(),
@@ -394,19 +444,48 @@ const OffersPage = () => {
               )}
               {!isSearchingProducts && searchResults.map((product) => {
                 const checked = selectedProducts.some((p) => p._id === product._id);
+                const isExpanded = expandedProductId === product._id;
+                const variants = variantsByProduct[product._id];
                 return (
-                  <label
-                    key={product._id}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-[10px] px-2 py-2 text-[12.5px] font-semibold text-ink t-fast hover:bg-soft2"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleProductTarget(product)}
-                      className="h-4 w-4 accent-(--k-accent)"
-                    />
-                    {product.name}
-                  </label>
+                  <div key={product._id}>
+                    <div className="flex items-center gap-2.5 rounded-[10px] px-2 py-2 t-fast hover:bg-soft2">
+                      <label className="flex flex-1 cursor-pointer items-center gap-2.5 text-[12.5px] font-semibold text-ink">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleProductTarget(product)}
+                          className="h-4 w-4 accent-(--k-accent)"
+                        />
+                        {product.name}
+                      </label>
+                      {checked && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpandProduct(product._id)}
+                          className="shrink-0 text-[11px] font-bold text-accent hover:underline"
+                        >
+                          {isExpanded ? 'Hide variants' : 'Variants'}
+                        </button>
+                      )}
+                    </div>
+                    {checked && isExpanded && (
+                      <div className="ml-6 mb-1 space-y-1 border-l border-line pl-3">
+                        {isLoadingVariants && !variants && <p className="py-1 text-[11px] text-muted">Loading variants…</p>}
+                        {variants?.length === 0 && <p className="py-1 text-[11px] text-muted">No variants.</p>}
+                        {variants?.map((variant) => (
+                          <label key={variant._id} className="flex cursor-pointer items-center gap-2 py-1 text-[11.5px] font-medium text-ink">
+                            <input
+                              type="checkbox"
+                              checked={selectedVariantIds.includes(variant._id)}
+                              onChange={() => toggleVariantTarget(variant._id)}
+                              className="h-3.5 w-3.5 accent-(--k-accent)"
+                            />
+                            {Object.entries(variant.attributes ?? {}).map(([k, v]) => `${k}: ${v}`).join(', ') || variant.sku || variant._id}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>

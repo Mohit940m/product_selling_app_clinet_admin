@@ -480,10 +480,11 @@ the spec describes. A caption above the grid is explicit that this is
 with real listing data — refreshing the page clears it, same as before.
 
 4.8.3 stays unticked (it still can't show offers created in a previous
-session or by anyone else) and 4.8.2/4.8.4/4.8.6/4.8.7/4.8.10-4.8.12
-(extracting `OfferForm`, edit/delete/enable-disable, the target picker,
-filter chips, mobile `Sheet` form) remain deferred for the same reason
-as before — no endpoints to back edit/delete/list-filtering.
+session or by anyone else) and 4.8.2/4.8.4/4.8.7/4.8.10-4.8.12
+(extracting `OfferForm`, edit/delete/enable-disable, filter chips, mobile
+`Sheet` form) remain deferred for the same reason as before — no
+endpoints to back edit/delete/list-filtering. (4.8.6, the target picker,
+was completed in a later follow-up — see further down.)
 
 ## Post-Phase-7 follow-up — dashboard stock-data bug fix + real Restock action
 
@@ -577,16 +578,8 @@ is now blocked with a real validation message if nothing is selected
 (the old `Textarea`'s native `required` no longer applies to a checkbox
 list).
 
-Stays unticked: the spec also wants each result row "expandable to its
-variants" for finer-grained targeting. Confirmed the backend genuinely
-supports this — `createOffer` accepts an optional `appliesTo.variantIds`
-that narrows the offer within the selected products, defaulting to all
-variants when omitted (read `offerManagement.controller.ts`) — so this
-isn't backend-blocked, just scoped out this pass: it would mean nested
-expand/collapse rows with per-product variant fetches and a second
-selection layer, adding real state/UI complexity this session couldn't
-verify visually. The product-level picker alone is still a substantial,
-working improvement over the raw-ID textarea it replaced.
+**Variant narrowing built in a later post-Phase-7 follow-up** (see
+further down) — completing 4.8.6, now ticked.
 
 Also: the row-height of the search-results checkbox list is a dense,
 scrollable multi-select list, not a primary action control — its rows
@@ -612,3 +605,23 @@ the confirmed response rather than assuming success. Before a config
 exists, all rows stay part of the single initial create-config submit,
 since there's nothing to PUT to yet. The view row also now stacks cost
 below the name below `sm` (4.7.8) instead of staying right-aligned.
+
+## Post-Phase-7 follow-up — variant narrowing completes the target picker (4.8.6)
+
+Completed the deferred half of 4.8.6: each selected product in the
+search-results list gets a "Variants" toggle that fetches and expands
+that product's variants (`GET /products/get-product/:id`, the same
+detail endpoint used elsewhere) into a checkbox list nested under the
+row. Checked variants across any expanded products are collected into
+`appliesTo.variantIds`; omitted entirely when nothing's checked, so the
+default "all variants" behavior is unchanged unless the seller
+deliberately narrows down.
+
+Interpretation choice: the expand toggle only appears once a product is
+already checked/selected — narrowing a product's variants before the
+product itself is targeted would leave checkboxes that don't do
+anything yet, which felt more confusing than useful. Deselecting a
+product also clears any variant-level selections scoped to it, so a
+stale `variantIds` entry can't outlive its parent product's selection.
+Created-offer cards' target summary now reads "{n} variants" instead of
+"{n} products (all variants)" when narrowing was used.
