@@ -875,3 +875,14 @@ on `/login`/`/signup`, so it can't loop or clobber a real invalid-OTP
 error on those pages. `RequireSellerAuth` already redirects on page
 *load* when there's no token; this covers the case where the token goes
 stale *during* a session, mid-page.
+
+## Post-Phase-7 follow-up — request timeout
+
+Same fix as the user client: `sellerApi` had no timeout configured, so a
+dropped connection left a page's loading spinner stuck forever. Added
+`timeout: 45000` — generous enough not to interrupt this app's real
+Render free-tier cold-start delay. Confirmed the actual Cloudinary file
+upload (`cloudinaryApi.ts`) is a separate, untouched `axios.post` call
+straight to Cloudinary's own API, not routed through `sellerApi` — this
+timeout only covers requests through this instance, so it can't cut off
+an in-progress image upload.

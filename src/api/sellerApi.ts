@@ -4,6 +4,16 @@ const API_BASE_URL = import.meta.env.VITE_SERVER_URL ?? 'https://product-selling
 
 const sellerApi = axios.create({
   baseURL: `${API_BASE_URL}/api/v1/seller`,
+  // No timeout was set before this — axios defaults to none, so a
+  // dropped connection (not a 4xx/5xx, just no response ever arriving)
+  // left a page's isLoading spinner stuck forever. 45s is generous
+  // enough to not interrupt the production backend's real cold-start
+  // delay (Render's free tier sleeps the service after inactivity) while
+  // still eventually giving up on a genuinely dead connection. The
+  // actual Cloudinary file upload in cloudinaryApi.ts is a separate,
+  // untouched axios.post call straight to Cloudinary's API — this
+  // timeout only covers requests through this instance, not that upload.
+  timeout: 45000,
 });
 
 sellerApi.interceptors.request.use((config) => {
