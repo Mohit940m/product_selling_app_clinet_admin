@@ -560,3 +560,33 @@ custom pill/icon buttons under 44px. Fixed the same way as the earlier
 audit — an invisible `before:absolute before:-inset-2` hit-area
 expansion, sized to stay within each button's actual surrounding
 padding/gap so it can't swallow a neighboring control's hit area.
+
+## Post-Phase-7 follow-up — real product target picker on OffersPage (4.8.6, partial)
+
+Replaced the free-text, comma-separated product-ID `Textarea` (error-
+prone — a seller had to know and correctly type raw Mongo ObjectIds)
+with a real searchable picker: a debounced search box hitting the same
+`/products/get-all-products` endpoint `ProductListPage` already uses,
+a checkbox list of results, and selected products rendered as removable
+`Chip`s above the list — matching 4.8.6's spec. The submitted payload
+shape is unchanged (`appliesTo: { productIds: [...] }`), and submission
+is now blocked with a real validation message if nothing is selected
+(the old `Textarea`'s native `required` no longer applies to a checkbox
+list).
+
+Stays unticked: the spec also wants each result row "expandable to its
+variants" for finer-grained targeting. Confirmed the backend genuinely
+supports this — `createOffer` accepts an optional `appliesTo.variantIds`
+that narrows the offer within the selected products, defaulting to all
+variants when omitted (read `offerManagement.controller.ts`) — so this
+isn't backend-blocked, just scoped out this pass: it would mean nested
+expand/collapse rows with per-product variant fetches and a second
+selection layer, adding real state/UI complexity this session couldn't
+verify visually. The product-level picker alone is still a substantial,
+working improvement over the raw-ID textarea it replaced.
+
+Also: the row-height of the search-results checkbox list is a dense,
+scrollable multi-select list, not a primary action control — its rows
+run under the usual 44px tap-target guideline the same way a native
+OS settings list's rows commonly do. Not treated as a 1.5.4/6.6
+violation for that reason.

@@ -1,14 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FiClock, FiGift, FiPlus, FiTag, FiTrash2 } from 'react-icons/fi';
+import { FiClock, FiGift, FiPlus, FiSearch, FiTag, FiTrash2, FiX } from 'react-icons/fi';
 import Container from '../components/layout/Container';
 import Panel from '../components/ui/Panel';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Input from '../components/ui/Input';
-import Textarea from '../components/ui/Textarea';
 import Chip from '../components/ui/Chip';
 import Switch from '../components/ui/Switch';
 import Button from '../components/ui/Button';
@@ -17,6 +16,7 @@ import sellerApi from '../api/sellerApi';
 
 type OfferType = 'DISCOUNT' | 'CASHBACK' | 'BUY_GET' | 'PRODUCT_BUNDLE';
 type DiscountType = 'PERCENTAGE' | 'FLAT';
+type TargetProduct = { _id: string; name: string };
 
 type BundleItem = {
   id: number;
@@ -91,7 +91,10 @@ const OffersPage = () => {
   const [bundleItems, setBundleItems] = useState<BundleItem[]>(() => [makeBundleItem()]);
   const [bundlePrice, setBundlePrice] = useState('');
 
-  const [productIds, setProductIds] = useState('');
+  const [selectedProducts, setSelectedProducts] = useState<TargetProduct[]>([]);
+  const [productSearch, setProductSearch] = useState('');
+  const [searchResults, setSearchResults] = useState<TargetProduct[]>([]);
+  const [isSearchingProducts, setIsSearchingProducts] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // The seller API has no offer-listing endpoint, so this only tracks
@@ -111,6 +114,33 @@ const OffersPage = () => {
     setBundleItems((current) => current.map((item) => (item.id === id ? { ...item, [field]: value } : item)));
   };
 
+  // Debounced product search for the target picker (4.8.6) — reuses the
+  // same seller endpoint ProductListPage already searches against.
+  useEffect(() => {
+    const timeout = window.setTimeout(async () => {
+      setIsSearchingProducts(true);
+      try {
+        const { data } = await sellerApi.get('/products/get-all-products', {
+          params: { limit: 20, search: productSearch || undefined },
+        });
+        setSearchResults(data.data?.products ?? []);
+      } catch {
+        // Non-critical — the picker just shows no results this pass.
+      } finally {
+        setIsSearchingProducts(false);
+      }
+    }, 250);
+    return () => window.clearTimeout(timeout);
+  }, [productSearch]);
+
+  const toggleProductTarget = (product: TargetProduct) => {
+    setSelectedProducts((current) =>
+      current.some((p) => p._id === product._id)
+        ? current.filter((p) => p._id !== product._id)
+        : [...current, product],
+    );
+  };
+
   const resetForm = () => {
     setName('');
     setValidFrom(today());
@@ -125,14 +155,12 @@ const OffersPage = () => {
     setGetQty('');
     setBundleItems([makeBundleItem()]);
     setBundlePrice('');
-    setProductIds('');
+    setSelectedProducts([]);
+    setProductSearch('');
   };
 
   const buildPayload = () => {
-    const parsedProductIds = productIds
-      .split(',')
-      .map((id) => id.trim())
-      .filter(Boolean);
+    const parsedProductIds = selectedProducts.map((p) => p._id);
 
     const base = {
       name: name.trim(),
@@ -181,7 +209,7 @@ const OffersPage = () => {
   };
 
   const buildCreatedOfferSummary = (): CreatedOffer => {
-    const parsedProductIds = productIds.split(',').map((id) => id.trim()).filter(Boolean);
+    const parsedProductIds = selectedProducts.map((p) => p._id);
 
     const discountLabel = (() => {
       if (offerType === 'DISCOUNT') {
@@ -209,6 +237,12 @@ const OffersPage = () => {
 
   const submitOffer = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (offerType !== 'PRODUCT_BUNDLE' && selectedProducts.length === 0) {
+      toast.error('Select at least one product for this offer to apply to.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -330,15 +364,56 @@ const OffersPage = () => {
         {offerType !== 'PRODUCT_BUNDLE' && (
           <Panel>
             <h2 className="text-[16px] font-extrabold text-ink">Applies To</h2>
-            <p className="mt-1 text-[12.5px] font-semibold text-muted">Enter the product IDs this offer applies to, separated by commas.</p>
-            <Textarea
-              wrapperClassName="mt-3"
-              value={productIds}
-              onChange={(e) => setProductIds(e.target.value)}
-              className="min-h-20"
-              placeholder="697bcc089b9dbee534801d65, 697bcc089b9dbee534801d66"
-              required
-            />
+            <p className="mt-1 text-[12.5px] font-semibold text-muted">Search and select the products this offer applies to.</p>
+
+            {selectedProducts.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {selectedProducts.map((product) => (
+                  <Chip key={product._id} selected onClick={() => toggleProductTarget(product)}>
+                    {product.name}
+                    <FiX size={12} />
+                  </Chip>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center gap-2.5 rounded-full border border-line px-4 py-2.5 t-fast focus-within:border-accent">
+              <FiSearch className="shrink-0 text-muted" size={15} />
+              <input
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                placeholder="Search products by name"
+                className="w-full bg-transparent text-[12.5px] outline-none placeholder:text-muted"
+              />
+            </div>
+
+            <div className="mt-2.5 max-h-56 space-y-1.5 overflow-y-auto rounded-tile border border-line p-2">
+              {isSearchingProducts && <p className="p-2 text-[12px] text-muted">Searching…</p>}
+              {!isSearchingProducts && searchResults.length === 0 && (
+                <p className="p-2 text-[12px] text-muted">No products found.</p>
+              )}
+              {!isSearchingProducts && searchResults.map((product) => {
+                const checked = selectedProducts.some((p) => p._id === product._id);
+                return (
+                  <label
+                    key={product._id}
+                    className="flex cursor-pointer items-center gap-2.5 rounded-[10px] px-2 py-2 text-[12.5px] font-semibold text-ink t-fast hover:bg-soft2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleProductTarget(product)}
+                      className="h-4 w-4 accent-(--k-accent)"
+                    />
+                    {product.name}
+                  </label>
+                );
+              })}
+            </div>
+
+            {selectedProducts.length === 0 && (
+              <p className="mt-2 text-[11px] font-medium text-danger">Select at least one product.</p>
+            )}
           </Panel>
         )}
 
