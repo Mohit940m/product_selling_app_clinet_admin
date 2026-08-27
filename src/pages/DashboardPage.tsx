@@ -326,7 +326,7 @@ const DashboardPage = () => {
                   <button
                     type="button"
                     onClick={() => setRestockTarget({ productId: item.productId, variantId: item.variantId, productName: item.productName, sku: item.sku })}
-                    className="shrink-0 rounded-full border border-line px-3 py-1.5 text-[11px] font-bold text-ink t-fast hover:border-accent hover:text-accent"
+                    className="relative shrink-0 rounded-full border border-line px-3 py-1.5 text-[11px] font-bold text-ink t-fast before:absolute before:-inset-2 before:content-[''] hover:border-accent hover:text-accent"
                   >
                     Restock
                   </button>

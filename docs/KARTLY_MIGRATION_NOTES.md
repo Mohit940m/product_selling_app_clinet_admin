@@ -549,3 +549,14 @@ and stock. Builds the same `{ [variantTypes[0]]: optionOne, ... }`
 attributes shape `AddProductPage` already uses, so the payload matches
 what the backend expects; refetches the product on success so the new
 row appears in the table immediately.
+
+## Post-Phase-7 follow-up — tap-target fix on today's new buttons
+
+Re-applied the 1.5.4/6.6 tap-target audit to everything added in this
+session's follow-up work (the earlier audit predated these): the
+variant "Manage" settings-icon button and mobile "Manage" button on
+`ProductDetailsPage`, and the dashboard's "Restock" button, were all
+custom pill/icon buttons under 44px. Fixed the same way as the earlier
+audit — an invisible `before:absolute before:-inset-2` hit-area
+expansion, sized to stay within each button's actual surrounding
+padding/gap so it can't swallow a neighboring control's hit area.

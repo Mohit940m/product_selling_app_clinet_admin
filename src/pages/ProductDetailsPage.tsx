@@ -335,7 +335,7 @@ const ProductDetailsPage = () => {
                               type="button"
                               onClick={() => openManageVariant(variant)}
                               aria-label={`Manage ${variant.sku ?? 'variant'}`}
-                              className="rounded-full border border-line p-2 text-muted t-fast hover:border-accent hover:text-accent"
+                              className="relative rounded-full border border-line p-2 text-muted t-fast before:absolute before:-inset-2 before:content-[''] hover:border-accent hover:text-accent"
                             >
                               <FiSettings size={14} />
                             </button>
@@ -367,7 +367,7 @@ const ProductDetailsPage = () => {
                       <button
                         type="button"
                         onClick={() => openManageVariant(variant)}
-                        className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-full border border-line py-2 text-[11px] font-bold text-ink t-fast hover:border-accent hover:text-accent"
+                        className="relative mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-full border border-line py-2 text-[11px] font-bold text-ink t-fast before:absolute before:-inset-2 before:content-[''] hover:border-accent hover:text-accent"
                       >
                         <FiSettings size={13} />
                         Manage
