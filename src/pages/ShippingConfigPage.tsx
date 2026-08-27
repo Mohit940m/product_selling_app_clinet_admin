@@ -121,6 +121,7 @@ const ShippingConfigPage = () => {
 
   const saveConfig = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSaving) return;
     setIsSaving(true);
 
     try {
@@ -158,7 +159,7 @@ const ShippingConfigPage = () => {
   const cancelEditRate = () => setEditingRateKey(null);
 
   const saveRate = async () => {
-    if (!editingRateKey) return;
+    if (!editingRateKey || isSavingRate) return;
     const cost = Number(rateEditCost);
     if (!Number.isFinite(cost) || cost < 0) {
       toast.error('Enter a valid cost.');

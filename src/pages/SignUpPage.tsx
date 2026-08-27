@@ -60,6 +60,7 @@ const SignUpPage = () => {
 
   const submitSignUp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSubmitting) return;
     setError('');
     setMessage('');
     setIsSubmitting(true);

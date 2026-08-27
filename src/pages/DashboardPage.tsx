@@ -136,7 +136,7 @@ const DashboardPage = () => {
   }, [products]);
 
   const submitRestock = async () => {
-    if (!restockTarget) return;
+    if (!restockTarget || isRestocking) return;
     const addedStock = Number(restockAmount);
     if (!Number.isFinite(addedStock) || addedStock <= 0) {
       toast.error('Enter a positive quantity to add.');

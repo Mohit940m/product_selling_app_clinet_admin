@@ -301,6 +301,10 @@ const OffersPage = () => {
 
   const submitOffer = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // The disabled attribute on the submit button only takes effect after
+    // the next render — a fast double-click (or double Enter) can still
+    // both fire before then. Guard explicitly rather than rely on timing.
+    if (isSubmitting) return;
 
     if (offerType !== 'PRODUCT_BUNDLE' && selectedProducts.length === 0) {
       toast.error('Select at least one product for this offer to apply to.');

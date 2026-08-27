@@ -132,6 +132,10 @@ const AddProductPage = () => {
 
   const submitProduct = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // The disabled attribute on the submit button only takes effect after
+    // the next render — a fast double-click (or double Enter) can still
+    // both fire before then. Guard explicitly rather than rely on timing.
+    if (isSubmitting) return;
 
     // RequireSellerAuth already guarantees a sellerToken exists for every
     // route inside AdminLayout, so this page-local check is no longer needed.

@@ -58,6 +58,7 @@ const LoginPage = () => {
 
   const submitLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSubmitting) return;
     setError('');
     setMessage('');
     setIsSubmitting(true);

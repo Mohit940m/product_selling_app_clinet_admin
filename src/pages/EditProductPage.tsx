@@ -155,6 +155,10 @@ const EditProductPage = () => {
 
   const saveProduct = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // The disabled attribute on the submit button only takes effect after
+    // the next render — a fast double-click (or double Enter) can still
+    // both fire before then. Guard explicitly rather than rely on timing.
+    if (isSaving) return;
     setIsSaving(true);
     setUploadStatus('');
 

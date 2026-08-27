@@ -129,7 +129,7 @@ const ProductDetailsPage = () => {
   };
 
   const saveVariant = async () => {
-    if (!manageTarget || !product) return;
+    if (!manageTarget || !product || isSavingVariant) return;
     setIsSavingVariant(true);
 
     const calls: Promise<unknown>[] = [];
@@ -171,7 +171,7 @@ const ProductDetailsPage = () => {
   };
 
   const submitAddVariant = async () => {
-    if (!product) return;
+    if (!product || isAddingVariant) return;
     const price = Number(newPrice);
     const stock = Number(newStock);
     if (!Number.isFinite(price) || price <= 0) {

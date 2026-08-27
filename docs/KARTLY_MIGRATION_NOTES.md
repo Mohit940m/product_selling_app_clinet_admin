@@ -907,3 +907,16 @@ resolves, letting a stale response land after a newer one and silently
 show wrong results. Added the same `isCurrent` guard to both. Checked
 both apps for any other `window.setTimeout`-based debounce and confirmed
 these were the only two.
+
+## Post-Phase-7 follow-up — explicit double-submit guards
+
+Every submit/save handler already disabled its trigger button while a
+request was in flight, but only via the `disabled` attribute — which
+takes effect on React's *next* render, not synchronously. A fast
+double-click (or a double Enter-key press) could still fire the handler
+twice before that re-render lands. Added an explicit `if (isX) return;`
+as the first real line of every handler across the app (`submitOffer`,
+`submitProduct`, `saveProduct`, `saveConfig`, `saveRate`, `saveVariant`,
+`submitAddVariant`, `submitRestock`, `submitLogin`, `submitSignUp`) —
+belt-and-suspenders on top of the disabled attribute, not a replacement
+for it (the attribute still matters for the visual/keyboard-focus state).
