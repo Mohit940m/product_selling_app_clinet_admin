@@ -112,6 +112,10 @@ const OffersPage = () => {
   // offers created in this browser session (not a persisted list) — see
   // the "created this session" note rendered above the grid.
   const [createdOffers, setCreatedOffers] = useState<CreatedOffer[]>([]);
+  // Real filter over the session-scoped grid above — status is a genuine
+  // derived value (getOfferStatus), just scoped to what's been created
+  // this session rather than a true full-catalog offer list (4.8.7).
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'Active' | 'Scheduled' | 'Expired'>('ALL');
 
   const addBundleItem = () => {
     setBundleItems((current) => [...current, makeBundleItem()]);
@@ -339,26 +343,47 @@ const OffersPage = () => {
             <FiClock size={13} />
             Created this session — there's no listing endpoint yet, so this isn't a persisted offer list.
           </p>
-          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-            {createdOffers.map((offer) => {
-              const status = getOfferStatus(offer.validFrom, offer.validTill);
-              return (
-                <Card key={offer.id} interactive={false} padded className="space-y-2.5">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-[15px] font-extrabold text-ink">{offer.name || OFFER_TYPE_LABELS[offer.type]}</p>
-                    <Badge tone="ink">{offer.discountLabel}</Badge>
-                  </div>
-                  <p className="font-mono text-[11px] text-muted">
-                    {formatDateShort(offer.validFrom)} – {formatDateShort(offer.validTill)}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11.5px] font-semibold text-muted">{offer.targetSummary}</span>
-                    <Badge tone={status.tone}>{status.label}</Badge>
-                  </div>
-                </Card>
-              );
-            })}
+          <div className="mb-3 flex gap-2 overflow-x-auto no-scrollbar">
+            {(['ALL', 'Active', 'Scheduled', 'Expired'] as const).map((option) => (
+              <Chip key={option} selected={statusFilter === option} onClick={() => setStatusFilter(option)}>
+                {option === 'ALL' ? 'All' : option}
+              </Chip>
+            ))}
           </div>
+          {(() => {
+            const filteredOffers = createdOffers.filter(
+              (offer) => statusFilter === 'ALL' || getOfferStatus(offer.validFrom, offer.validTill).label === statusFilter,
+            );
+            if (filteredOffers.length === 0) {
+              return (
+                <p className="rounded-tile bg-soft2 p-4 text-[12.5px] font-medium text-muted">
+                  No {statusFilter.toLowerCase()} offers created this session.
+                </p>
+              );
+            }
+            return (
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+                {filteredOffers.map((offer) => {
+                  const status = getOfferStatus(offer.validFrom, offer.validTill);
+                  return (
+                    <Card key={offer.id} interactive={false} padded className="space-y-2.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-[15px] font-extrabold text-ink">{offer.name || OFFER_TYPE_LABELS[offer.type]}</p>
+                        <Badge tone="ink">{offer.discountLabel}</Badge>
+                      </div>
+                      <p className="font-mono text-[11px] text-muted">
+                        {formatDateShort(offer.validFrom)} – {formatDateShort(offer.validTill)}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11.5px] font-semibold text-muted">{offer.targetSummary}</span>
+                        <Badge tone={status.tone}>{status.label}</Badge>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       )}
 

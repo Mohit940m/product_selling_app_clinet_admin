@@ -804,3 +804,13 @@ added. The two `required` text `Input`s (name/category/description,
 etc.) already get real inline feedback from the browser's native
 validation, and backend request failures still surface via the
 submit-level toast, per the spec's own instruction to keep that.
+
+## Post-Phase-7 follow-up — status filter chips on the created-offers grid (4.8.7)
+
+Added the spec's `All`/`Active`/`Scheduled`/`Expired` `Chip` filter rail
+above the created-offers grid. This is a genuine filter over real data —
+`getOfferStatus` already derives a real status per offer from its
+validity dates — just scoped to the same session-created set as the
+grid itself (still no listing endpoint to filter a true full catalog
+with). Shows an honest "No {status} offers created this session"
+message rather than an empty grid when a filter matches nothing.

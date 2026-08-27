@@ -412,7 +412,7 @@ At 458 lines this is the largest page; restructure rather than restyle in place.
 - [ ] **4.8.4** Card footer: `Edit` ghost + `danger` `Delete` behind `ConfirmDialog`, plus an enable/disable `Switch`.
 - [x] **4.8.5** `OfferForm` layout: name `Input`, discount type `Chip` row (percent / flat), value `Input`, a validity date range (two `Input type="date"`), then the product/variant target picker.
 - [x] **4.8.6** Target picker: a searchable list of products with checkboxes, each expandable to its variants. Selected targets render as removable `Chip`s above the list. This replaces whatever multi-select the page uses today; keep the submitted payload shape identical.
-- [ ] **4.8.7** Filter `Chip` rail above the grid: `All` / `Active` / `Scheduled` / `Expired`.
+- [x] **4.8.7** Filter `Chip` rail above the grid: `All` / `Active` / `Scheduled` / `Expired`.
 - [x] **4.8.8** Empty state: `EmptyState` with a `Create your first offer` CTA.
 
 ### Mobile
