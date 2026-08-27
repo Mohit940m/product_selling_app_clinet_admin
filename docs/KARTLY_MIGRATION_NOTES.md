@@ -790,3 +790,17 @@ expansion) — its sibling on the same page ("New Images to Upload") had
 already been fixed, but this one was overlooked. Applied the same
 `before:absolute before:-inset-2` fix. Re-checked every other `h-7 w-7`/
 `h-8 w-8`/`h-9 w-9` button in both apps afterward; nothing else missing.
+
+## Post-Phase-7 follow-up — inline validation error on AddProductPage (4.3.7)
+
+The only pre-submit validation check with no native HTML equivalent is
+"at least one product image" — a custom `FileDrop` dropzone can't carry
+a `required` attribute the way a text `Input` can, so it was a toast-
+only check. Added an `error` prop to the shared `FileDrop` primitive
+(red border, `aria-invalid`, matching `Input`'s own error styling) and
+an inline error line below it, replacing the toast for this specific
+check — set on a failed submit attempt, cleared as soon as an image is
+added. The two `required` text `Input`s (name/category/description,
+etc.) already get real inline feedback from the browser's native
+validation, and backend request failures still surface via the
+submit-level toast, per the spec's own instruction to keep that.

@@ -6,6 +6,7 @@ interface FileDropProps {
   accept?: string;
   label?: string;
   disabled?: boolean;
+  error?: boolean;
 }
 
 /**
@@ -14,7 +15,7 @@ interface FileDropProps {
  * Staging/removing files is the caller's concern (AddProductPage /
  * EditProductPage own the file list) — this just reports selections.
  */
-const FileDrop = ({ onFiles, multiple = true, accept = 'image/*', label = 'Drop product images here', disabled = false }: FileDropProps) => {
+const FileDrop = ({ onFiles, multiple = true, accept = 'image/*', label = 'Drop product images here', disabled = false, error = false }: FileDropProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -48,8 +49,14 @@ const FileDrop = ({ onFiles, multiple = true, accept = 'image/*', label = 'Drop 
         'cursor-pointer rounded-tile border border-dashed p-6.5 text-center text-[12px] font-bold t-base',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         disabled ? 'cursor-not-allowed border-line text-muted opacity-60' : '',
-        isDragOver ? 'border-accent bg-soft2 text-accent' : 'border-edge text-muted hover:border-accent hover:bg-soft2 hover:text-accent',
+        !disabled && error ? 'border-danger text-danger' : '',
+        !disabled && !error
+          ? isDragOver
+            ? 'border-accent bg-soft2 text-accent'
+            : 'border-edge text-muted hover:border-accent hover:bg-soft2 hover:text-accent'
+          : '',
       ].join(' ')}
+      aria-invalid={error}
     >
       {label}
       <input

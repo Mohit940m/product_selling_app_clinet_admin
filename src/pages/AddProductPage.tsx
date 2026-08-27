@@ -61,6 +61,10 @@ const AddProductPage = () => {
   const [images, setImages] = useState<SelectedProductImage[]>([]);
   const [uploadedImages, setUploadedImages] = useState<UploadedProductImage[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Inline validation (4.3.7) for the one pre-submit check with no native
+  // HTML equivalent — a file dropzone can't carry a `required` attribute
+  // the way a text Input can.
+  const [imagesError, setImagesError] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
   // create-product has no isActive field at all (confirmed by reading the
   // controller) — a new product is always created active. When this is
@@ -89,6 +93,7 @@ const AddProductPage = () => {
   };
 
   const handleImages = (files: File[]) => {
+    setImagesError(false);
     setUploadedImages([]);
     setImages((current) => {
       const availableSlots = 5 - current.length;
@@ -131,9 +136,10 @@ const AddProductPage = () => {
     // RequireSellerAuth already guarantees a sellerToken exists for every
     // route inside AdminLayout, so this page-local check is no longer needed.
     if (images.length === 0) {
-      toast.error('Add at least one product image.');
+      setImagesError(true);
       return;
     }
+    setImagesError(false);
 
     if (variantTypes.length === 0) {
       toast.error('Add at least one variant type.');
@@ -313,7 +319,9 @@ const AddProductPage = () => {
               onFiles={handleImages}
               label={`Add product images here — ${images.length}/5 selected`}
               disabled={images.length >= 5}
+              error={imagesError}
             />
+            {imagesError && <p className="mt-1.5 text-[11px] font-bold text-danger">Add at least one product image.</p>}
 
             {/* Mobile: horizontal 72x72 no-scrollbar rail (4.3.11) — the
                 filename caption is dropped at that size, too cramped to be
