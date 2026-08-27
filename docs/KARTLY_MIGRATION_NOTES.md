@@ -974,3 +974,27 @@ when the deleted row was the only one left on a page beyond the first
 `products.length`) — which lands the pager on the new-last page and lets
 the existing `[search, page]` debounce effect's dependency on `page`
 trigger a refetch automatically.
+
+## Known backend gap — orphaned Cloudinary assets on a failed create/edit
+
+Both `AddProductPage.tsx` and `EditProductPage.tsx` upload staged images
+straight to Cloudinary (`uploadProductImages`, via the signed
+`/products/cloudinary-signature` endpoint) *before* calling
+`POST /products/create-product` / `PUT /products/edit-product/:id`. If
+that second call fails — network blip, validation error, backend down —
+the images are already sitting in Cloudinary with nothing in Mongo
+referencing them. This isn't fixable from either client alone: cleaning
+up an orphaned asset needs `cloudinary.uploader.destroy`, which requires
+the API secret and so can only run server-side, and
+`seller.routes/product.routes.ts` exposes no delete-by-`publicId` (or
+any other cleanup) endpoint — only the upload signature. Per this
+project's stated policy of naming a missing endpoint rather than
+fabricating around it: this is that gap. Today a failed save after a
+successful upload just surfaces the normal error toast and leaves the
+seller free to retry (which re-uploads fresh copies rather than reusing
+the orphaned ones, compounding the waste on repeated failures) — there's
+no user-facing incorrectness, only unused storage on the Cloudinary
+account accumulating silently. Fixing it for real needs a backend
+`DELETE /products/cloudinary-asset/:publicId` (or similar) that the
+client calls from the create/edit catch block when a save fails after a
+successful upload.
