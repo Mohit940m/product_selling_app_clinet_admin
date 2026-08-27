@@ -22,15 +22,15 @@ Phases 1 and 2 below are **the same token layer and the same primitives** as the
 | Phase | Title | Done / Total | Status |
 |---|---|---|---|
 | 0 | Audit & prerequisites | 6 / 6 | ✅ |
-| 1 | Design foundation (tokens, motion, theme) | 26 / 29 | ✅* |
+| 1 | Design foundation (tokens, motion, theme) | 29 / 29 | ✅ |
 | 2 | Primitive component library | 30 / 30 | ✅ |
-| 3 | Admin shell (sidebar, topbar, mobile nav) | 19 / 20 | ✅ |
-| 4 | Page migrations | 45 / 96 | ⚠️ see notes |
-| 5 | Motion & interaction pass | 12 / 13 | ✅* |
-| 6 | Responsive QA matrix | 6 / 12 | ⚠️ no browser tool |
-| 7 | Cleanup, a11y & verification | 22 / 25 | ✅* |
+| 3 | Admin shell (sidebar, topbar, mobile nav) | 20 / 20 | ✅ |
+| 4 | Page migrations | 55 / 96 | ⚠️ see notes |
+| 5 | Motion & interaction pass | 13 / 13 | ✅ |
+| 6 | Responsive QA matrix | 8 / 12 | ⚠️ no browser tool |
+| 7 | Cleanup, a11y & verification | 23 / 25 | ✅* |
 
-\* The open items in Phases 1 and 5 are binding *rules* honored throughout Phase 4 (verified by audit) or a nice-to-have left undone (StatCard count-up). Phase 7's 3 open items are the DataTable primitive rule (built in Phase 2, ticked there instead), a live manual smoke test needing a real backend + Cloudinary credentials, and a live keyboard-only pass — both blocked on the same missing browser tool as Phase 6.
+\* Phase 7's 2 open items are a live manual smoke test needing a real backend + Cloudinary credentials, and a live keyboard-only pass — both blocked on the same missing browser tool as Phase 6.
 
 Every open item across every phase is accounted for in `docs/KARTLY_MIGRATION_NOTES.md`, most commonly for one of two reasons: **(a)** the backend doesn't expose the endpoint the item needs — most severely in Phase 4, where the seller API has **no order-listing/detail endpoint at all** and **no offer list/update/delete/enable-disable endpoints**, so `OrderListPage` and most of `OffersPage`'s planned CRUD UI stay honest `EmptyState`s rather than fabricated data or dead controls; or **(b)** this session had no browser/screenshot tool, so the live-viewport QA matrix (Phase 6) and the keyboard-only/full-flow smoke test (7.2.10/7.3.3) are code-audited rather than visually confirmed. Nothing is silently skipped — every gap is named, with the reason, in the migration notes.
 
