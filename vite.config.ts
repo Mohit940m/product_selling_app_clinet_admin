@@ -10,7 +10,10 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       react()],
     server: {
-      port: parseInt(env.VITE_PORT || env.PORT) || 5173,
+      // 5203 matches this app's documented dev port (CLAUDE.md, .env.example)
+      // when VITE_PORT/PORT aren't set — not Vite's generic 5173 default,
+      // which this previously fell back to and didn't match either doc.
+      port: parseInt(env.VITE_PORT || env.PORT) || 5203,
     },
   }
 })
