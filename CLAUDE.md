@@ -74,8 +74,8 @@ The backend returns the OTP in the response body ("for testing/demo purposes" �
 
 Several seller routes the Kartly prototype assumes don't exist yet — the corresponding UI is built as an honest "coming soon" state rather than against fabricated data (see `docs/KARTLY_MIGRATION_NOTES.md` for the full reasoning per page):
 - **No order-listing/detail endpoint** (`seller.routes/` has no order routes at all) — `OrderListPage` and the dashboard's "recent orders"/"fulfilment queue" stay `EmptyState`s.
-- **`offerManagement.routes.ts` exposes only `POST /create-offer`** — no list/get/update/delete/enable-disable — so `OffersPage` is create-only, with a panel explaining the rest isn't available yet.
-- **`ProductListPage`'s `/products/get-all-products` has no sort or pagination params wired**, and **`ShippingConfigPage`'s five rate zones are a fixed shape**, not an addable/removable list.
+- **`offerManagement.routes.ts` exposes only `POST /create-offer`** — no list/get/update/delete/enable-disable — so `OffersPage` can only create offers and show the ones created in the current browser session (not a persisted list, explicitly labelled as such), with a panel explaining the rest isn't available yet. Its target-product picker is real, though — it's backed by the same `get-all-products` endpoint `ProductListPage` uses, including optional per-product variant narrowing.
+- **`ShippingConfigPage`'s five rate zones are a fixed shape**, not an addable/removable list, and there's no free-shipping-threshold field. `ProductListPage`'s pagination *is* wired (the endpoint supports `page`/`limit`/`total`); only sort is still unwired (no sort param exists on the backend).
 
 ### Styling
 
