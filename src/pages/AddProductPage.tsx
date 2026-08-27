@@ -5,10 +5,12 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FiArrowLeft, FiImage, FiPlus, FiTrash2 } from 'react-icons/fi';
 import Container from '../components/layout/Container';
+import PageHeader from '../components/layout/PageHeader';
 import Panel from '../components/ui/Panel';
 import Input from '../components/ui/Input';
 import Textarea from '../components/ui/Textarea';
 import Button from '../components/ui/Button';
+import Switch from '../components/ui/Switch';
 import FileDrop from '../components/ui/FileDrop';
 import ProgressBar from '../components/ui/ProgressBar';
 import { showKartlyToast } from '../components/ui/showKartlyToast';
@@ -60,6 +62,12 @@ const AddProductPage = () => {
   const [uploadedImages, setUploadedImages] = useState<UploadedProductImage[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
+  // create-product has no isActive field at all (confirmed by reading the
+  // controller) — a new product is always created active. When this is
+  // off, a real follow-up PATCH /edit-product-status call deactivates it
+  // right after creation, so "create inactive" is two real requests, not
+  // a fabricated draft state.
+  const [isActive, setIsActive] = useState(true);
 
   const variantTypes = useMemo(
     () => [variantTypeOne.trim(), variantTypeTwo.trim()].filter(Boolean),
@@ -166,7 +174,19 @@ const AddProductPage = () => {
       formData.append('variants', JSON.stringify(productVariants));
       formData.append('productImagesURL', JSON.stringify(cloudinaryImages.map((image) => image.url)));
 
-      await sellerApi.post('/products/create-product', formData);
+      const { data } = await sellerApi.post('/products/create-product', formData);
+      const newProductId = data.data?._id;
+
+      if (!isActive && newProductId) {
+        setUploadStatus('Setting status...');
+        try {
+          await sellerApi.patch(`/products/edit-product-status/${newProductId}`, { status: false });
+        } catch {
+          // The product itself was created successfully — a failed status
+          // flip afterward shouldn't block navigation, just note it.
+          toast.error('Product created, but could not be set inactive. Change it from the product list.');
+        }
+      }
 
       showKartlyToast({ title: 'Product created', sub: name });
       navigate('/products');
@@ -180,16 +200,26 @@ const AddProductPage = () => {
 
   return (
     <Container className="py-6 pb-28 lg:pb-8 lg:py-8">
-      <div className="mb-6">
-        <Link to="/products" className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
-          <FiArrowLeft size={16} />
-          Products
-        </Link>
-        <h1 className="mt-2 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">New product</h1>
-        <p className="mt-1 text-[12.5px] font-semibold text-muted">
-          Upload images to Cloudinary first, then save product metadata to the seller API.
-        </p>
-      </div>
+      <Link to="/products" className="mb-3 inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
+        <FiArrowLeft size={16} />
+        Products
+      </Link>
+      <PageHeader
+        title="New product"
+        subtitle="Upload images to Cloudinary first, then save product metadata to the seller API."
+        actions={
+          <Button
+            type="submit"
+            form="add-product-form"
+            variant="primary"
+            loading={isSubmitting}
+            icon={<FiPlus size={16} />}
+            className="hidden lg:inline-flex"
+          >
+            Publish
+          </Button>
+        }
+      />
 
       <form id="add-product-form" className="grid gap-5 lg:grid-cols-[1.6fr_1fr]" onSubmit={submitProduct}>
         <section className="space-y-5">
@@ -315,6 +345,16 @@ const AddProductPage = () => {
             </div>
           </Panel>
 
+          <Panel className="flex items-center justify-between">
+            <div>
+              <h2 className="text-[16px] font-extrabold text-ink">Status</h2>
+              <p className="mt-1 text-[12.5px] font-semibold text-muted">
+                {isActive ? 'Visible to buyers as soon as it is published.' : 'Created but hidden from buyers until you activate it.'}
+              </p>
+            </div>
+            <Switch checked={isActive} onChange={() => setIsActive((v) => !v)} label="Active" />
+          </Panel>
+
           <Panel>
             <h2 className="text-[16px] font-extrabold text-ink">Publish</h2>
             {uploadStatus && (
@@ -326,9 +366,6 @@ const AddProductPage = () => {
             {uploadedImages.length > 0 && (
               <p className="mt-3 text-[12.5px] font-semibold text-muted">{uploadedImages.length} image URLs ready for metadata save.</p>
             )}
-            <Button type="submit" variant="primary" fullWidth loading={isSubmitting} icon={<FiPlus size={16} />} className="mt-4 hidden lg:inline-flex">
-              Publish
-            </Button>
           </Panel>
         </aside>
       </form>

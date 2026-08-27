@@ -625,3 +625,27 @@ product also clears any variant-level selections scoped to it, so a
 stale `variantIds` entry can't outlive its parent product's selection.
 Created-offer cards' target summary now reads "{n} variants" instead of
 "{n} products (all variants)" when narrowing was used.
+
+## Post-Phase-7 follow-up — AddProductPage Status panel + PageHeader (4.3.1 partial, 4.3.6)
+
+`createProduct` has no `isActive` field at all — confirmed by reading
+the controller — so a new product is always created active; there was
+previously no way to create one inactive without a separate manual step
+afterward. Added a Status `Panel` with an Active `Switch` (4.3.6): when
+off, a real follow-up `PATCH /products/edit-product-status/:id` call
+fires right after creation succeeds — two genuine requests composing a
+"create inactive" outcome, not a fabricated draft flag. If that second
+call fails, the product itself still exists (created successfully) and
+the seller is told to flip the status from the product list instead of
+losing their work.
+
+Also switched the page's bespoke `<h1>` header to the shared
+`PageHeader` (title, subtitle, the desktop `Publish` action moved into
+`PageHeader`'s actions via `form="add-product-form"`, matching the
+pattern already used on `ShippingConfigPage`/`OffersPage`), with the
+back-to-products link kept above it. **4.3.1 stays partial/unticked**:
+its spec also wants an `outline` "Save draft" button beside `Publish` —
+since there's no backend draft concept (the same `create-product` call
+would just create the same live product either way), a "Save draft"
+button would be indistinguishable from "Publish" and thus a misleading
+control. Not built.

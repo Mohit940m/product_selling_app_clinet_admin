@@ -324,7 +324,7 @@ The prototype's admin artboard is essentially this page. Match it closely.
 - [x] **4.3.3** Images `Panel` uses `FileDrop` (2.2.6). Preserve the existing Cloudinary signature flow in `src/api/cloudinaryApi.ts` exactly — this is a styling change, not an upload rewrite.
 - [x] **4.3.4** Staged image thumbnails: `96×96 rounded-tile border border-line`, the first marked `Cover` with a `Badge tone="ink"`, each with a remove `×` on hover. Support drag-to-reorder if the current code already tracks order; otherwise leave order as upload order and note it.
 - [x] **4.3.5** Variant rows: `rounded-tile border border-line p-3.5` with attribute/value/price/stock `Input`s and a `danger` remove button; `+ Add variant` as a dashed row (`border-dashed border-edge`, hover `border-accent text-accent`).
-- [ ] **4.3.6** Status `Panel`: an active/inactive `Switch` with a muted explanation line.
+- [x] **4.3.6** Status `Panel`: an active/inactive `Switch` with a muted explanation line.
 - [ ] **4.3.7** Per-field validation errors render inline in the `Input` error slot, not as a toast dump. Keep the existing submit-level toast for request failures.
 - [x] **4.3.8** Upload progress: an accent `ProgressBar` per file while Cloudinary uploads; the `Publish` button is `loading` and disabled until all uploads settle.
 
