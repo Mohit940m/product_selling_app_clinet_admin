@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FiArrowLeft, FiEdit2, FiPackage, FiTrash2 } from 'react-icons/fi';
+import { FiArrowLeft, FiEdit2, FiPackage, FiSettings, FiTrash2 } from 'react-icons/fi';
 import Container from '../components/layout/Container';
 import Panel from '../components/ui/Panel';
 import Button from '../components/ui/Button';
@@ -12,6 +12,9 @@ import ProgressBar from '../components/ui/ProgressBar';
 import Skeleton from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import Modal from '../components/ui/Modal';
+import Input from '../components/ui/Input';
+import Switch from '../components/ui/Switch';
 import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
 
@@ -70,6 +73,12 @@ const ProductDetailsPage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [manageTarget, setManageTarget] = useState<Variant | null>(null);
+  const [managePrice, setManagePrice] = useState('');
+  const [manageAddStock, setManageAddStock] = useState('');
+  const [manageActive, setManageActive] = useState(true);
+  const [isSavingVariant, setIsSavingVariant] = useState(false);
+
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -84,6 +93,60 @@ const ProductDetailsPage = () => {
 
     loadProduct();
   }, [productId]);
+
+  /** Re-fetches after a variant save — kept separate from the mount effect's
+   * loader (react-hooks/set-state-in-effect requires that one to stay
+   * effect-local) rather than sharing one component-scoped function. */
+  const refetchProduct = async () => {
+    try {
+      const { data } = await sellerApi.get(`/products/get-product/${productId}`);
+      setProduct(data.data);
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Unable to refresh product.'));
+    }
+  };
+
+  const openManageVariant = (variant: Variant) => {
+    setManageTarget(variant);
+    setManagePrice(variant.price !== undefined ? String(variant.price) : '');
+    setManageAddStock('');
+    setManageActive(variant.isActive ?? true);
+  };
+
+  const saveVariant = async () => {
+    if (!manageTarget || !product) return;
+    setIsSavingVariant(true);
+
+    const calls: Promise<unknown>[] = [];
+    const nextPrice = Number(managePrice);
+    if (managePrice !== '' && Number.isFinite(nextPrice) && nextPrice !== manageTarget.price) {
+      calls.push(sellerApi.patch(`/products/edit-variant-price/${product._id}`, { variantId: manageTarget._id, price: nextPrice }));
+    }
+    if (manageActive !== (manageTarget.isActive ?? true)) {
+      calls.push(sellerApi.patch(`/products/edit-variant-status/${product._id}`, { variantId: manageTarget._id, status: manageActive }));
+    }
+    const addedStock = Number(manageAddStock);
+    if (manageAddStock !== '' && Number.isFinite(addedStock) && addedStock > 0) {
+      calls.push(sellerApi.patch(`/products/increase-stock/${product._id}`, { variantId: manageTarget._id, addedStock }));
+    }
+
+    if (calls.length === 0) {
+      setManageTarget(null);
+      setIsSavingVariant(false);
+      return;
+    }
+
+    const results = await Promise.allSettled(calls);
+    const failed = results.filter((r) => r.status === 'rejected').length;
+    if (failed > 0) {
+      toast.error(failed === results.length ? 'Unable to save variant changes.' : 'Some variant changes could not be saved.');
+    } else {
+      toast.success('Variant updated.');
+    }
+    await refetchProduct();
+    setManageTarget(null);
+    setIsSavingVariant(false);
+  };
 
   const deleteProduct = async () => {
     if (!product) return;
@@ -188,7 +251,8 @@ const ProductDetailsPage = () => {
                       <th scope="col" className="px-4 py-2.5">Attributes</th>
                       <th scope="col" className="px-4 py-2.5">Price</th>
                       <th scope="col" className="px-4 py-2.5">Stock</th>
-                      <th scope="col" className="py-2.5 pl-4">Status</th>
+                      <th scope="col" className="px-4 py-2.5">Status</th>
+                      <th scope="col" className="py-2.5 pl-4 text-right">Manage</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -212,8 +276,18 @@ const ProductDetailsPage = () => {
                               <span className={low ? 'font-extrabold text-bad-fg' : 'text-muted'}>{stock}</span>
                             </div>
                           </td>
-                          <td className="py-3 pl-4">
+                          <td className="px-4 py-3">
                             <Badge tone={variant.isActive ? 'success' : 'plum'}>{variant.isActive ? 'Active' : 'Inactive'}</Badge>
+                          </td>
+                          <td className="py-3 pl-4 text-right">
+                            <button
+                              type="button"
+                              onClick={() => openManageVariant(variant)}
+                              aria-label={`Manage ${variant.sku ?? 'variant'}`}
+                              className="rounded-full border border-line p-2 text-muted t-fast hover:border-accent hover:text-accent"
+                            >
+                              <FiSettings size={14} />
+                            </button>
                           </td>
                         </tr>
                       );
@@ -239,6 +313,14 @@ const ProductDetailsPage = () => {
                         <span className="font-extrabold text-ink">{formatCurrency(variant.price)}</span>
                         <span className={`text-[12px] ${low ? 'font-extrabold text-bad-fg' : 'text-muted'}`}>{stock} in stock</span>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => openManageVariant(variant)}
+                        className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-full border border-line py-2 text-[11px] font-bold text-ink t-fast hover:border-accent hover:text-accent"
+                      >
+                        <FiSettings size={13} />
+                        Manage
+                      </button>
                     </div>
                   );
                 })}
@@ -257,6 +339,38 @@ const ProductDetailsPage = () => {
         confirmLabel="Delete product"
         loading={isDeleting}
       />
+
+      <Modal open={!!manageTarget} onClose={() => setManageTarget(null)} title="Manage variant">
+        {manageTarget && (
+          <div className="space-y-4">
+            <div>
+              <p className="text-[13px] font-bold text-ink">{manageTarget.sku ?? 'Variant'}</p>
+              <p className="mt-0.5 text-[11.5px] text-muted">
+                {Object.entries(manageTarget.attributes ?? {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No attributes'}
+              </p>
+            </div>
+            <Input label="Price (₹)" type="number" min="0" value={managePrice} onChange={(e) => setManagePrice(e.target.value)} />
+            <Input
+              label="Add stock (units)"
+              type="number"
+              min="0"
+              value={manageAddStock}
+              onChange={(e) => setManageAddStock(e.target.value)}
+              placeholder="0"
+            />
+            <div className="flex items-center justify-between rounded-tile border border-line px-4 py-3.5">
+              <div>
+                <p className="text-[13px] font-bold text-ink">Active</p>
+                <p className="text-[11.5px] font-medium text-muted">Inactive variants can't be added to cart.</p>
+              </div>
+              <Switch checked={manageActive} onChange={() => setManageActive((v) => !v)} label="Variant active" />
+            </div>
+            <Button variant="primary" fullWidth loading={isSavingVariant} onClick={saveVariant}>
+              Save changes
+            </Button>
+          </div>
+        )}
+      </Modal>
     </Container>
   );
 };

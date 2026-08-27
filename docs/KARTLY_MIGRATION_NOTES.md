@@ -508,3 +508,25 @@ anywhere in this frontend. Wired a real "Restock" button onto each
 low-stock row, opening a `Modal` with a units-to-add `Input`; on success
 the local `products` state updates from the response's returned stock
 figure so the panel reflects the new count immediately, no full reload.
+
+## Post-Phase-7 follow-up — real per-variant management on ProductDetailsPage
+
+Kept finding real, working seller endpoints with zero frontend usage:
+`PATCH /products/edit-variant-price/:productId` (body `{ variantId, price
+}`) and `PATCH /products/edit-variant-status/:productId` (body
+`{ variantId, status }`) — confirmed by reading `product.controller.ts`.
+`EditProductPage`'s `PUT /edit-product/:id` only ever touches
+name/description/category/images, never variants, so there was
+previously **no way at all** to change an existing variant's price or
+active status, or add stock, after initial product creation — only
+`AddProductPage` could set them, once, at creation time.
+
+Added a "Manage" action (settings icon on desktop table rows, a full-
+width button on mobile cards) on `ProductDetailsPage`'s existing
+Variants panel, opening a `Modal` with a price `Input`, an "Add stock"
+`Input` (additive, matching `increase-stock`'s actual semantics — not a
+replace), and an Active `Switch`. On save, only the fields that actually
+changed are sent (each via its own real endpoint, in parallel via
+`Promise.allSettled` so one failing doesn't block the others), then the
+product is refetched so the table reflects the authoritative saved
+state rather than an optimistic guess.
