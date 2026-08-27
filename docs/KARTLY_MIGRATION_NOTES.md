@@ -998,3 +998,21 @@ account accumulating silently. Fixing it for real needs a backend
 `DELETE /products/cloudinary-asset/:publicId` (or similar) that the
 client calls from the create/edit catch block when a save fails after a
 successful upload.
+
+## Backend bug found + fixed — editProduct silently dropped new images
+
+While tracing the above gap, found a real one, not just a limitation:
+`editProduct` (`product_selling_app_server/src/controllers/seller.controllers/product.controller.ts`)
+only ever read `req.files` for new images — it had no equivalent of
+`createProduct`'s files-then-`productImagesURL`-fallback. Since
+`EditProductPage.tsx` uploads new images directly to Cloudinary and
+sends only the resulting URLs (never raw files, by design — see the
+"orphaned Cloudinary assets" note above), `req.files` was always empty
+for this flow, and the URLs were never read anywhere in the function.
+The PUT request still returned 200 and showed "Product updated," but
+any new image added during an edit was silently discarded — the
+seller had no way to know from the UI, since the request looked
+entirely successful. Fixed server-side by mirroring `createProduct`'s
+existing files-fallback-to-`productImagesURL` handling; verified with
+`npm run build` in the server project. No frontend change was needed —
+`EditProductPage.tsx` was already sending the right payload.
