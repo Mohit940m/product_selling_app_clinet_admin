@@ -459,3 +459,25 @@ Code-audited the one page using `DataTable` (`ProductListPage`) plus
 `mobileCard` render prop already use `truncate` on product name/SKU/
 category; the sidebar seller name/store-name already uses `truncate`.
 No untruncated long-text cell found — checked off with no code change.
+
+## Post-Phase-7 follow-up — session-scoped created-offers grid (4.8.3, partial)
+
+The seller API still only exposes `POST /create-offer` — no list/get/
+update/delete — so a true persisted offer list stays out of reach. As a
+middle ground, `OffersPage` now tracks offers created in the current
+browser session (in local component state, populated from the same
+payload just POSTed successfully) and renders them as real `Card`s in a
+`grid-cols-1 sm:grid-cols-2 xl:grid-cols-3` grid, per 4.8.3's spec: name,
+a discount-value `Badge tone="ink"` (`−10%`, `₹500 off`, `₹50 cashback`,
+`Buy 2 Get 1`, `Bundle @ ₹999` depending on offer type), a mono validity-
+window line, a target-count summary, and a status `Badge`
+(Active/Scheduled/Expired) derived from the validity dates exactly as
+the spec describes. A caption above the grid is explicit that this is
+"created this session," not a persisted list, so it can't be confused
+with real listing data — refreshing the page clears it, same as before.
+
+4.8.3 stays unticked (it still can't show offers created in a previous
+session or by anyone else) and 4.8.2/4.8.4/4.8.6/4.8.7/4.8.10-4.8.12
+(extracting `OfferForm`, edit/delete/enable-disable, the target picker,
+filter chips, mobile `Sheet` form) remain deferred for the same reason
+as before — no endpoints to back edit/delete/list-filtering.

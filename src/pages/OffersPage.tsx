@@ -5,6 +5,8 @@ import axios from 'axios';
 import { FiClock, FiGift, FiPlus, FiTag, FiTrash2 } from 'react-icons/fi';
 import Container from '../components/layout/Container';
 import Panel from '../components/ui/Panel';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
 import Input from '../components/ui/Input';
 import Textarea from '../components/ui/Textarea';
 import Chip from '../components/ui/Chip';
@@ -41,8 +43,31 @@ const getErrorMessage = (err: unknown, fallback: string) => {
   return err instanceof Error ? err.message : fallback;
 };
 
+type CreatedOffer = {
+  id: number;
+  name: string;
+  type: OfferType;
+  discountLabel: string;
+  targetSummary: string;
+  validFrom: string;
+  validTill: string;
+};
+
 const today = () => new Date().toISOString().slice(0, 16);
 const makeBundleItem = (): BundleItem => ({ id: Date.now() + Math.floor(Math.random() * 1000), productId: '', quantity: '1' });
+
+const formatDateShort = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** Derived purely from validity dates, per the plan's Active/Scheduled/Expired spec. */
+const getOfferStatus = (validFrom: string, validTill: string): { label: string; tone: 'success' | 'warn' | 'plum' } => {
+  const now = Date.now();
+  const from = new Date(validFrom).getTime();
+  const till = new Date(validTill).getTime();
+  if (now < from) return { label: 'Scheduled', tone: 'warn' };
+  if (now > till) return { label: 'Expired', tone: 'plum' };
+  return { label: 'Active', tone: 'success' };
+};
 
 const OffersPage = () => {
   const [offerType, setOfferType] = useState<OfferType>('DISCOUNT');
@@ -68,6 +93,11 @@ const OffersPage = () => {
 
   const [productIds, setProductIds] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // The seller API has no offer-listing endpoint, so this only tracks
+  // offers created in this browser session (not a persisted list) — see
+  // the "created this session" note rendered above the grid.
+  const [createdOffers, setCreatedOffers] = useState<CreatedOffer[]>([]);
 
   const addBundleItem = () => {
     setBundleItems((current) => [...current, makeBundleItem()]);
@@ -150,13 +180,42 @@ const OffersPage = () => {
     };
   };
 
+  const buildCreatedOfferSummary = (): CreatedOffer => {
+    const parsedProductIds = productIds.split(',').map((id) => id.trim()).filter(Boolean);
+
+    const discountLabel = (() => {
+      if (offerType === 'DISCOUNT') {
+        return discountType === 'PERCENTAGE' ? `−${discountValue}%` : `₹${discountValue} off`;
+      }
+      if (offerType === 'CASHBACK') return `₹${cashbackAmount} cashback`;
+      if (offerType === 'BUY_GET') return `Buy ${buyQty} Get ${getQty}`;
+      return `Bundle @ ₹${bundlePrice}`;
+    })();
+
+    const targetSummary = offerType === 'PRODUCT_BUNDLE'
+      ? `${bundleItems.length} bundle item${bundleItems.length === 1 ? '' : 's'}`
+      : `${parsedProductIds.length} product${parsedProductIds.length === 1 ? '' : 's'}`;
+
+    return {
+      id: Date.now(),
+      name: name.trim(),
+      type: offerType,
+      discountLabel,
+      targetSummary,
+      validFrom: new Date(validFrom).toISOString(),
+      validTill: new Date(validTill).toISOString(),
+    };
+  };
+
   const submitOffer = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
 
     try {
+      const createdSummary = buildCreatedOfferSummary();
       await sellerApi.post('/offer/create-offer', buildPayload());
       toast.success('Offer created successfully.');
+      setCreatedOffers((current) => [createdSummary, ...current]);
       resetForm();
     } catch (err) {
       toast.error(getErrorMessage(err, 'Unable to create offer.'));
@@ -175,19 +234,48 @@ const OffersPage = () => {
         </p>
       </div>
 
-      <Panel className="mb-5">
-        <EmptyState
-          icon={<FiGift size={28} />}
-          title="Your active offers will appear here"
-          description="The seller API only exposes offer creation right now — listing, editing, and disabling existing offers needs endpoints that don't exist yet."
-          action={
-            <span className="flex items-center gap-2 rounded-full border border-line bg-soft2 px-4 py-2 text-xs font-semibold text-muted">
-              <FiClock size={14} className="text-accent" />
-              Offer listing coming soon
-            </span>
-          }
-        />
-      </Panel>
+      {createdOffers.length === 0 ? (
+        <Panel className="mb-5">
+          <EmptyState
+            icon={<FiGift size={28} />}
+            title="Your active offers will appear here"
+            description="The seller API only exposes offer creation right now — listing, editing, and disabling existing offers needs endpoints that don't exist yet."
+            action={
+              <span className="flex items-center gap-2 rounded-full border border-line bg-soft2 px-4 py-2 text-xs font-semibold text-muted">
+                <FiClock size={14} className="text-accent" />
+                Offer listing coming soon
+              </span>
+            }
+          />
+        </Panel>
+      ) : (
+        <div className="mb-5">
+          <p className="mb-3 flex items-center gap-1.5 text-[11.5px] font-semibold text-muted">
+            <FiClock size={13} />
+            Created this session — there's no listing endpoint yet, so this isn't a persisted offer list.
+          </p>
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+            {createdOffers.map((offer) => {
+              const status = getOfferStatus(offer.validFrom, offer.validTill);
+              return (
+                <Card key={offer.id} interactive={false} padded className="space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-[15px] font-extrabold text-ink">{offer.name || OFFER_TYPE_LABELS[offer.type]}</p>
+                    <Badge tone="ink">{offer.discountLabel}</Badge>
+                  </div>
+                  <p className="font-mono text-[11px] text-muted">
+                    {formatDateShort(offer.validFrom)} – {formatDateShort(offer.validTill)}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11.5px] font-semibold text-muted">{offer.targetSummary}</span>
+                    <Badge tone={status.tone}>{status.label}</Badge>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={submitOffer} className="space-y-5">
         <Panel>
