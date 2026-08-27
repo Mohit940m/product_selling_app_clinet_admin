@@ -886,3 +886,12 @@ upload (`cloudinaryApi.ts`) is a separate, untouched `axios.post` call
 straight to Cloudinary's own API, not routed through `sellerApi` — this
 timeout only covers requests through this instance, so it can't cut off
 an in-progress image upload.
+
+## Post-Phase-7 follow-up — same race condition on ProductDetailsPage/EditProductPage
+
+Same real bug as the user client's `ProductDetailPage`: navigating
+between products (or between two products' edit forms) before the first
+fetch resolved could let a stale response for the *previous* `productId`
+overwrite the correct, newer product's data. Added the same `isCurrent`
+flag guard to both pages' load effects, checked before every `setState`
+in the load path.

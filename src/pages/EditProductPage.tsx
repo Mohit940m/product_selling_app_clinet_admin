@@ -61,9 +61,15 @@ const EditProductPage = () => {
   const [initialSnapshot, setInitialSnapshot] = useState<{ name: string; description: string; category: string; imageCount: number } | null>(null);
 
   useEffect(() => {
+    // Guards against a real race: navigating from editing one product
+    // straight to another before the first fetch resolves could
+    // otherwise let a stale response overwrite the newer product's data.
+    let isCurrent = true;
+
     const loadProduct = async () => {
       try {
         const { data } = await sellerApi.get<{ data: ProductDetails }>(`/products/get-product/${productId}`);
+        if (!isCurrent) return;
         setName(data.data.name);
         setDescription(data.data.description);
         setCategory(data.data.category);
@@ -75,13 +81,16 @@ const EditProductPage = () => {
           imageCount: data.data.images?.length ?? 0,
         });
       } catch (err) {
-        toast.error(getErrorMessage(err, 'Unable to load product.'));
+        if (isCurrent) toast.error(getErrorMessage(err, 'Unable to load product.'));
       } finally {
-        setIsLoading(false);
+        if (isCurrent) setIsLoading(false);
       }
     };
 
     loadProduct();
+    return () => {
+      isCurrent = false;
+    };
   }, [productId]);
 
   const isDirty = !!initialSnapshot && (

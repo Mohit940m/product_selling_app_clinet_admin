@@ -87,18 +87,26 @@ const ProductDetailsPage = () => {
   const [isAddingVariant, setIsAddingVariant] = useState(false);
 
   useEffect(() => {
+    // Guards against a real race: navigating from one product straight to
+    // another before the first fetch resolves could otherwise let a
+    // stale response overwrite the newer product's data.
+    let isCurrent = true;
+
     const loadProduct = async () => {
       try {
         const { data } = await sellerApi.get(`/products/get-product/${productId}`);
-        setProduct(data.data);
+        if (isCurrent) setProduct(data.data);
       } catch (err) {
-        toast.error(getErrorMessage(err, 'Unable to load product.'));
+        if (isCurrent) toast.error(getErrorMessage(err, 'Unable to load product.'));
       } finally {
-        setIsLoading(false);
+        if (isCurrent) setIsLoading(false);
       }
     };
 
     loadProduct();
+    return () => {
+      isCurrent = false;
+    };
   }, [productId]);
 
   /** Re-fetches after a variant save — kept separate from the mount effect's
