@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -59,6 +59,20 @@ const AddProductPage = () => {
   // (react-hooks/purity flagged the previous `useState([{ id: Date.now() ... }])`).
   const [variants, setVariants] = useState<VariantRow[]>(() => [makeVariant()]);
   const [images, setImages] = useState<SelectedProductImage[]>([]);
+  // Individual removals already revoke their own blob: URL, but staged
+  // images the seller never removes (they submit, or just navigate away)
+  // would otherwise leak until the tab fully unloads. A ref keeps this
+  // cleanup from needing `images` in its deps, so it only runs once, on
+  // unmount, but still sees whatever was staged most recently.
+  const imagesRef = useRef(images);
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+    };
+  }, []);
   const [uploadedImages, setUploadedImages] = useState<UploadedProductImage[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Inline validation (4.3.7) for the one pre-submit check with no native

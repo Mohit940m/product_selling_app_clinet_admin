@@ -920,3 +920,41 @@ as the first real line of every handler across the app (`submitOffer`,
 `submitAddVariant`, `submitRestock`, `submitLogin`, `submitSignUp`) —
 belt-and-suspenders on top of the disabled attribute, not a replacement
 for it (the attribute still matters for the visual/keyboard-focus state).
+
+## Post-Phase-7 follow-up — object-URL leak in staged product image previews (4.3.7, 4.4.x)
+
+Both `AddProductPage.tsx` and `EditProductPage.tsx` call
+`URL.createObjectURL(file)` per staged image to build the `FileDrop`
+preview grid, and paired it with a revoke only when a single image was
+individually removed — never on unmount, so navigating away mid-upload
+(back button, or just moving to another page) leaked every still-staged
+preview until the tab fully unloaded. Added an unmount-cleanup effect to
+both pages that revokes whatever is still staged at that point:
+
+```tsx
+const [images, setImages] = useState<SelectedProductImage[]>([]);
+const imagesRef = useRef(images);
+useEffect(() => {
+  imagesRef.current = images;
+}, [images]);
+useEffect(() => {
+  return () => {
+    imagesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+  };
+}, []);
+```
+
+(`EditProductPage.tsx` mirrors this for its `newImages`/`newImagesRef`,
+which track only the *newly added* images in that flow — the existing
+Cloudinary URLs loaded with the product are ordinary https: URLs, not
+blob: ones, so they need no revoke.)
+
+The ref indirection is required, not stylistic: the cleanup closure
+captures whatever `images` was on the *first* render if read directly,
+so a plain `images.forEach(...)` in the unmount effect would only ever
+revoke an empty initial array. Reading `imagesRef.current` at cleanup
+time gets the latest value instead. Writing the ref itself has to happen
+in its own effect rather than inline during render — assigning
+`ref.current` in the render body trips the `react-hooks/refs` lint rule
+(refs may only be read/written from effects, event handlers, or other
+refs' cleanups, never during render).

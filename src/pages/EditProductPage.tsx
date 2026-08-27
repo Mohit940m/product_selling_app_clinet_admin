@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -46,6 +46,18 @@ const EditProductPage = () => {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<NewImage[]>([]);
+  // Same leak guard as AddProductPage — individually-removed images
+  // already revoke their own blob: URL, but any left staged when the
+  // seller navigates away otherwise leak until the tab fully unloads.
+  const newImagesRef = useRef(newImages);
+  useEffect(() => {
+    newImagesRef.current = newImages;
+  }, [newImages]);
+  useEffect(() => {
+    return () => {
+      newImagesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+    };
+  }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
