@@ -130,9 +130,10 @@ Deliberately **not** built:
 - **4.1.11/4.1.13/4.1.14 mobile-specific revenue-chart/orders-table/quick-form
   treatments** — not applicable, since none of those desktop elements were
   built to begin with.
-- **4.1.15 "+New product" in MobileActionBar** — kept as an always-visible
-  PageHeader action instead (reachable at every width, just not pinned to
-  a bottom bar).
+- **4.1.15 "+New product" in MobileActionBar** — built in the "wire up
+  MobileActionBar" post-Phase-7 follow-up further down; this paragraph
+  is the original Phase-4-pass state, kept as the historical record of
+  what wasn't true yet.
 
 ### 4.2 ProductListPage
 
@@ -146,10 +147,10 @@ with the same `eslint-disable-next-line` pattern already used elsewhere
 in this codebase for the identical intentional-omission case.
 
 Not built: **4.2.2 sort Select** (no sort query param confirmed on the
-backend), **4.2.7 pagination** (the endpoint is called with a flat
-`limit: 50`, no page param wired — pre-existing scope, not added), and
-**4.2.11 MobileActionBar** for "+New product" (kept as an always-visible
-`PageHeader` action instead, matching the Dashboard note above).
+backend — still true). **4.2.7 pagination** and **4.2.11 MobileActionBar**
+were both built in later post-Phase-7 follow-ups (see further down) —
+this paragraph is the original Phase-4-pass state, kept as the
+historical record of what wasn't true yet.
 
 ### 4.3/4.4 AddProductPage / EditProductPage — no shared ProductForm
 
@@ -175,13 +176,16 @@ import time — not actually the lint-flagged pattern, but the same latent
 smell as `OffersPage`) for a `makeVariant()` factory called from a lazy
 `useState` initializer.
 
-**Not built:** a "Save draft" action (no draft-status field confirmed on
-the backend — the original form never had one either), a product
-active/inactive `Switch` on create (no field exposed), per-field inline
-validation (kept the existing native-`required` + submit-toast pattern),
-per-file (vs. aggregate) upload progress bars, a horizontal thumbnail
-rail specifically on mobile, and a `MobileActionBar` for Publish/Save
-draft.
+**Not built:** a "Save draft" action — still correct, `create-product`
+has no draft-status field, confirmed by reading the controller — per-
+field inline validation (4.3.7, still open), and per-file (vs.
+aggregate) upload progress bars. **Corrected since this original pass:**
+an active/inactive `Switch` on create *is* now built (`create-product`
+has no `isActive` field, but a real follow-up `PATCH edit-product-status`
+call after creation achieves the same outcome — see the "AddProductPage
+Status panel" follow-up), and the mobile thumbnail rail + `MobileActionBar`
+for Publish were both also built later — see the "wire up MobileActionBar"
+and "AddProductPage mobile refinements" follow-ups further down.
 
 ### 4.5 ProductDetailsPage
 
@@ -196,9 +200,11 @@ Deliberately simplified rather than mirroring the storefront's D2 PDP
 composition (thumbnail rail + full-bleed hero, mono price eyebrow, mobile
 dot pager) — this is a seller-facing detail view, not a buyer product
 page; kept a plain image grid instead. **Not built:** an "Offers" section
-(no per-product offers-lookup endpoint verified from this page), a
-"Preview in store" link (no confirmed public storefront base URL exposed
-to this app), and a `MobileActionBar` for Edit.
+(no per-product offers-lookup endpoint verified from this page — still
+true) and a "Preview in store" link (no confirmed public storefront base
+URL exposed to this app — still true). **Corrected since this original
+pass:** a `MobileActionBar` for Edit was built in the "wire up
+MobileActionBar" follow-up further down.
 
 ### 4.6 OrderListPage
 
@@ -224,15 +230,20 @@ bordered tiles with a hover state. Kept the existing single-column,
 whole-form-save UX (all five rate zones always editable, one Save action)
 rather than the plan's inline-edit-per-row pattern — this backend's
 shipping config is one document with five **fixed** rate keys
-(`sameCity/sameState/sameRegion/restOfIndia/remote`), not a addable/
-removable list, so "+ Add rate" (4.7.5) and per-row inline-edit-then-Save
-(4.7.4/4.7.9) don't map onto the real data model. A free-shipping
-threshold field (4.7.6) doesn't exist in the schema either.
+(`sameCity/sameState/sameRegion/restOfIndia/remote`), not an addable/
+removable list, so "+ Add rate" (4.7.5) doesn't map onto the real data
+model. A free-shipping threshold field (4.7.6) doesn't exist in the
+schema either. Both of those two are still correctly blocked.
 
-Not built: the two-column origin/rates desktop layout (kept one stacked
-column at every width, matching the original), a real-data `PageHeader`
-subtitle showing the configured city/state, moving Save into the page
-header, and a `MobileActionBar`.
+**Everything else in this original paragraph was corrected in later
+follow-ups** (see "ShippingConfigPage header + layout" and
+"ShippingConfigPage per-row inline edit" further down): the two-column
+origin/rates desktop layout, a real-data `PageHeader` subtitle, moving
+Save into the page header, a `MobileActionBar`, and — reversing this
+pass's own claim — per-row inline-edit-then-Save (4.7.4/4.7.9) turned
+out to map onto the real data model just fine, since
+`updateShippingConfig` deep-merges a single rate key rather than
+requiring the whole `shippingRates` object.
 
 ### 4.8 OffersPage
 
@@ -241,9 +252,21 @@ header, and a `MobileActionBar`.
 expose exactly one endpoint — `POST /create-offer`. There is no list, get,
 update, delete, or enable/disable endpoint. This page was always a
 create-only form, never a list+CRUD screen, so the plan's grid-of-offer-
-cards / Modal edit / delete-with-Switch / status filter chips (4.8.2-4.8.4,
-4.8.7, and their mobile equivalents 4.8.9-4.8.12) don't have data to work
-against and weren't built.
+cards / Modal edit / delete-with-Switch / status filter chips
+(4.8.2/4.8.4/4.8.7, and their nested-modal mobile equivalents
+4.8.10/4.8.11) genuinely have no data to work against and stay unbuilt.
+
+**Corrected since this original pass** — turned out some items in this
+same numeric range didn't actually depend on the missing list/CRUD
+endpoints, since they're about the create-form's own UI, not about
+listing existing offers: **4.8.3** now shows a session-scoped grid of
+just-created offers (not a persisted list, but real `Card`s from real
+POST responses); **4.8.6** got a real searchable product-target picker
+(see below — this was mistakenly attributed to the offer-listing gap
+originally); **4.8.9** (mobile `grid-cols-1`) and **4.8.12**
+(`MobileActionBar`) are just responsive/layout details of the create
+form itself and were always independently buildable. See the relevant
+follow-ups further down for each.
 
 Implemented: the create form restyled on the new primitives (`Panel`,
 `Input`, `Textarea`, `Chip` for offer-type and discount-type selection,
@@ -257,11 +280,13 @@ called the impure `Date.now()` directly in the initializer expression;
 replaced with a `makeBundleItem()` factory called from a lazy `useState`
 initializer, same pattern used in `AddProductPage`.
 
-**Not built (all a consequence of the missing list/edit endpoints):** the
-target-product picker as a searchable checkbox list (kept the original
-comma-separated product-ID textarea — there's no product-list fetch wired
-into this form to back a picker with), and everything Modal/Sheet/grid
-related above.
+**Not built (genuine consequences of the missing list/edit endpoints):**
+everything Modal/Sheet/grid-of-existing-offers related above (4.8.2/
+4.8.4/4.8.7/4.8.10/4.8.11). The target-product picker claim originally
+here was a mistake — `/products/get-all-products` was never blocked by
+the offer-listing gap; it's the same endpoint `ProductListPage` already
+uses, and a real searchable picker was built later (4.8.6, see further
+down) using exactly that.
 
 With this page fixed, **all three pre-existing baseline lint issues from
 Phase 0 are now resolved** — `npm run lint` is fully clean.
