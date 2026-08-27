@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FiMapPin, FiSave, FiTruck } from 'react-icons/fi';
+import { FiEdit2, FiMapPin, FiSave, FiTruck, FiX } from 'react-icons/fi';
 import Container from '../components/layout/Container';
 import PageHeader from '../components/layout/PageHeader';
 import Panel from '../components/ui/Panel';
@@ -66,6 +66,16 @@ const ShippingConfigPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasConfig, setHasConfig] = useState(false);
+
+  // Once a config exists, each rate row can be edited and saved
+  // independently (the update endpoint deep-merges a single rate key
+  // rather than requiring the whole shippingRates object). Before a
+  // config exists, all rows stay always-editable as part of the one
+  // initial create-config submit — there's nothing to PUT to yet.
+  const [editingRateKey, setEditingRateKey] = useState<RateKey | null>(null);
+  const [rateEditCost, setRateEditCost] = useState('');
+  const [rateEditTime, setRateEditTime] = useState('');
+  const [isSavingRate, setIsSavingRate] = useState(false);
 
   useEffect(() => {
     const loadConfig = async () => {
@@ -136,6 +146,41 @@ const ShippingConfigPage = () => {
       toast.error(getErrorMessage(err, 'Unable to save shipping configuration.'));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const startEditRate = (key: RateKey) => {
+    setEditingRateKey(key);
+    setRateEditCost(form[key].cost);
+    setRateEditTime(form[key].time);
+  };
+
+  const cancelEditRate = () => setEditingRateKey(null);
+
+  const saveRate = async () => {
+    if (!editingRateKey) return;
+    const cost = Number(rateEditCost);
+    if (!Number.isFinite(cost) || cost < 0) {
+      toast.error('Enter a valid cost.');
+      return;
+    }
+    if (!rateEditTime.trim()) {
+      toast.error('Enter a delivery time.');
+      return;
+    }
+
+    setIsSavingRate(true);
+    try {
+      await sellerApi.put('/shipping/update-shipping-config', {
+        shippingRates: { [editingRateKey]: { cost, time: rateEditTime.trim() } },
+      });
+      setForm((current) => ({ ...current, [editingRateKey]: { cost: String(cost), time: rateEditTime.trim() } }));
+      toast.success(`${RATE_LABELS[editingRateKey]} rate updated.`);
+      setEditingRateKey(null);
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Unable to update this rate.'));
+    } finally {
+      setIsSavingRate(false);
     }
   };
 
@@ -210,30 +255,83 @@ const ShippingConfigPage = () => {
               </div>
             </div>
             <div className="mt-4 space-y-2.5">
-              {RATE_KEYS.map((key) => (
-                <div key={key} className="rounded-tile border border-line p-3.5 t-fast hover:border-accent">
-                  <p className="text-[12.5px] font-bold text-ink">{RATE_LABELS[key]}</p>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    <Input
-                      label="Cost (₹)"
-                      type="number"
-                      min="0"
-                      value={form[key].cost}
-                      onChange={(event) => updateRate(key, 'cost', event.target.value)}
-                      placeholder="0"
-                      required
-                    />
-                    <Input
-                      label="Delivery Time"
-                      type="text"
-                      value={form[key].time}
-                      onChange={(event) => updateRate(key, 'time', event.target.value)}
-                      placeholder={DEFAULT_TIMES[key]}
-                      required
-                    />
-                  </div>
-                </div>
-              ))}
+              {RATE_KEYS.map((key) => {
+                if (!hasConfig) {
+                  // No config saved yet — all rows stay part of the one
+                  // initial create-config submit.
+                  return (
+                    <div key={key} className="rounded-tile border border-line p-3.5 t-fast hover:border-accent">
+                      <p className="text-[12.5px] font-bold text-ink">{RATE_LABELS[key]}</p>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <Input
+                          label="Cost (₹)"
+                          type="number"
+                          min="0"
+                          value={form[key].cost}
+                          onChange={(event) => updateRate(key, 'cost', event.target.value)}
+                          placeholder="0"
+                          required
+                        />
+                        <Input
+                          label="Delivery Time"
+                          type="text"
+                          value={form[key].time}
+                          onChange={(event) => updateRate(key, 'time', event.target.value)}
+                          placeholder={DEFAULT_TIMES[key]}
+                          required
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (editingRateKey === key) {
+                  return (
+                    <div key={key} className="rounded-tile border border-accent p-3.5">
+                      <p className="text-[12.5px] font-bold text-ink">{RATE_LABELS[key]}</p>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <Input
+                          label="Cost (₹)"
+                          type="number"
+                          min="0"
+                          value={rateEditCost}
+                          onChange={(event) => setRateEditCost(event.target.value)}
+                          autoFocus
+                        />
+                        <Input label="Delivery Time" type="text" value={rateEditTime} onChange={(event) => setRateEditTime(event.target.value)} />
+                      </div>
+                      <div className="mt-3 flex gap-2">
+                        <Button variant="outline" size="sm" icon={<FiSave size={14} />} loading={isSavingRate} onClick={saveRate}>
+                          Save
+                        </Button>
+                        <Button variant="outline" size="sm" icon={<FiX size={14} />} onClick={cancelEditRate} disabled={isSavingRate}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => startEditRate(key)}
+                    className="group flex w-full flex-col gap-2 rounded-tile border border-line p-3.5 text-left t-fast hover:border-accent sm:flex-row sm:items-center sm:justify-between sm:gap-0"
+                  >
+                    <div>
+                      <p className="text-[12.5px] font-bold text-ink">{RATE_LABELS[key]}</p>
+                      <p className="mt-0.5 text-[11px] font-medium text-muted">{form[key].time || 'Time not set'}</p>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-[12.5px] font-extrabold text-accent">
+                        {form[key].cost ? `₹${form[key].cost}` : '—'}
+                      </span>
+                      <FiEdit2 size={14} className="text-muted opacity-0 t-fast group-hover:opacity-100" />
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </Panel>
         </form>

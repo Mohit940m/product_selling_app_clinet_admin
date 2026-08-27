@@ -421,17 +421,20 @@ switched the form body to the spec's two-column layout (`Origin` Panel
 `flex-[1.2]` left, `Rates` Panel right, `lg:grid-cols-[1.2fr_1fr]`) —
 stacked on mobile as before.
 
-Left `4.7.4`/`4.7.9` (per-row inline-edit toggle, mobile edit `Sheet`)
-and `4.7.5`/`4.7.6`/`4.7.8` (add/remove rate zones, free-shipping
-threshold, mobile stacked-cost layout) deferred:
-`sellerShipping.model.ts` hard-codes exactly five rate zones with no
-threshold field and no add/remove support, so `4.7.5`/`4.7.6` are
-genuine backend blockers (confirmed by reading the model). `4.7.4`/
-`4.7.9`/`4.7.8` would mean rewriting the rate rows from "always editable
-inline" (current, working) into a view/edit-toggle flow — a real
-behavioral rewrite with no browser available this session to verify it
-didn't regress, so left as-is rather than risk shipping something
-untested.
+Left `4.7.5`/`4.7.6` (add/remove rate zones, free-shipping threshold)
+deferred: `sellerShipping.model.ts` hard-codes exactly five rate zones
+with no threshold field and no add/remove support — a genuine backend
+blocker confirmed by reading the model.
+
+**`4.7.4`/`4.7.8` built in a later post-Phase-7 follow-up** (see further
+down): the rate rows now do the view/edit-toggle flow the spec asks
+for, since `updateShippingConfig` deep-merges a single rate key rather
+than requiring the whole `shippingRates` object (confirmed by reading
+the controller), so each row can save independently. `4.7.9` (mobile
+Sheet) stays out — the edit-mode row's two `Input`s already collapse to
+a single stacked column below `sm` via the same grid the rest of the
+app uses, which reasonably addresses the "too cramped at 375px" concern
+without the added complexity of a second edit surface.
 
 ## Post-Phase-7 follow-up — tap-target audit + DataTable rule ticks (1.5.3, 1.5.4, 1.5.5, 6.6)
 
@@ -590,3 +593,22 @@ scrollable multi-select list, not a primary action control — its rows
 run under the usual 44px tap-target guideline the same way a native
 OS settings list's rows commonly do. Not treated as a 1.5.4/6.6
 violation for that reason.
+
+## Post-Phase-7 follow-up — ShippingConfigPage per-row inline edit (4.7.4, 4.7.8)
+
+Reconsidered this deferral: `updateShippingConfig`'s controller deep-
+merges one rate key at a time (`if (shippingRates.sameCity) config.
+shippingRates.sameCity = { ...current, ...shippingRates.sameCity }`,
+same for each zone) — so a per-row save was always backend-safe, not
+just a frontend risk as previously assessed.
+
+Once a config exists (`hasConfig`), each rate row now renders as a
+clickable view row (name, delivery time muted below, cost
+`font-extrabold text-accent`) that switches into the spec's inline
+edit mode on click — two `Input`s (cost, time) plus `Save`/`Cancel`
+`outline` `Button`s — and PUTs only that one rate key via
+`shippingRates: { [key]: { cost, time } }`, updating local state from
+the confirmed response rather than assuming success. Before a config
+exists, all rows stay part of the single initial create-config submit,
+since there's nothing to PUT to yet. The view row also now stacks cost
+below the name below `sm` (4.7.8) instead of staying right-aligned.
