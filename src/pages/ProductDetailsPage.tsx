@@ -217,8 +217,10 @@ const ProductDetailsPage = () => {
             <FiArrowLeft size={16} />
             Products
           </Link>
-          <h1 className="mt-2 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">{product?.name ?? 'Product details'}</h1>
-          {product && <p className="mt-1 text-[12.5px] font-semibold text-muted">{product.category}</p>}
+          {product && <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-wide text-muted">{product.category}</p>}
+          <h1 className="mt-1 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink lg:text-[34px] lg:leading-[1.05] lg:tracking-[-.03em]">
+            {product?.name ?? 'Product details'}
+          </h1>
         </div>
         {product && (
           <div className="flex gap-2.5">
@@ -276,14 +278,15 @@ const ProductDetailsPage = () => {
               </div>
               <h2 className="mt-4 text-[15px] font-extrabold text-ink">Description</h2>
               <p className="mt-2 text-[13px] leading-6 text-muted">{product.description}</p>
+            </Panel>
 
-              {(product.createdAt || product.updatedAt) && (
-                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-t border-line pt-3.5 font-mono text-[10.5px] text-muted">
-                  <span>ID: {product._id}</span>
-                  {product.createdAt && <span>Created {formatDate(product.createdAt)}</span>}
-                  {product.updatedAt && <span>Updated {formatDate(product.updatedAt)}</span>}
-                </div>
-              )}
+            <Panel>
+              <h2 className="text-[15px] font-extrabold text-ink">Metadata</h2>
+              <div className="mt-3.5 flex flex-wrap gap-x-5 gap-y-1.5 font-mono text-[10.5px] text-muted">
+                <span>ID: {product._id}</span>
+                {product.createdAt && <span>Created {formatDate(product.createdAt)}</span>}
+                {product.updatedAt && <span>Updated {formatDate(product.updatedAt)}</span>}
+              </div>
             </Panel>
 
             <Panel>

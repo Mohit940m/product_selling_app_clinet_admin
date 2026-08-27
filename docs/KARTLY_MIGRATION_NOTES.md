@@ -725,3 +725,33 @@ form a 2×2 grid, with the remove button spanning the full row below
 (gaining a "Remove variant" text label at that size, icon-only again at
 `md+` matching the original desktop treatment) rather than being an
 odd fifth grid cell.
+
+## Post-Phase-7 follow-up — ProductDetailsPage header + Metadata panel (4.5.2/4.5.3, partial)
+
+Two safe, additive pieces of 4.5.2/4.5.3, without touching the page's
+overall column layout (see below for why the full composition stays
+out):
+
+- Category now renders as a mono uppercase eyebrow above the name
+  (matching the storefront PDP convention), and the name itself scales
+  up to the spec's `text-[34px]` at `lg+` (kept smaller on mobile,
+  consistent with how every other page in this app scales headings
+  down for small widths — the spec doesn't call out a separate mobile
+  size).
+- Metadata (id, created/updated timestamps) is now its own `Panel`
+  instead of being appended inside the Description `Panel`.
+
+**Still not built:** the discount `Badge tone="ink"` in the price row
+(4.5.2) — the seller `getProductById` response has no offer/discount
+data on it at all (confirmed by re-reading the controller earlier this
+session; only the *user-facing* product endpoints compute
+`activeOffer`), so there's nothing to derive a discount tag from here.
+An "Offers" panel (4.5.3) is blocked the same way `OffersPage` itself
+is — no endpoint to list offers targeting a given product.
+
+**4.5.1 (thumbnail column + full-bleed hero + fixed `w-[340px]` info
+column, matching the storefront PDP composition) and 4.5.6 (mobile
+gallery with a dot pager) stay deferred** — that's a real visual
+layout rewrite of a page with several working, tested features built
+this session (variant management, add-variant), and there's no browser
+available to verify a layout overhaul didn't regress any of it.
