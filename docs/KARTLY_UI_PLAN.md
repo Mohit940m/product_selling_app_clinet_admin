@@ -484,7 +484,7 @@ Pass criteria applied at every width:
 - [x] **6.4** `MobileActionBar` visible below `lg` on the pages that declare one, with no content trapped underneath it.
 - [x] **6.5** All modals present as bottom sheets below `lg`.
 - [x] **6.6** Every tap target ≥ 44px on touch widths.
-- [ ] **6.7** Long product names, customer names and addresses truncate or wrap — never overflow their cell.
+- [x] **6.7** Long product names, customer names and addresses truncate or wrap — never overflow their cell.
 - [ ] **6.8** Forms are single-column below `lg` with no field narrower than its content.
 - [ ] **6.9** Run the whole matrix twice — once light, once dark.
 - [ ] **6.10** Safe-area insets respected on iOS.

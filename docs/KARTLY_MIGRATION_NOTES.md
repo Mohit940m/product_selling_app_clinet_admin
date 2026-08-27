@@ -451,3 +451,11 @@ product-image remove (`FiTrash2`) buttons on `AddProductPage.tsx` and
 `before:absolute before:-inset-2` hit-area expansion used on the
 storefront — the visible circle and grid layout are unchanged, only the
 actual clickable box grows to 44px+.
+
+## Post-Phase-7 follow-up — text-overflow audit (6.7)
+
+Code-audited the one page using `DataTable` (`ProductListPage`) plus
+`Sidebar`'s account card. Both the desktop table cells and the
+`mobileCard` render prop already use `truncate` on product name/SKU/
+category; the sidebar seller name/store-name already uses `truncate`.
+No untruncated long-text cell found — checked off with no code change.
