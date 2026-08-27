@@ -51,6 +51,14 @@ const EditProductPage = () => {
   const [uploadStatus, setUploadStatus] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
+
+  // Snapshot of the loaded values, captured once so `isDirty` can be a
+  // plain derived comparison rather than a "first change after load"
+  // flag — the latter races with React batching the load's own setState
+  // calls together with the isLoading=false update. State, not a ref —
+  // react-hooks/refs disallows reading ref.current during render.
+  const [initialSnapshot, setInitialSnapshot] = useState<{ name: string; description: string; category: string; imageCount: number } | null>(null);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -60,6 +68,12 @@ const EditProductPage = () => {
         setDescription(data.data.description);
         setCategory(data.data.category);
         setExistingImages(data.data.images ?? []);
+        setInitialSnapshot({
+          name: data.data.name,
+          description: data.data.description,
+          category: data.data.category,
+          imageCount: data.data.images?.length ?? 0,
+        });
       } catch (err) {
         toast.error(getErrorMessage(err, 'Unable to load product.'));
       } finally {
@@ -69,6 +83,27 @@ const EditProductPage = () => {
 
     loadProduct();
   }, [productId]);
+
+  const isDirty = !!initialSnapshot && (
+    name !== initialSnapshot.name ||
+    description !== initialSnapshot.description ||
+    category !== initialSnapshot.category ||
+    imagesToDelete.length > 0 ||
+    newImages.length > 0
+  );
+
+  // Browser-level navigation only (refresh, close tab, typed URL) — this
+  // app uses <BrowserRouter> (declarative mode), which doesn't support
+  // react-router's useBlocker for in-app Link clicks; that needs the
+  // data-router APIs, a bigger routing change out of scope here.
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      event.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
 
   const toggleDeleteExisting = (url: string) => {
     setImagesToDelete((current) =>
@@ -160,7 +195,16 @@ const EditProductPage = () => {
 
   return (
     <Container className="max-w-3xl! py-6 pb-28 lg:pb-8 lg:py-8">
-      <Link to={`/products/${productId}`} className="mb-3 inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline">
+      <Link
+        to={`/products/${productId}`}
+        onClick={(event) => {
+          if (isDirty) {
+            event.preventDefault();
+            setShowUnsavedConfirm(true);
+          }
+        }}
+        className="mb-3 inline-flex items-center gap-1.5 text-[12.5px] font-bold text-accent hover:underline"
+      >
         <FiArrowLeft size={16} />
         Product details
       </Link>
@@ -306,6 +350,15 @@ const EditProductPage = () => {
         description="This removes it from your catalog. This action can't be undone from here."
         confirmLabel="Delete product"
         loading={isDeleting}
+      />
+
+      <ConfirmDialog
+        open={showUnsavedConfirm}
+        onClose={() => setShowUnsavedConfirm(false)}
+        onConfirm={() => navigate(`/products/${productId}`)}
+        title="Discard unsaved changes?"
+        description="You have edits that haven't been saved. Leaving now will lose them."
+        confirmLabel="Discard changes"
       />
     </Container>
   );

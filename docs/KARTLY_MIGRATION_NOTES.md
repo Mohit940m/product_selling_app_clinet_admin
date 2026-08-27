@@ -660,3 +660,29 @@ the product's mono id, per spec. `PageHeader`'s `subtitle` prop type
 widened from `string` to `ReactNode` to allow the mixed plain-text +
 `font-mono` styling — backward compatible, every other page's plain-
 string subtitle still works unchanged.
+
+## Post-Phase-7 follow-up — EditProductPage unsaved-changes guard (4.4.5)
+
+`isDirty` is derived by comparing current form state against a snapshot
+captured once when the product loads (state, not a ref — the React
+Compiler's `react-hooks/refs` rule correctly flagged an initial `useRef`
+version of this: reading `ref.current` during render isn't safe since
+ref mutations don't trigger re-renders, so a value used in render needs
+to live in real state).
+
+Two real guards, both scoped by what this app's router actually
+supports:
+- A `beforeunload` listener blocks browser-level navigation (refresh,
+  close tab, typed URL) while dirty — works regardless of router mode.
+- The "Product details" back link is intercepted with `preventDefault`
+  and a `ConfirmDialog` ("Discard unsaved changes?") when dirty, rather
+  than a raw `window.confirm`.
+
+**Scoped out:** react-router's `useBlocker` — the idiomatic way to
+intercept *all* in-app `Link`/programmatic navigation — only works with
+the data-router APIs (`createBrowserRouter`), and this app still uses
+`<BrowserRouter>` declarative mode (`App.tsx`). Switching the whole
+app's router setup is a bigger, riskier change than one page's guard
+justifies, so only the one known exit point (the back link) got an
+explicit intercept; other in-app navigation (e.g. the sidebar) isn't
+covered.
