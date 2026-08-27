@@ -130,11 +130,22 @@ const ProductDetailsPage = () => {
 
   const saveVariant = async () => {
     if (!manageTarget || !product || isSavingVariant) return;
+
+    // This panel is a Modal, not a <form> — the Save button is a plain
+    // onClick, so the Price input's min="0" never actually gets enforced
+    // by the browser the way it would on a real form submit. Validate
+    // explicitly, matching the check submitAddVariant already does for
+    // this same field a few lines up.
+    const nextPrice = Number(managePrice);
+    if (managePrice !== '' && (!Number.isFinite(nextPrice) || nextPrice <= 0)) {
+      toast.error('Enter a valid price.');
+      return;
+    }
+
     setIsSavingVariant(true);
 
     const calls: Promise<unknown>[] = [];
-    const nextPrice = Number(managePrice);
-    if (managePrice !== '' && Number.isFinite(nextPrice) && nextPrice !== manageTarget.price) {
+    if (managePrice !== '' && nextPrice !== manageTarget.price) {
       calls.push(sellerApi.patch(`/products/edit-variant-price/${product._id}`, { variantId: manageTarget._id, price: nextPrice }));
     }
     if (manageActive !== (manageTarget.isActive ?? true)) {

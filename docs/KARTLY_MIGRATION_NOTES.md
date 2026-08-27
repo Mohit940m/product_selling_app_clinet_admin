@@ -1049,3 +1049,31 @@ shares the same `value` field) and added `max="100"` to the discount
 value input, but only while `discountType === 'PERCENTAGE'` — switching
 to `FLAT` drops the cap back to unbounded, mirroring how the label and
 placeholder already branch on `discountType`.
+
+## Backend + frontend bug found + fixed — negative price via Manage Variant
+
+`ProductDetailsPage.tsx`'s "Manage variant" panel is a `Modal`, not a
+`<form>` — its Price input carries `type="number" min="0"`, but since
+the Save button is a plain `onClick` (not a form submit), that `min`
+never actually gets enforced by the browser. `saveVariant` itself only
+checked `Number.isFinite(nextPrice)`, not its sign, before sending it to
+`PATCH /products/edit-variant-price/:productId` — so typing a negative
+number and clicking Save actually persisted a negative price on a live
+variant. The backend offered no safety net either:
+`editVariantPrice` only checked that `price` was present, not that it
+was positive, and used `findOneAndUpdate` (which doesn't run Mongoose
+schema validators by default) — and the `Variant` schema itself had no
+`min` bound on `price` to begin with. Fixed at every layer: explicit
+`nextPrice <= 0` rejection in `saveVariant` (matching the check
+`submitAddVariant` already does correctly for this same field a few
+lines up — this was a same-file inconsistency, not a new rule), a
+matching `price <= 0` rejection in the `editVariantPrice` controller,
+and `min` bounds added to the `Variant` schema's `price`/`stock` fields
+as defense-in-depth for any other path (`createProduct`, `addVariant`)
+that creates a variant directly. Also found and fixed the same class of
+gap in `increaseStock`: it validated nothing about `addedStock`, so a
+negative value would pass straight through to a `$inc` and silently
+*decrease* stock — added the equivalent positive-number check there
+too. All three are server-side fixes (see `product_selling_app_server`
+commit `15ccfff`); verified with `npm run build` in both the server and
+this app.
