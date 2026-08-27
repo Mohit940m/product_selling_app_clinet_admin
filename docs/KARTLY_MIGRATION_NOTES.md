@@ -530,3 +530,22 @@ changed are sent (each via its own real endpoint, in parallel via
 `Promise.allSettled` so one failing doesn't block the others), then the
 product is refetched so the table reflects the authoritative saved
 state rather than an optimistic guess.
+
+## Post-Phase-7 follow-up — real "Add variant" action on ProductDetailsPage
+
+One more genuinely unused endpoint: `POST /products/add-variant/:productId`
+(body `{ attributes, price, stock }`) — `AddProductPage.tsx` has a local
+`addVariant()` helper, but it only appends a row to in-memory form state
+before the initial `create-product` submit; it never calls this route.
+Once a product existed, there was no way to add a new size/color
+combination to it later — only what was chosen at creation time, forever
+(short of deleting and recreating the whole product).
+
+Added an "Add variant" button to `ProductDetailsPage`'s Variants panel
+header, opening a `Modal` with two option `Input`s labelled from the
+product's existing `variantTypes` (e.g. `Size`/`Color` — these are fixed
+per-product, matching how `AddProductPage` establishes them) plus price
+and stock. Builds the same `{ [variantTypes[0]]: optionOne, ... }`
+attributes shape `AddProductPage` already uses, so the payload matches
+what the backend expects; refetches the product on success so the new
+row appears in the table immediately.

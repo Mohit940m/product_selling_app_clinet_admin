@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FiArrowLeft, FiEdit2, FiPackage, FiSettings, FiTrash2 } from 'react-icons/fi';
+import { FiArrowLeft, FiEdit2, FiPackage, FiPlus, FiSettings, FiTrash2 } from 'react-icons/fi';
 import Container from '../components/layout/Container';
 import Panel from '../components/ui/Panel';
 import Button from '../components/ui/Button';
@@ -79,6 +79,13 @@ const ProductDetailsPage = () => {
   const [manageActive, setManageActive] = useState(true);
   const [isSavingVariant, setIsSavingVariant] = useState(false);
 
+  const [showAddVariant, setShowAddVariant] = useState(false);
+  const [newOptionOne, setNewOptionOne] = useState('');
+  const [newOptionTwo, setNewOptionTwo] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newStock, setNewStock] = useState('');
+  const [isAddingVariant, setIsAddingVariant] = useState(false);
+
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -146,6 +153,45 @@ const ProductDetailsPage = () => {
     await refetchProduct();
     setManageTarget(null);
     setIsSavingVariant(false);
+  };
+
+  const resetAddVariantForm = () => {
+    setNewOptionOne('');
+    setNewOptionTwo('');
+    setNewPrice('');
+    setNewStock('');
+  };
+
+  const submitAddVariant = async () => {
+    if (!product) return;
+    const price = Number(newPrice);
+    const stock = Number(newStock);
+    if (!Number.isFinite(price) || price <= 0) {
+      toast.error('Enter a valid price.');
+      return;
+    }
+    if (!Number.isFinite(stock) || stock < 0) {
+      toast.error('Enter a valid stock quantity.');
+      return;
+    }
+
+    const [typeOne, typeTwo] = product.variantTypes ?? [];
+    const attributes: Record<string, string> = {};
+    if (typeOne) attributes[typeOne] = newOptionOne.trim();
+    if (typeTwo) attributes[typeTwo] = newOptionTwo.trim();
+
+    setIsAddingVariant(true);
+    try {
+      await sellerApi.post(`/products/add-variant/${product._id}`, { attributes, price, stock });
+      toast.success('Variant added.');
+      await refetchProduct();
+      setShowAddVariant(false);
+      resetAddVariantForm();
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Unable to add variant.'));
+    } finally {
+      setIsAddingVariant(false);
+    }
   };
 
   const deleteProduct = async () => {
@@ -241,7 +287,12 @@ const ProductDetailsPage = () => {
             </Panel>
 
             <Panel>
-              <h2 className="text-[15px] font-extrabold text-ink">Variants</h2>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-[15px] font-extrabold text-ink">Variants</h2>
+                <Button variant="outline" size="sm" icon={<FiPlus size={14} />} onClick={() => setShowAddVariant(true)}>
+                  Add variant
+                </Button>
+              </div>
 
               <div className="mt-3.5 hidden overflow-x-auto lg:block">
                 <table className="w-full text-left">
@@ -367,6 +418,36 @@ const ProductDetailsPage = () => {
             </div>
             <Button variant="primary" fullWidth loading={isSavingVariant} onClick={saveVariant}>
               Save changes
+            </Button>
+          </div>
+        )}
+      </Modal>
+
+      <Modal open={showAddVariant} onClose={() => setShowAddVariant(false)} title="Add variant">
+        {product && (
+          <div className="space-y-4">
+            <div className="grid gap-3.5 sm:grid-cols-2">
+              <Input
+                label={product.variantTypes?.[0] ?? 'Option 1'}
+                value={newOptionOne}
+                onChange={(e) => setNewOptionOne(e.target.value)}
+                placeholder="e.g. XL"
+                required
+              />
+              <Input
+                label={product.variantTypes?.[1] ?? 'Option 2'}
+                value={newOptionTwo}
+                onChange={(e) => setNewOptionTwo(e.target.value)}
+                placeholder="e.g. Black"
+                required
+              />
+            </div>
+            <div className="grid gap-3.5 sm:grid-cols-2">
+              <Input label="Price (₹)" type="number" min="0" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required />
+              <Input label="Stock" type="number" min="0" value={newStock} onChange={(e) => setNewStock(e.target.value)} required />
+            </div>
+            <Button variant="primary" fullWidth loading={isAddingVariant} onClick={submitAddVariant}>
+              Add variant
             </Button>
           </div>
         )}
