@@ -1095,3 +1095,37 @@ at every `new RegExp(userInput, ...)` call site across both product
 search endpoints and the variant attribute filter
 (`product_selling_app_server` commit `c4f8ebb`) — no frontend change
 needed here either.
+
+## Critical backend fix (cross-repo) — cross-tenant product authorization gaps
+
+The most severe backend findings of this audit. Three seller product
+endpoints — `getProductById` (backs `ProductDetailsPage.tsx`'s detail
+view), `editProductStatus` (backs `ProductListPage.tsx`'s status
+toggle and `AddProductPage.tsx`'s inactive-on-create flip), and
+`editVariantStatus` (backs `ProductDetailsPage.tsx`'s Manage Variant
+Active switch) — all used a bare `Product.findById(productId)` with no
+check that the product belonged to the calling seller, unlike every
+other function in that same controller file. The two status-toggle
+endpoints are writes: any authenticated seller could activate or
+deactivate *any other seller's* product or variant just by knowing (or
+enumerating) its ID — including pulling a competitor's listing off the
+marketplace entirely. `getProductById` let any seller view a
+competitor's full product details, stock, and pricing. Both
+status-toggle functions had a commented-out
+`// const sellerId = req.seller._id;` line, suggesting the ownership
+check existed at some point and was lost. Also found, while fixing
+`editVariantStatus`, a separate and unconditionally-broken bug in the
+same function: it looked up the variant with
+`Variant.findById({ _id: variantId, productId })` — `findById` takes a
+single id value, not a filter object, so this nested the whole object
+*as* the `_id` condition instead of matching two separate fields.
+Verified empirically that the resulting query could never match a real
+document, meaning this endpoint 404'd unconditionally regardless of
+whether the variant existed — the Manage Variant Active switch's PATCH
+call has likely never actually worked. Fixed all of it server-side
+(`product_selling_app_server` commit `6fd6d14`), scoping every lookup
+to `sellerId: req.seller._id` to match the rest of the file, and
+switching the broken variant lookup to `Variant.findOne({ _id:
+variantId, productId })`. No frontend change needed — these three
+`ProductDetailsPage.tsx`/`ProductListPage.tsx`/`AddProductPage.tsx`
+flows were already calling the right endpoints correctly.
