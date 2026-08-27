@@ -700,3 +700,28 @@ with the desktop button now `hidden lg:inline-flex`.
 Also ticked **4.8.9** (offer grid → `grid-cols-1` on mobile) — already
 true from the earlier target-picker follow-up's
 `grid-cols-1 sm:grid-cols-2 xl:grid-cols-3`, just never checked off.
+
+## Post-Phase-7 follow-up — AddProductPage mobile refinements (4.3.11, 4.3.12) + a tick correction (4.3.13)
+
+**Correction:** un-ticked **4.3.13** (`Save draft`/`Publish` in
+`MobileActionBar`). Checked the actual `MobileActionBar` content —
+it only ever had `Publish`; there is no `Save draft` ghost button next
+to it, for the same reason `4.3.1`'s desktop header doesn't have one
+either (no backend draft concept — see the earlier `4.3.1`/`4.3.6`
+follow-up). The item as written needs both buttons; only one is real,
+so it wasn't accurately tickable.
+
+**4.3.11**: staged thumbnails now render as a `flex gap-2 overflow-x-
+auto no-scrollbar` rail of `72×72` tiles below `lg` (dropping the
+filename caption at that size — too cramped to read on a 72px tile),
+falling back to the existing `grid-cols-2` 96×96 layout at `lg+`
+(4.3.4).
+
+**4.3.12**: variant rows now use an explicit `grid-cols-2` base
+(previously implicit single-column, which happened to already avoid
+the "four-across squeeze" the spec worried about, but wasn't the
+"two-up" layout it actually asks for) — option-1/option-2/price/stock
+form a 2×2 grid, with the remove button spanning the full row below
+(gaining a "Remove variant" text label at that size, icon-only again at
+`md+` matching the original desktop treatment) rather than being an
+odd fifth grid cell.

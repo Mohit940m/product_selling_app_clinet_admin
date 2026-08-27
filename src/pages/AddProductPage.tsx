@@ -258,7 +258,7 @@ const AddProductPage = () => {
 
             <div className="mt-4 space-y-2.5">
               {variants.map((variant, index) => (
-                <div key={variant.id} className="grid gap-2.5 rounded-tile border border-line p-3.5 md:grid-cols-[1fr_1fr_110px_110px_40px]">
+                <div key={variant.id} className="grid grid-cols-2 gap-2.5 rounded-tile border border-line p-3.5 md:grid-cols-[1fr_1fr_110px_110px_40px]">
                   <input
                     value={variant.optionOne}
                     onChange={(event) => updateVariant(variant.id, 'optionOne', event.target.value)}
@@ -295,9 +295,10 @@ const AddProductPage = () => {
                     type="button"
                     onClick={() => removeVariant(variant.id)}
                     aria-label={`Remove variant ${index + 1}`}
-                    className="flex h-10 w-10 items-center justify-center rounded-btn border border-line text-muted t-fast hover:border-danger hover:text-danger"
+                    className="col-span-2 flex h-10 items-center justify-center gap-1.5 rounded-btn border border-line text-[12.5px] font-bold text-muted t-fast hover:border-danger hover:text-danger md:col-span-1 md:w-10"
                   >
                     <FiTrash2 size={16} />
+                    <span className="md:hidden">Remove variant</span>
                   </button>
                 </div>
               ))}
@@ -314,9 +315,12 @@ const AddProductPage = () => {
               disabled={images.length >= 5}
             />
 
-            <div className="mt-4 grid grid-cols-2 gap-2.5">
+            {/* Mobile: horizontal 72x72 no-scrollbar rail (4.3.11) — the
+                filename caption is dropped at that size, too cramped to be
+                useful. Desktop: the existing 2-col 96x96 grid (4.3.4). */}
+            <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar pb-1 lg:grid lg:grid-cols-2 lg:gap-2.5 lg:overflow-visible lg:pb-0">
               {images.map((image, idx) => (
-                <div key={image.id} className="overflow-hidden rounded-tile border border-line bg-card">
+                <div key={image.id} className="w-[72px] shrink-0 overflow-hidden rounded-tile border border-line bg-card lg:w-auto lg:shrink">
                   <div className="relative">
                     <img src={image.previewUrl} alt={image.file.name} className="aspect-square w-full object-cover" />
                     {idx === 0 && (
@@ -333,11 +337,11 @@ const AddProductPage = () => {
                       <FiTrash2 size={14} />
                     </button>
                   </div>
-                  <p className="truncate px-2 py-1.5 text-[10.5px] text-muted">{image.file.name}</p>
+                  <p className="hidden truncate px-2 py-1.5 text-[10.5px] text-muted lg:block">{image.file.name}</p>
                 </div>
               ))}
               {images.length === 0 && (
-                <div className="col-span-2 rounded-tile border border-line p-4 text-center text-[12.5px] text-muted">
+                <div className="w-full shrink-0 rounded-tile border border-line p-4 text-center text-[12.5px] text-muted lg:col-span-2">
                   <FiImage className="mx-auto text-accent" size={22} />
                   <p className="mt-2">No images selected.</p>
                 </div>

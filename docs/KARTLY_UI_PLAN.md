@@ -332,9 +332,9 @@ The prototype's admin artboard is essentially this page. Match it closely.
 
 - [x] **4.3.9** Single column; the side `Panel`s move below the main ones in the order Basics → Images → Pricing → Variants → Status.
 - [x] **4.3.10** `FileDrop` becomes a tap-to-browse tile — drag-and-drop text is meaningless on touch; swap the copy to `Add product images`.
-- [ ] **4.3.11** Staged thumbnails become a horizontal `no-scrollbar` rail at `72×72`.
-- [ ] **4.3.12** Variant rows stack their fields two-up instead of four-across.
-- [x] **4.3.13** `Save draft` / `Publish` move into `MobileActionBar` (`Publish` primary and full-width, `Save draft` as a ghost beside it).
+- [x] **4.3.11** Staged thumbnails become a horizontal `no-scrollbar` rail at `72×72`.
+- [x] **4.3.12** Variant rows stack their fields two-up instead of four-across.
+- [ ] **4.3.13** `Save draft` / `Publish` move into `MobileActionBar` (`Publish` primary and full-width, `Save draft` as a ghost beside it).
 
 ## 4.4 `EditProductPage.tsx` — edit product
 
