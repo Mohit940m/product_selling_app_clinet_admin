@@ -283,7 +283,7 @@ const EditProductPage = () => {
                           type="button"
                           onClick={() => toggleDeleteExisting(url)}
                           aria-label={markedForDelete ? 'Undo remove' : 'Mark for removal'}
-                          className={`absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full shadow-kartly t-fast ${markedForDelete ? 'bg-danger text-card' : 'bg-card text-muted hover:text-danger'}`}
+                          className={`absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full shadow-kartly t-fast before:absolute before:-inset-2 before:content-[''] ${markedForDelete ? 'bg-danger text-card' : 'bg-card text-muted hover:text-danger'}`}
                         >
                           <FiTrash2 size={14} />
                         </button>

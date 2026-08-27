@@ -780,3 +780,13 @@ gallery with a dot pager) stay deferred** — that's a real visual
 layout rewrite of a page with several working, tested features built
 this session (variant management, add-variant), and there's no browser
 available to verify a layout overhaul didn't regress any of it.
+
+## Post-Phase-7 follow-up — one more missed tap target on EditProductPage
+
+Re-swept both apps for the `h-7 w-7` remove-button pattern the earlier
+1.5.4/6.6 audits fixed, and found one that was missed: the "Current
+Images" grid's mark-for-removal toggle button (28px, no hit-area
+expansion) — its sibling on the same page ("New Images to Upload") had
+already been fixed, but this one was overlooked. Applied the same
+`before:absolute before:-inset-2` fix. Re-checked every other `h-7 w-7`/
+`h-8 w-8`/`h-9 w-9` button in both apps afterward; nothing else missing.
