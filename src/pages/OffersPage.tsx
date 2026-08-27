@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { FiClock, FiGift, FiPlus, FiSearch, FiTag, FiTrash2, FiX } from 'react-icons/fi';
 import Container from '../components/layout/Container';
+import MobileActionBar from '../components/layout/MobileActionBar';
 import Panel from '../components/ui/Panel';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -309,7 +310,7 @@ const OffersPage = () => {
   };
 
   return (
-    <Container className="max-w-3xl! py-6 lg:py-8">
+    <Container className="max-w-3xl! py-6 pb-28 lg:pb-8 lg:py-8">
       <div className="mb-6">
         <p className="font-mono text-[11px] font-bold text-muted">PROMOTIONS</p>
         <h1 className="mt-1.5 font-black text-[26px] leading-[1.1] tracking-[-.03em] text-ink">Offers</h1>
@@ -361,7 +362,7 @@ const OffersPage = () => {
         </div>
       )}
 
-      <form onSubmit={submitOffer} className="space-y-5">
+      <form id="offer-form" onSubmit={submitOffer} className="space-y-5 pb-2">
         <Panel>
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-tile bg-soft text-[var(--k-on-soft)]">
@@ -582,10 +583,23 @@ const OffersPage = () => {
           )}
         </Panel>
 
-        <Button type="submit" variant="primary" fullWidth loading={isSubmitting} icon={<FiGift size={16} />}>
+        <Button
+          type="submit"
+          variant="primary"
+          fullWidth
+          loading={isSubmitting}
+          icon={<FiGift size={16} />}
+          className="hidden lg:inline-flex"
+        >
           Create offer
         </Button>
       </form>
+
+      <MobileActionBar>
+        <Button type="submit" form="offer-form" variant="primary" fullWidth loading={isSubmitting} icon={<FiGift size={16} />}>
+          Create offer
+        </Button>
+      </MobileActionBar>
     </Container>
   );
 };

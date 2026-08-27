@@ -686,3 +686,17 @@ app's router setup is a bigger, riskier change than one page's guard
 justifies, so only the one known exit point (the back link) got an
 explicit intercept; other in-app navigation (e.g. the sidebar) isn't
 covered.
+
+## Post-Phase-7 follow-up — OffersPage MobileActionBar + tick 4.8.9
+
+`Create offer` was previously a normal fullWidth `Button` at the very
+bottom of a genuinely long form (offer type, details, target picker,
+type-specific config) — reachable only after scrolling all the way
+down. Gave the `<form>` an id and wired the standard
+`MobileActionBar` pattern already used on every other admin form page
+(Dashboard, ProductListPage, ShippingConfigPage, Add/EditProductPage),
+with the desktop button now `hidden lg:inline-flex`.
+
+Also ticked **4.8.9** (offer grid → `grid-cols-1` on mobile) — already
+true from the earlier target-picker follow-up's
+`grid-cols-1 sm:grid-cols-2 xl:grid-cols-3`, just never checked off.

@@ -417,10 +417,10 @@ At 458 lines this is the largest page; restructure rather than restyle in place.
 
 ### Mobile
 
-- [ ] **4.8.9** Offer grid becomes `grid-cols-1`.
+- [x] **4.8.9** Offer grid becomes `grid-cols-1`.
 - [ ] **4.8.10** `OfferForm` renders in a full-height bottom `Sheet` instead of a `Modal`, with its own sticky save bar.
 - [ ] **4.8.11** The target picker becomes a nested full-screen `Sheet` — a searchable list inside a modal inside a modal does not work at 375px.
-- [ ] **4.8.12** `+ Create offer` in `MobileActionBar`.
+- [x] **4.8.12** `+ Create offer` in `MobileActionBar`.
 
 ## 4.9 `LoginPage.tsx` & `SignUpPage.tsx` — auth
 
