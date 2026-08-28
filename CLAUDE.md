@@ -38,11 +38,11 @@ This is a **React 19 + TypeScript + Vite SPA** serving as the seller admin dashb
 
 **`src/components/layout/`** — Admin shell: `AdminLayout` (persistent `Sidebar` at `lg+`, `MobileTopBar` + left drawer below it, routed content, `Footer`; `min-w-0` on the content column so a wide table can't force page-level horizontal scroll), `Sidebar`/`SidebarNavLinks` (shared nav list — real routes only: Overview/Products/Orders/Shipping/Offers; the prototype's Customers/Fulfilment/Discounts have no route and were dropped), `MobileActionBar`, `PageHeader`, `BrandMark`, `Container`, `AuthLayout` (shared shell for `/login` and `/signup`, outside `AdminLayout`).
 
-**`src/components/ui/`** — The primitive library: `Button` (includes a `danger` variant), `Input`, `Select`, `Textarea`, `FileDrop` (drag/drop product-image zone), `Chip`, `Badge` + `statusTone.ts` (maps the backend's real order/payment status enum to a Badge tone), `Card`, `Panel`, `StatCard`, `ProgressBar`, `Skeleton`, `EmptyState`, `ImageFrame`, `Switch`, `Sheet`/`Modal` (sharing `useDialogBehavior`), `ConfirmDialog` (replaces every `window.confirm`), `Toast`/`showKartlyToast.tsx`, and the admin-only `DataTable` (real `<table>` at `lg+`, stacked `Card` list below, with its own `overflow-x-auto`), `BarChart` (pure CSS, with an accessible sr-only table fallback), `QueueList`, `Toolbar`.
+**`src/components/ui/`** — The primitive library: `Button` (includes a `danger` variant), `Input`, `Select`, `Textarea`, `FileDrop` (drag/drop product-image zone), `Chip`, `Badge` + `statusTone.ts` (maps the backend's real order/payment status enum to a Badge tone), `Card`, `Panel`, `StatCard`, `ProgressBar`, `Skeleton`, `EmptyState`, `ImageFrame` (falls back on a failed image load, not just an absent `src`), `Switch`, `Sheet`/`Modal` (sharing `useDialogBehavior`), `ConfirmDialog` (replaces every `window.confirm`), `Toast`/`showKartlyToast.tsx`, `DataTable` (real `<table>` at `lg+`, stacked `Card` list below, with its own `overflow-x-auto`; clickable rows are keyboard-operable, not just clickable), `BarChart` (pure CSS, with an accessible sr-only table fallback), `QueueList`. `BarChart`/`QueueList` are currently unused by any page — they're the real, ready implementations for `DashboardPage`'s revenue chart and fulfilment queue, both deliberately shown as an honest `EmptyState` instead since there's no backend endpoint for either yet (see `docs/KARTLY_MIGRATION_NOTES.md` §4.1); a near-duplicate `Toolbar` primitive that had no such tie to an unbuilt feature was removed as dead code, superseded by `PageHeader`.
 
 **`src/theme/`** — `ThemeProvider`/`ThemeContext`/`useTheme` — light/dark mode via a `data-theme` attribute on `<html>`, persisted to `localStorage` (`kartlyAdminTheme`). Toggled live from the `Sidebar`'s dark-mode `Switch`.
 
-**`src/components/auth/OtpInput.tsx`**, **`src/hooks/useCountdown.ts`** — the six-box OTP input and resend-countdown hook shared by `LoginPage`/`SignUpPage`.
+**`src/components/auth/OtpInput.tsx`**, **`src/hooks/useCountdown.ts`** — the six-box OTP input and resend-countdown hook shared by `LoginPage`/`SignUpPage`. **`src/hooks/useDocumentTitle.ts`** — sets a real per-page `document.title`, called from every page.
 
 **~~`src/assets/icons/`~~** — deleted; was a set of unused custom SVG wrapper components. The app uses `react-icons` (Feather set, `fi` prefix) directly everywhere.
 
@@ -62,6 +62,8 @@ Nested routing: `/login` and `/signup` render outside the shell (their own `Auth
 /orders                   → order list
 /shipping                 → shipping origin + per-zone rate configuration
 /offers                   → offer creation (discount/cashback/buy-get/bundle)
+*                         → NotFoundPage (catch-all; there was none for a long stretch of this
+                            app's history, so any unmatched URL just rendered a blank screen)
 ```
 
 ### Authentication flow
