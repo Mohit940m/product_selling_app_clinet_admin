@@ -1272,3 +1272,17 @@ state. Added `aria-expanded={open}`. Swept the user client for the
 same pattern (a disclosure toggle button with no state reflected in
 its accessible name/attributes) and found one instance there too — see
 its own notes.
+
+## Post-Phase-7 follow-up — variant-row inputs relied on placeholder-only text
+
+`AddProductPage.tsx`'s per-variant option/price/stock inputs had no
+`aria-label`, only a placeholder — and since a product can have several
+variant rows, a screen reader user had no way to tell which row an
+unlabeled "Price" or "Stock" field belonged to, or what an unlabeled
+option-value field was even for. Added `aria-label` to all four inputs
+per row, reusing the same dynamic text already used for the
+placeholder (e.g. `${variantTypeOne} value`) plus a `variant ${index +
+1}` suffix so each row's fields are distinguishable. Verified (not
+changed, already correct) the product/variant checkboxes in
+`OffersPage.tsx`'s target picker — both are properly wrapped in
+`<label>` elements, giving them implicit accessible names already.

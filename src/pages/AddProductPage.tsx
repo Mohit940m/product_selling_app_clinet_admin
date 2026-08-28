@@ -300,6 +300,7 @@ const AddProductPage = () => {
                     onChange={(event) => updateVariant(variant.id, 'optionOne', event.target.value)}
                     className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"
                     placeholder={`${variantTypeOne || 'Option'} value`}
+                    aria-label={`${variantTypeOne || 'Option'} value, variant ${index + 1}`}
                     required
                   />
                   <input
@@ -307,6 +308,7 @@ const AddProductPage = () => {
                     onChange={(event) => updateVariant(variant.id, 'optionTwo', event.target.value)}
                     className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"
                     placeholder={`${variantTypeTwo || 'Option'} value`}
+                    aria-label={`${variantTypeTwo || 'Option'} value, variant ${index + 1}`}
                     required={Boolean(variantTypeTwo.trim())}
                   />
                   <input
@@ -316,6 +318,7 @@ const AddProductPage = () => {
                     onChange={(event) => updateVariant(variant.id, 'price', event.target.value)}
                     className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"
                     placeholder="Price"
+                    aria-label={`Price, variant ${index + 1}`}
                     required
                   />
                   <input
@@ -325,6 +328,7 @@ const AddProductPage = () => {
                     onChange={(event) => updateVariant(variant.id, 'stock', event.target.value)}
                     className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"
                     placeholder="Stock"
+                    aria-label={`Stock, variant ${index + 1}`}
                     required
                   />
                   <button
