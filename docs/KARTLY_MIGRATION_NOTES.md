@@ -1190,3 +1190,20 @@ tokens — clearly a leftover from before the migration. Deleted rather
 than left in place, where it risked misleading a future contributor
 into using it and reintroducing the wrong colors. Swept the rest of
 `src/` for duplicate-named files or similar leftovers — found none.
+
+## Backend fix (cross-repo) — Min Cart Value offers checked the wrong number
+
+`OffersPage.tsx`'s "Min Cart Value" field on discount offers sets
+`minCartValue`, which the backend's `calculateBestPrice` used as a
+"spend over this amount" gate — but it checked it against a single
+cart item's own price, not the actual cart total, even at checkout
+where the real total is available. A shopper's cart split across
+several smaller items (e.g. five ₹500 items totalling ₹2500) would
+never qualify for a seller's "Min Cart Value ₹2000" offer, since no
+single item alone reached ₹2000 — silently defeating the field this
+page exposes, for essentially every real cart. Fixed server-side
+(`product_selling_app_server` commit `5221b1d`) by threading the real
+cart/order subtotal through to the offer-resolution utility from every
+call site that has one (cart, checkout, order creation); no frontend
+change was needed — this page was already sending the right value,
+the backend just wasn't checking it against the right number.
