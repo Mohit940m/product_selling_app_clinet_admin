@@ -17,6 +17,7 @@ import ProductDetailsPage from "./pages/ProductDetailsPage"
 import EditProductPage from "./pages/EditProductPage"
 import ShippingConfigPage from "./pages/ShippingConfigPage"
 import OffersPage from "./pages/OffersPage"
+import NotFoundPage from "./pages/NotFoundPage"
 
 const AppRoutes = () => {
   const { theme } = useTheme()
@@ -41,6 +42,10 @@ const AppRoutes = () => {
               <Route path="/offers" element={<OffersPage />} />
             </Route>
           </Route>
+
+          {/* Catch-all: React Router renders nothing for an unmatched path
+              otherwise — a blank white screen with no way back. */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </ErrorBoundary>
       <ToastContainer

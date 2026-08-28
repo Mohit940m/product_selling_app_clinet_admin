@@ -1231,3 +1231,15 @@ existing cart lines, a post-purchase credit rather than a
 checkout-time price change, detecting a specific item combination and
 repricing that group) — a real feature to design and build per type,
 not a shared shortcut.
+
+## Post-Phase-7 follow-up — added a 404 page (there was no catch-all route)
+
+Same gap as the user client, same fix. `App.tsx` had no `path="*"`
+route — React Router v6's path-less parent routes (`RequireSellerAuth`
+and `AdminLayout`'s wrappers here) only match when a nested child's
+path matches, not everything by default, so any unmatched URL rendered
+completely blank: no sidebar, no message, nothing. Added
+`NotFoundPage.tsx` (reuses the existing `EmptyState` primitive) as a
+top-level `path="*"` route, outside both `RequireSellerAuth` and
+`AdminLayout` so it renders regardless of auth state, with a single
+"Back to dashboard" action.
