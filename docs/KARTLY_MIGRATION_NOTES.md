@@ -1243,3 +1243,22 @@ completely blank: no sidebar, no message, nothing. Added
 top-level `path="*"` route, outside both `RequireSellerAuth` and
 `AdminLayout` so it renders regardless of auth state, with a single
 "Back to dashboard" action.
+
+## Post-Phase-7 follow-up — every page now has a real document.title (11/11)
+
+Same gap and fix as the user client. Added
+`src/hooks/useDocumentTitle.ts` and called it from all 11 pages,
+including `NotFoundPage`. `ProductDetailsPage` uses the loaded
+product's name; `EditProductPage` shows "Edit {name}" once loaded;
+every other page uses a fixed, page-appropriate title.
+
+## Post-Phase-7 follow-up — added a skip-to-content link (WCAG 2.4.1)
+
+Same gap and fix as the user client. `Sidebar`'s full nav (Overview/
+Products/Orders/Shipping/Offers, dark-mode toggle, account card,
+logout) repeats identically on every authenticated page — without a
+bypass, a keyboard or screen-reader user had to tab through all of it
+on every navigation before reaching that page's content. Added a
+visually-hidden-until-focused "Skip to content" link as the first
+element in `AdminLayout`, pointing at a new `id="main-content"` on
+`<main>`.
