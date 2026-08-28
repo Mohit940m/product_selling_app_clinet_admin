@@ -1356,3 +1356,27 @@ product-scoping query already correct elsewhere in that same
 controller file. No frontend change needed — all three pages were
 already correctly assuming the backend would only return their own
 seller's products.
+
+## Post-Phase-7 follow-up — saveVariant discarded the actual error message
+
+`ProductDetailsPage.tsx`'s "Manage variant" save fires up to three
+independent calls (price, status, stock) via `Promise.allSettled`, but
+only ever *counted* failures — "Unable to save variant changes." or
+"Some variant changes could not be saved.", regardless of why any of
+them actually failed. A seller hitting a genuine backend rejection
+(this session's own `editVariantPrice`/`increaseStock` validation
+fixes, for instance, which return specific messages like "Price must
+be a positive number.") would never see that specific message, only
+the generic fallback — even though the negative-price case
+specifically is already caught by this same function's client-side
+check before these calls ever fire, so this mattered for the *other*
+rejection paths (a genuine 500, a network error, anything not already
+covered client-side). Rewrote the failure branch to extract each
+rejection's actual message via the file's existing `getErrorMessage`
+helper, deduplicate, and show them. Swept both apps for the same
+"count `Promise.allSettled` failures, discard reasons" pattern —
+found one other instance, `DashboardPage.tsx`'s per-product detail
+enrichment, which is a different and already-correct case (a
+background read that's meant to silently degrade one product's data
+rather than alarm the user, not a write the seller is waiting on
+explicit feedback for) — left unchanged.

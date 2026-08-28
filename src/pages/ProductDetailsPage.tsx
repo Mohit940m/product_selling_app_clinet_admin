@@ -165,9 +165,15 @@ const ProductDetailsPage = () => {
     }
 
     const results = await Promise.allSettled(calls);
-    const failed = results.filter((r) => r.status === 'rejected').length;
-    if (failed > 0) {
-      toast.error(failed === results.length ? 'Unable to save variant changes.' : 'Some variant changes could not be saved.');
+    const rejections = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+    if (rejections.length > 0) {
+      // Surface the actual backend message (e.g. "Price must be a
+      // positive number.") rather than a generic count — this used to
+      // just count failures and show "Unable to save variant changes."
+      // regardless of why, discarding whatever specific reason the
+      // backend gave.
+      const messages = [...new Set(rejections.map((r) => getErrorMessage(r.reason, 'Unable to save variant changes.')))];
+      toast.error(messages.join(' '));
     } else {
       toast.success('Variant updated.');
     }
