@@ -1323,3 +1323,36 @@ ready-to-wire-up components for documented, backend-blocked features,
 not abandoned leftovers like `Toolbar.tsx` or the old `Button.tsx`
 were. Deleting `QueueList.tsx` while keeping `BarChart.tsx` would have
 been an inconsistent call for the same underlying reason, so it stays.
+
+## CRITICAL backend fix (cross-repo) — the seller product list leaked every seller's products
+
+The most severe bug found in this entire audit, and one this session's
+own earlier review of this exact function missed while fixing its
+pagination and search-regex handling. The seller-side `getAllProducts`
+controller's base query was `{ isDeleted: false }` plus optional
+category/search filters — it **never scoped by `sellerId` at all**.
+Every seller opening `ProductListPage.tsx` — the primary landing page
+of this app's product management flow — saw every other seller's
+products mixed into their own list: names, images, categories, active
+status, sku, and pricing, with zero exploit needed, just normal use of
+the page. Unlike the other cross-tenant gaps found and fixed earlier
+this session (`getProductById`, `editProductStatus`,
+`editVariantStatus`), which needed a guessed or known product ID, this
+one required nothing at all.
+
+One backend endpoint, three consumers in this app all affected and all
+fixed by the same one-line change: `ProductListPage.tsx` itself,
+`DashboardPage.tsx`'s "recent products" panel (which would have shown
+other sellers' recent products, not this seller's), and
+`OffersPage.tsx`'s product-target-picker search (a seller creating an
+offer could see, and could have attempted to select, a product they
+don't own — though `createOffer` independently verifies
+`appliesTo.productIds` ownership before saving, with a 403 on mismatch,
+so this was a severe *visibility* leak, not an exploitable write; the
+actual offer-creation path was already safe). Fixed server-side
+(`product_selling_app_server` commit `b9d676d`) by adding `sellerId:
+req.seller._id` to the base query, matching every other
+product-scoping query already correct elsewhere in that same
+controller file. No frontend change needed — all three pages were
+already correctly assuming the backend would only return their own
+seller's products.
