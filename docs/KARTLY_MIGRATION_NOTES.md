@@ -1129,3 +1129,22 @@ switching the broken variant lookup to `Variant.findOne({ _id:
 variantId, productId })`. No frontend change needed — these three
 `ProductDetailsPage.tsx`/`ProductListPage.tsx`/`AddProductPage.tsx`
 flows were already calling the right endpoints correctly.
+
+## Post-Phase-7 follow-up — no size limit anywhere on product image uploads
+
+Related to, but distinct from, the profile-photo upload gap documented
+in the user client's notes: `AddProductPage.tsx`/`EditProductPage.tsx`
+upload product images directly from the browser to Cloudinary
+(`uploadProductImages` in `cloudinaryApi.ts`), bypassing the backend's
+multer path — and therefore its newly-added file-size limit — entirely.
+There was no size check anywhere in this flow: not client-side, not
+server-side (since the server never sees these bytes), only whatever
+limit Cloudinary's own account plan happens to impose, surfaced as
+whatever raw error their API returns rather than a friendly,
+product-specific one. Added a shared `MAX_IMAGE_SIZE_MB` (10, matching
+the server's own limit) and `partitionBySize()` helper to
+`cloudinaryApi.ts`, and applied it in both pages' file-selection
+handlers (`handleImages`/`handleNewImages`) — oversized files are
+filtered out before ever reaching the upload step, with a toast naming
+which file(s) were rejected and why, following the same pattern
+already used there for the 5-image slot limit.

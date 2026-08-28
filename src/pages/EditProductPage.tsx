@@ -16,7 +16,7 @@ import ConfirmDialog from '../components/ui/ConfirmDialog';
 import { showKartlyToast } from '../components/ui/showKartlyToast';
 import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
-import { uploadProductImages } from '../api/cloudinaryApi';
+import { uploadProductImages, partitionBySize, MAX_IMAGE_SIZE_MB } from '../api/cloudinaryApi';
 
 type ProductDetails = {
   _id: string;
@@ -132,7 +132,16 @@ const EditProductPage = () => {
     );
   };
 
-  const handleNewImages = (files: File[]) => {
+  const handleNewImages = (selectedFiles: File[]) => {
+    const { accepted: files, oversized } = partitionBySize(selectedFiles);
+    if (oversized.length > 0) {
+      toast.error(
+        oversized.length === 1
+          ? `"${oversized[0].name}" is over ${MAX_IMAGE_SIZE_MB}MB and wasn't added.`
+          : `${oversized.length} images are over ${MAX_IMAGE_SIZE_MB}MB and weren't added.`,
+      );
+    }
+
     setNewImages((current) => {
       const retained = existingImages.length - imagesToDelete.length;
       const availableSlots = 5 - retained - current.length;

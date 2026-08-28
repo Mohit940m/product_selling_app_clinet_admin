@@ -16,7 +16,7 @@ import ProgressBar from '../components/ui/ProgressBar';
 import { showKartlyToast } from '../components/ui/showKartlyToast';
 import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
-import { uploadProductImages, type UploadedProductImage } from '../api/cloudinaryApi';
+import { uploadProductImages, partitionBySize, MAX_IMAGE_SIZE_MB, type UploadedProductImage } from '../api/cloudinaryApi';
 
 type VariantRow = {
   id: number;
@@ -106,9 +106,19 @@ const AddProductPage = () => {
     setVariants((current) => current.length === 1 ? current : current.filter((variant) => variant.id !== id));
   };
 
-  const handleImages = (files: File[]) => {
+  const handleImages = (selectedFiles: File[]) => {
     setImagesError(false);
     setUploadedImages([]);
+
+    const { accepted: files, oversized } = partitionBySize(selectedFiles);
+    if (oversized.length > 0) {
+      toast.error(
+        oversized.length === 1
+          ? `"${oversized[0].name}" is over ${MAX_IMAGE_SIZE_MB}MB and wasn't added.`
+          : `${oversized.length} images are over ${MAX_IMAGE_SIZE_MB}MB and weren't added.`,
+      );
+    }
+
     setImages((current) => {
       const availableSlots = 5 - current.length;
 
