@@ -11,6 +11,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, valid, className = '', wrapperClassName = '', id, ...rest }, ref) => {
     const generatedId = useId();
     const inputId = id ?? generatedId;
+    const errorId = `${inputId}-error`;
 
     return (
       <div className={wrapperClassName}>
@@ -23,6 +24,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           ref={ref}
           aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           className={[
             'w-full rounded-btn border bg-transparent px-4 py-3.5 text-base font-medium text-ink t-fast sm:text-[12.5px]',
             'placeholder:text-muted placeholder:font-medium',
@@ -32,7 +34,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ].join(' ')}
           {...rest}
         />
-        {error && <p className="mt-1.5 text-[11px] font-bold text-danger">{error}</p>}
+        {error && (
+          <p id={errorId} className="mt-1.5 text-[11px] font-bold text-danger">
+            {error}
+          </p>
+        )}
       </div>
     );
   },

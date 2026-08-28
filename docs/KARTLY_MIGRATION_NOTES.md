@@ -1286,3 +1286,17 @@ placeholder (e.g. `${variantTypeOne} value`) plus a `variant ${index +
 changed, already correct) the product/variant checkboxes in
 `OffersPage.tsx`'s target picker — both are properly wrapped in
 `<label>` elements, giving them implicit accessible names already.
+
+## Post-Phase-7 follow-up — form error messages weren't linked to their fields
+
+`Input.tsx`, `Textarea.tsx`, and `Select.tsx` — the three shared form
+primitives every form in this app is built from — each correctly set
+`aria-invalid={!!error}` and rendered the error text visually below
+the field, but never linked the two with `aria-describedby`. A screen
+reader user landing on an invalid field heard that it was invalid, but
+not *why* — the error text had no programmatic connection to the
+field, only screen proximity. Added an `errorId` (`${fieldId}-error`)
+to all three components: the error `<p>` now carries that `id`, and
+the field carries `aria-describedby={error ? errorId : undefined}`
+pointing at it. Fixes every form across the whole app at once, since
+they're all built from these three primitives.

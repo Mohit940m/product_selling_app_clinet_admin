@@ -10,6 +10,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, className = '', wrapperClassName = '', id, children, ...rest }, ref) => {
     const generatedId = useId();
     const selectId = id ?? generatedId;
+    const errorId = `${selectId}-error`;
 
     return (
       <div className={wrapperClassName}>
@@ -23,6 +24,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             id={selectId}
             ref={ref}
             aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
             className={[
               'w-full appearance-none rounded-btn border bg-transparent px-4 py-3.5 text-base font-medium text-ink t-fast sm:text-[12.5px]',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
@@ -35,7 +37,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </select>
           <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-muted">▾</span>
         </div>
-        {error && <p className="mt-1.5 text-[11px] font-bold text-danger">{error}</p>}
+        {error && (
+          <p id={errorId} className="mt-1.5 text-[11px] font-bold text-danger">
+            {error}
+          </p>
+        )}
       </div>
     );
   },

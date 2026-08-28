@@ -10,6 +10,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, className = '', wrapperClassName = '', id, ...rest }, ref) => {
     const generatedId = useId();
     const textareaId = id ?? generatedId;
+    const errorId = `${textareaId}-error`;
 
     return (
       <div className={wrapperClassName}>
@@ -22,6 +23,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={textareaId}
           ref={ref}
           aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           className={[
             'w-full rounded-btn border bg-transparent px-4 py-3.5 text-base font-medium text-ink t-fast sm:text-[12.5px]',
             'placeholder:text-muted placeholder:font-medium',
@@ -31,7 +33,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ].join(' ')}
           {...rest}
         />
-        {error && <p className="mt-1.5 text-[11px] font-bold text-danger">{error}</p>}
+        {error && (
+          <p id={errorId} className="mt-1.5 text-[11px] font-bold text-danger">
+            {error}
+          </p>
+        )}
       </div>
     );
   },
