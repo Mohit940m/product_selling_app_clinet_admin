@@ -17,6 +17,7 @@ import { showKartlyToast } from '../components/ui/showKartlyToast';
 import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages, partitionBySize, MAX_IMAGE_SIZE_MB } from '../api/cloudinaryApi';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 type ProductDetails = {
   _id: string;
@@ -41,6 +42,7 @@ const EditProductPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const [name, setName] = useState('');
+  useDocumentTitle(name ? `Edit ${name}` : 'Edit Product');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [existingImages, setExistingImages] = useState<string[]>([]);

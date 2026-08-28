@@ -14,6 +14,7 @@ import Switch from '../components/ui/Switch';
 import Button from '../components/ui/Button';
 import EmptyState from '../components/ui/EmptyState';
 import sellerApi from '../api/sellerApi';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 type OfferType = 'DISCOUNT' | 'CASHBACK' | 'BUY_GET' | 'PRODUCT_BUNDLE';
 type DiscountType = 'PERCENTAGE' | 'FLAT';
@@ -72,6 +73,7 @@ const getOfferStatus = (validFrom: string, validTill: string): { label: string; 
 };
 
 const OffersPage = () => {
+  useDocumentTitle('Offers');
   const [offerType, setOfferType] = useState<OfferType>('DISCOUNT');
   const [name, setName] = useState('');
   const [validFrom, setValidFrom] = useState(today());

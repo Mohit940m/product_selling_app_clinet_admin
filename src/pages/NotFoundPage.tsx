@@ -3,6 +3,7 @@ import { FiCompass } from 'react-icons/fi';
 import Container from '../components/layout/Container';
 import Button from '../components/ui/Button';
 import EmptyState from '../components/ui/EmptyState';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 /**
  * Catch-all for any URL that doesn't match a real route. Without this,
@@ -11,6 +12,7 @@ import EmptyState from '../components/ui/EmptyState';
  * hitting a typo'd URL, a stale bookmark, or a broken external link.
  */
 const NotFoundPage = () => {
+  useDocumentTitle('Page Not Found');
   const navigate = useNavigate();
 
   return (

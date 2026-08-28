@@ -4,6 +4,7 @@ import PageHeader from '../components/layout/PageHeader';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import statusTone from '../components/ui/statusTone';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 // Matches product_selling_app_server/src/models/orderModels/order.model.ts ORDER_STATUS.
 type OrderStatus = 'CREATED' | 'CONFIRMED' | 'SHIPPED' | 'OUT FOR DELIVERY' | 'DELIVERED' | 'CANCELLED';
@@ -33,6 +34,7 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
  * statuses this seller API will eventually support.
  */
 const OrderListPage = () => {
+  useDocumentTitle('Orders');
   return (
     <Container className="py-6 lg:py-8">
       <PageHeader

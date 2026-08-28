@@ -11,6 +11,7 @@ import Button from '../components/ui/Button';
 import Skeleton from '../components/ui/Skeleton';
 import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 type ShippingRate = {
   cost: string;
@@ -62,6 +63,7 @@ const getErrorMessage = (err: unknown, fallback: string) => {
 };
 
 const ShippingConfigPage = () => {
+  useDocumentTitle('Shipping');
   const [form, setForm] = useState<ShippingFormState>(defaultForm());
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

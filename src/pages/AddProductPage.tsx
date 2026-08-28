@@ -17,6 +17,7 @@ import { showKartlyToast } from '../components/ui/showKartlyToast';
 import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
 import { uploadProductImages, partitionBySize, MAX_IMAGE_SIZE_MB, type UploadedProductImage } from '../api/cloudinaryApi';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 type VariantRow = {
   id: number;
@@ -49,6 +50,7 @@ const getErrorMessage = (err: unknown, fallback: string) => {
 };
 
 const AddProductPage = () => {
+  useDocumentTitle('New Product');
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');

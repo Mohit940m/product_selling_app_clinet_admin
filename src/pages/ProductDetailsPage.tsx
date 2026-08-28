@@ -17,6 +17,7 @@ import Input from '../components/ui/Input';
 import Switch from '../components/ui/Switch';
 import MobileActionBar from '../components/layout/MobileActionBar';
 import sellerApi from '../api/sellerApi';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 const LOW_STOCK_THRESHOLD = 5;
 const STOCK_BAR_CEILING = 20;
@@ -69,6 +70,7 @@ const ProductDetailsPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState<ProductDetails | null>(null);
+  useDocumentTitle(product?.name ?? 'Product');
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);

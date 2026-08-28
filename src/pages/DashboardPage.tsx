@@ -16,6 +16,7 @@ import EmptyState from '../components/ui/EmptyState';
 import Skeleton from '../components/ui/Skeleton';
 import Modal from '../components/ui/Modal';
 import Input from '../components/ui/Input';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 const LOW_STOCK_THRESHOLD = 5;
 
@@ -47,6 +48,7 @@ const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
 
 const DashboardPage = () => {
+  useDocumentTitle('Dashboard');
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [shippingConfig, setShippingConfig] = useState<ShippingConfig | null>(null);

@@ -14,6 +14,7 @@ import EmptyState from '../components/ui/EmptyState';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import DataTable, { type DataTableColumn } from '../components/ui/DataTable';
 import sellerApi from '../api/sellerApi';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 type ProductListItem = {
   _id: string;
@@ -47,6 +48,7 @@ const getErrorMessage = (err: unknown, fallback: string) => {
 };
 
 const ProductListPage = () => {
+  useDocumentTitle('Products');
   const navigate = useNavigate();
   const [products, setProducts] = useState<ProductListItem[]>([]);
   const [total, setTotal] = useState(0);

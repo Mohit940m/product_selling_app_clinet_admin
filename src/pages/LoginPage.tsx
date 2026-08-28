@@ -11,6 +11,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import OtpInput from '../components/auth/OtpInput';
 import { useCountdown } from '../hooks/useCountdown';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 const OTP_SCREEN_DELAY_MS = 1000;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -18,6 +19,7 @@ const RESEND_COOLDOWN_SECONDS = 60;
 type LoginStep = 'credentials' | 'otp';
 
 const LoginPage = () => {
+  useDocumentTitle('Log in');
   const navigate = useNavigate();
   const [step, setStep] = useState<LoginStep>('credentials');
   const [email, setEmail] = useState('');
