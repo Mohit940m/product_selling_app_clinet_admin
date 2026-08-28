@@ -1148,3 +1148,19 @@ handlers (`handleImages`/`handleNewImages`) — oversized files are
 filtered out before ever reaching the upload step, with a toast naming
 which file(s) were rejected and why, following the same pattern
 already used there for the 5-image slot limit.
+
+## Post-Phase-7 follow-up — ImageFrame didn't actually handle a broken image
+
+Same fix as the user client's `ImageFrame.tsx` (same component, ported
+independently to both apps). The doc comment claimed it handles a
+"broken" image, but the implementation only ever checked `!src`
+(absent) — a `src` that's present but fails to load rendered the raw
+browser broken-image icon instead. Added an `onError` handler plus a
+`failed` flag gating the placeholder branch, with the flag reset done
+via React's render-time "adjust state when a prop changes" pattern
+(track the `src` `failed` applies to, compare and reset in the render
+body on a change) rather than a `useEffect` — this app's
+`react-hooks/set-state-in-effect` rule rejects the effect version
+outright (hit it directly: `Calling setState() directly within an
+effect` error on build), and the render-time version also avoids an
+extra render cycle per image switch.
