@@ -1300,3 +1300,26 @@ to all three components: the error `<p>` now carries that `id`, and
 the field carries `aria-describedby={error ? errorId : undefined}`
 pointing at it. Fixes every form across the whole app at once, since
 they're all built from these three primitives.
+
+## Post-Phase-7 follow-up — removed an orphaned Toolbar component, kept two others
+
+Swept for other genuinely-unused components after the earlier
+`Button.tsx` cleanup and found two more with zero imports anywhere:
+`Toolbar.tsx` and `QueueList.tsx`. Deleted `Toolbar.tsx` — a generic
+"title left, actions right" row wrapper superseded by `PageHeader`,
+which now owns that exact job everywhere, with no tie to any specific
+unbuilt feature.
+
+Kept `QueueList.tsx`, on reflection, despite it also having zero
+current usage: it's the intended fulfilment-queue widget for
+`DashboardPage`, and this file's own 4.1 notes already document that
+section as deliberately built as an honest `EmptyState` instead,
+*specifically because* there's no seller order/fulfilment endpoint yet
+— "an honest EmptyState-based revenue panel and fulfilment-queue
+block (no fabricated ... numbers)". That's the same status as
+`BarChart.tsx` (the revenue chart's real implementation, also unused
+today, also kept) — both are well-built, current-design-system,
+ready-to-wire-up components for documented, backend-blocked features,
+not abandoned leftovers like `Toolbar.tsx` or the old `Button.tsx`
+were. Deleting `QueueList.tsx` while keeping `BarChart.tsx` would have
+been an inconsistent call for the same underlying reason, so it stays.
