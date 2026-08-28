@@ -1207,3 +1207,27 @@ cart/order subtotal through to the offer-resolution utility from every
 call site that has one (cart, checkout, order creation); no frontend
 change was needed — this page was already sending the right value,
 the backend just wasn't checking it against the right number.
+
+## Significant known gap (cross-repo) — three of four offer types do nothing
+
+Worth its own entry, separate from the `minCartValue` fix above: only
+`DISCOUNT`-type offers actually change a price anywhere in the
+backend. `BUY_GET`, `CASHBACK`, and `PRODUCT_BUNDLE` — all fully
+creatable through this very page's UI, with their own dedicated form
+sections and `BundleItem` state — are accepted, validated, saved, and
+returned as "applicable" in `offers: [...]` on cart/product responses,
+but nothing computes any actual price effect for any of them
+(confirmed by grepping the whole backend: the only places these three
+types appear at all are the `OFFER_TYPES` enum and the config-shape
+validator). A seller building a "Buy 2 Get 1 Free" or "₹50 cashback"
+promotion through this page today gets a save confirmation and a real
+database record, but a buyer's price never changes because of it —
+this isn't a display bug, the underlying calculation genuinely
+doesn't exist yet for these three types. Documented in detail at the
+source (`product_selling_app_server` commit `9aa4eaa`,
+`src/utils/offer.util.ts`) rather than fixed here, since each type
+needs materially different logic (identifying a "free" unit within
+existing cart lines, a post-purchase credit rather than a
+checkout-time price change, detecting a specific item combination and
+repricing that group) — a real feature to design and build per type,
+not a shared shortcut.
