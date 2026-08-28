@@ -1262,3 +1262,13 @@ on every navigation before reaching that page's content. Added a
 visually-hidden-until-focused "Skip to content" link as the first
 element in `AdminLayout`, pointing at a new `id="main-content"` on
 `<main>`.
+
+## Post-Phase-7 follow-up — hamburger toggle missing aria-expanded
+
+`MobileTopBar.tsx`'s hamburger button had `aria-label="Open menu"` but
+nothing reflecting whether the drawer it controls was actually open —
+a screen reader announced the same "Open menu, button" regardless of
+state. Added `aria-expanded={open}`. Swept the user client for the
+same pattern (a disclosure toggle button with no state reflected in
+its accessible name/attributes) and found one instance there too — see
+its own notes.

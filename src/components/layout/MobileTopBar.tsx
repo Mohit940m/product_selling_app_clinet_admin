@@ -21,6 +21,7 @@ const MobileTopBar = ({ actionSlot }: MobileTopBarProps) => {
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open menu"
+          aria-expanded={open}
           className="grid h-10 w-10 place-items-center rounded-[13px] border border-edge t-fast hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <span className="flex flex-col gap-[3px]">
