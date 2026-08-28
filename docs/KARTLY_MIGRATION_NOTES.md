@@ -1164,3 +1164,29 @@ body on a change) rather than a `useEffect` — this app's
 outright (hit it directly: `Calling setState() directly within an
 effect` error on build), and the render-time version also avoids an
 extra render cycle per image switch.
+
+## Post-Phase-7 follow-up — DataTable's clickable rows were keyboard-unreachable
+
+`DataTable`'s `onRowClick` rows had a click handler and nothing else —
+no `tabIndex`, `role`, or key handler — so they were entirely
+unreachable by keyboard or by a screen reader navigating via Tab. This
+is live: `ProductListPage.tsx` uses it as the primary way to navigate
+from the list to a product's detail page. Added `role="button"`,
+`tabIndex={0}`, an `onKeyDown` handling Enter/Space, and a
+focus-visible ring to both the mobile card wrapper and the desktop
+`<tr>` (the `<tr>`'s ring uses a negative outline-offset rather than
+the usual positive one, so it draws inside the row instead of
+overlapping into the tightly-packed row above/below it), gated on
+`onRowClick` being provided at all.
+
+## Post-Phase-7 follow-up — removed an orphaned pre-migration Button.tsx
+
+Found while sweeping for the same "clickable element, no keyboard
+support" pattern elsewhere: `src/components/Button.tsx`, distinct from
+the actively-used `src/components/ui/Button.tsx`. Zero imports
+anywhere in the codebase, and still styled with the old pre-Kartly
+purple (`#A78BFA`/`#4C1D95` hardcoded hex) instead of the `--k-accent`
+tokens — clearly a leftover from before the migration. Deleted rather
+than left in place, where it risked misleading a future contributor
+into using it and reintroducing the wrong colors. Swept the rest of
+`src/` for duplicate-named files or similar leftovers — found none.
