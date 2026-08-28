@@ -53,7 +53,19 @@ const DataTable = <T,>({ columns, rows, rowKey, onRowClick, loading, loadingRows
           <div
             key={rowKey(row)}
             onClick={() => onRowClick?.(row)}
-            className={`animate-up ${onRowClick ? 'cursor-pointer' : ''}`}
+            role={onRowClick ? 'button' : undefined}
+            tabIndex={onRowClick ? 0 : undefined}
+            onKeyDown={
+              onRowClick
+                ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onRowClick(row);
+                    }
+                  }
+                : undefined
+            }
+            className={`animate-up ${onRowClick ? 'cursor-pointer rounded-tile focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent' : ''}`}
             style={{ animationDelay: `${Math.min(i, 10) * 40}ms` }}
           >
             {mobileCard(row)}
@@ -83,7 +95,19 @@ const DataTable = <T,>({ columns, rows, rowKey, onRowClick, loading, loadingRows
                 <tr
                   key={rowKey(row)}
                   onClick={() => onRowClick?.(row)}
-                  className={`border-t border-line t-fast hover:bg-soft2 ${onRowClick ? 'cursor-pointer' : ''}`}
+                  role={onRowClick ? 'button' : undefined}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  onKeyDown={
+                    onRowClick
+                      ? (e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onRowClick(row);
+                          }
+                        }
+                      : undefined
+                  }
+                  className={`border-t border-line t-fast hover:bg-soft2 ${onRowClick ? 'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent' : ''}`}
                   style={{ display: 'grid', gridTemplateColumns: gridTemplate }}
                 >
                   {columns.map((col) => (
