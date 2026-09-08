@@ -1380,3 +1380,38 @@ enrichment, which is a different and already-correct case (a
 background read that's meant to silently degrade one product's data
 rather than alarm the user, not a write the seller is waiting on
 explicit feedback for) — left unchanged.
+
+## 2026-09-09 — CRITICAL: offer creation was silently 404ing; real offer list wired
+
+Re-checked the offers gap this file has documented since the Kartly
+migration ("no list/get/update/delete endpoint") against the actual
+route files again, following this doc's established discipline of
+verifying "endpoint doesn't exist" claims directly rather than
+trusting an earlier note. Two findings:
+
+1. **The create-offer request itself was broken.** `OffersPage.tsx`
+   called `sellerApi.post('/offer/create-offer', ...)` — singular
+   `offer` — but `sellerRoute.ts` mounts `offerManagement.routes.ts`
+   at `/offers` (plural). Every submission through this UI has been
+   hitting a 404, caught by `submitOffer`'s existing try/catch and
+   shown as the same generic "Unable to create offer." toast a real
+   validation failure would produce — nothing distinguished a broken
+   URL from a seller's own bad input. No test suite and no manual
+   click-through against a live backend during this app's history
+   would have caught it without actually reading both the frontend
+   call site and the backend mount side by side, which is what
+   surfaced it here. Fixed to `/offers/create-offer`.
+
+2. **A real list endpoint now exists.** Added `GET /offers/`
+   server-side (`getSellerOffers`, seller-scoped like every other list
+   query fixed this session — see `product_selling_app_server` commit
+   `9359128`) and wired it here: `OffersPage` now fetches a seller's
+   actual persisted offers on mount, with a loading-skeleton state,
+   rather than only ever tracking what was created in the current
+   browser session. Get-by-id/update/delete/enable-disable still don't
+   exist, so editing or disabling an existing offer still isn't
+   possible from the UI — updated the panel copy to say that
+   specifically instead of the old blanket "coming soon."
+
+Verified with `npm run build` (server + this app, both clean) and
+`npm run lint` (0 issues, this app's ESLint).
