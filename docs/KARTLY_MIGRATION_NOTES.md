@@ -1415,3 +1415,27 @@ trusting an earlier note. Two findings:
 
 Verified with `npm run build` (server + this app, both clean) and
 `npm run lint` (0 issues, this app's ESLint).
+
+## 2026-09-09 — ProductDetailsPage gains a real Offers panel
+
+Plan item 4.5.3 calls for a Metadata/Variants/**Offers** trio of
+`Panel`s on this page; only the first two existed, because there was
+no way to fetch a seller's offers at all before `GET /offers/` was
+added earlier today (commit `9359128`, `product_selling_app_server`).
+Added the third: fetches the seller's full offer list and filters
+client-side to the ones whose `appliesTo.productIds` includes this
+product, rendering name, validity window, an "all variants"/"specific
+variants" note, a value `Badge` and a status `Badge` — reusing the
+same `getOfferStatus` derivation and value-summarization logic
+`OffersPage.tsx` uses.
+
+Marking this **partial**, not closing 4.5.3's checkbox: the item also
+specifies the page's desktop layout (`w-[340px]` info column, etc,
+4.5.1/4.5.2), which this page doesn't fully match yet — only the
+"Offers panel exists with real data" half is done. Filtering
+client-side rather than adding a backend query param is a deliberate,
+documented choice, not a shortcut — a seller's total offer count is
+small, and a dedicated per-product endpoint would be premature for
+that scale.
+
+Verified with `npm run build` (clean) and `npm run lint` (0 issues).
