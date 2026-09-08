@@ -13,6 +13,7 @@ import Chip from '../components/ui/Chip';
 import Switch from '../components/ui/Switch';
 import Button from '../components/ui/Button';
 import EmptyState from '../components/ui/EmptyState';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import sellerApi from '../api/sellerApi';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
@@ -46,19 +47,10 @@ const getErrorMessage = (err: unknown, fallback: string) => {
   return err instanceof Error ? err.message : fallback;
 };
 
-type CreatedOffer = {
-  id: string | number;
-  name: string;
-  type: OfferType;
-  discountLabel: string;
-  targetSummary: string;
-  validFrom: string;
-  validTill: string;
-};
-
 // Shape of one document returned by GET /offers/ — appliesTo.productIds and
 // .variantIds arrive populated (name/images, sku/attributes) per
-// getSellerOffers on the backend.
+// getSellerOffers on the backend. isActive is the seller's own on/off
+// switch — independent of the validFrom/validTill-derived status below.
 type PersistedOffer = {
   _id: string;
   name: string;
@@ -71,6 +63,7 @@ type PersistedOffer = {
   };
   validFrom: string;
   validTill: string;
+  isActive: boolean;
 };
 
 const summarizeDiscountLabel = (type: OfferType, config: Record<string, unknown>) => {
@@ -84,24 +77,14 @@ const summarizeDiscountLabel = (type: OfferType, config: Record<string, unknown>
   return `Bundle @ ₹${(config.bundlePrice as number) ?? 0}`;
 };
 
-const toCreatedOfferSummary = (offer: PersistedOffer): CreatedOffer => {
+const summarizeTarget = (offer: PersistedOffer) => {
   const productCount = offer.appliesTo.productIds?.length ?? 0;
   const variantCount = offer.appliesTo.variantIds?.length ?? 0;
-  const targetSummary = offer.type === 'PRODUCT_BUNDLE'
+  return offer.type === 'PRODUCT_BUNDLE'
     ? 'Bundle'
     : variantCount > 0
       ? `${variantCount} variant${variantCount === 1 ? '' : 's'}`
       : `${productCount} product${productCount === 1 ? '' : 's'} (all variants)`;
-
-  return {
-    id: offer._id,
-    name: offer.name || OFFER_TYPE_LABELS[offer.type],
-    type: offer.type,
-    discountLabel: summarizeDiscountLabel(offer.type, offer.config),
-    targetSummary,
-    validFrom: offer.validFrom,
-    validTill: offer.validTill,
-  };
 };
 
 const today = () => new Date().toISOString().slice(0, 16);
@@ -158,35 +141,56 @@ const OffersPage = () => {
   const [isLoadingVariants, setIsLoadingVariants] = useState(false);
   const [selectedVariantIds, setSelectedVariantIds] = useState<string[]>([]);
 
-  // Backed by the real GET /offers/ list (added alongside this fetch) —
-  // populated on mount, then a newly-created offer is prepended locally
-  // for instant feedback rather than waiting on a full refetch.
-  const [createdOffers, setCreatedOffers] = useState<CreatedOffer[]>([]);
+  // Backed by the real GET /offers/ list.
+  const [offers, setOffers] = useState<PersistedOffer[]>([]);
   const [isLoadingOffers, setIsLoadingOffers] = useState(true);
+  const [togglingOfferId, setTogglingOfferId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<PersistedOffer | null>(null);
+  const [isDeletingOffer, setIsDeletingOffer] = useState(false);
   // Real filter over the offer grid above — status is a genuine derived
   // value (getOfferStatus) over the seller's actual persisted offers.
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'Active' | 'Scheduled' | 'Expired'>('ALL');
 
-  useEffect(() => {
-    let isCurrent = true;
+  const loadOffers = () => {
     sellerApi
       .get('/offers/')
-      .then(({ data }) => {
-        if (!isCurrent) return;
-        const offers: PersistedOffer[] = data.data ?? [];
-        setCreatedOffers(offers.map(toCreatedOfferSummary));
-      })
-      .catch((err) => {
-        if (!isCurrent) return;
-        toast.error(getErrorMessage(err, 'Unable to load offers.'));
-      })
-      .finally(() => {
-        if (isCurrent) setIsLoadingOffers(false);
-      });
-    return () => {
-      isCurrent = false;
-    };
+      .then(({ data }) => setOffers(data.data ?? []))
+      .catch((err) => toast.error(getErrorMessage(err, 'Unable to load offers.')))
+      .finally(() => setIsLoadingOffers(false));
+  };
+
+  useEffect(() => {
+    loadOffers();
   }, []);
+
+  const toggleOfferActive = async (offer: PersistedOffer) => {
+    if (togglingOfferId) return;
+    const nextActive = !offer.isActive;
+    setTogglingOfferId(offer._id);
+    try {
+      await sellerApi.patch(`/offers/edit-offer-status/${offer._id}`, { isActive: nextActive });
+      setOffers((current) => current.map((o) => (o._id === offer._id ? { ...o, isActive: nextActive } : o)));
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Unable to update offer status.'));
+    } finally {
+      setTogglingOfferId(null);
+    }
+  };
+
+  const confirmDeleteOffer = async () => {
+    if (!deleteTarget) return;
+    setIsDeletingOffer(true);
+    try {
+      await sellerApi.delete(`/offers/delete-offer/${deleteTarget._id}`);
+      setOffers((current) => current.filter((o) => o._id !== deleteTarget._id));
+      toast.success('Offer deleted.');
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Unable to delete offer.'));
+    } finally {
+      setIsDeletingOffer(false);
+    }
+  };
 
   const addBundleItem = () => {
     setBundleItems((current) => [...current, makeBundleItem()]);
@@ -341,35 +345,6 @@ const OffersPage = () => {
     };
   };
 
-  const buildCreatedOfferSummary = (): CreatedOffer => {
-    const parsedProductIds = selectedProducts.map((p) => p._id);
-
-    const discountLabel = (() => {
-      if (offerType === 'DISCOUNT') {
-        return discountType === 'PERCENTAGE' ? `−${discountValue}%` : `₹${discountValue} off`;
-      }
-      if (offerType === 'CASHBACK') return `₹${cashbackAmount} cashback`;
-      if (offerType === 'BUY_GET') return `Buy ${buyQty} Get ${getQty}`;
-      return `Bundle @ ₹${bundlePrice}`;
-    })();
-
-    const targetSummary = offerType === 'PRODUCT_BUNDLE'
-      ? `${bundleItems.length} bundle item${bundleItems.length === 1 ? '' : 's'}`
-      : selectedVariantIds.length > 0
-        ? `${selectedVariantIds.length} variant${selectedVariantIds.length === 1 ? '' : 's'}`
-        : `${parsedProductIds.length} product${parsedProductIds.length === 1 ? '' : 's'} (all variants)`;
-
-    return {
-      id: Date.now(),
-      name: name.trim(),
-      type: offerType,
-      discountLabel,
-      targetSummary,
-      validFrom: new Date(validFrom).toISOString(),
-      validTill: new Date(validTill).toISOString(),
-    };
-  };
-
   const submitOffer = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // The disabled attribute on the submit button only takes effect after
@@ -385,10 +360,13 @@ const OffersPage = () => {
     setIsSubmitting(true);
 
     try {
-      const createdSummary = buildCreatedOfferSummary();
       await sellerApi.post('/offers/create-offer', buildPayload());
       toast.success('Offer created successfully.');
-      setCreatedOffers((current) => [createdSummary, ...current]);
+      // The creation response isn't populated the way getSellerOffers'
+      // list is (appliesTo.productIds would just be raw ids, not
+      // {_id, name}), so a full reload is simpler and safer than trying
+      // to merge two different shapes for one card.
+      loadOffers();
       resetForm();
     } catch (err) {
       toast.error(getErrorMessage(err, 'Unable to create offer.'));
@@ -419,19 +397,19 @@ const OffersPage = () => {
             ))}
           </div>
         </Panel>
-      ) : createdOffers.length === 0 ? (
+      ) : offers.length === 0 ? (
         <Panel className="mb-5">
           <EmptyState
             icon={<FiGift size={28} />}
             title="Your active offers will appear here"
-            description="Create your first offer below — editing and disabling existing offers isn't available yet, so treat validity dates as the way to retire one."
+            description="Create your first offer below. Editing an offer's own fields isn't available yet — enabling/disabling and deleting are."
           />
         </Panel>
       ) : (
         <div className="mb-5">
           <p className="mb-3 flex items-center gap-1.5 text-[11.5px] font-semibold text-muted">
             <FiClock size={13} />
-            Editing and disabling existing offers isn't available yet — validity dates are the only way to retire one.
+            Editing an offer's fields isn't available yet — disable or delete one instead.
           </p>
           <div className="mb-3 flex gap-2 overflow-x-auto no-scrollbar">
             {(['ALL', 'Active', 'Scheduled', 'Expired'] as const).map((option) => (
@@ -441,7 +419,7 @@ const OffersPage = () => {
             ))}
           </div>
           {(() => {
-            const filteredOffers = createdOffers.filter(
+            const filteredOffers = offers.filter(
               (offer) => statusFilter === 'ALL' || getOfferStatus(offer.validFrom, offer.validTill).label === statusFilter,
             );
             if (filteredOffers.length === 0) {
@@ -456,17 +434,36 @@ const OffersPage = () => {
                 {filteredOffers.map((offer) => {
                   const status = getOfferStatus(offer.validFrom, offer.validTill);
                   return (
-                    <Card key={offer.id} interactive={false} padded className="space-y-2.5">
+                    <Card key={offer._id} interactive={false} padded className="space-y-2.5">
                       <div className="flex items-start justify-between gap-2">
                         <p className="text-[15px] font-extrabold text-ink">{offer.name || OFFER_TYPE_LABELS[offer.type]}</p>
-                        <Badge tone="ink">{offer.discountLabel}</Badge>
+                        <Badge tone="ink">{summarizeDiscountLabel(offer.type, offer.config)}</Badge>
                       </div>
                       <p className="font-mono text-[11px] text-muted">
                         {formatDateShort(offer.validFrom)} – {formatDateShort(offer.validTill)}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="text-[11.5px] font-semibold text-muted">{offer.targetSummary}</span>
+                        <span className="text-[11.5px] font-semibold text-muted">{summarizeTarget(offer)}</span>
                         <Badge tone={status.tone}>{status.label}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between border-t border-line pt-2.5">
+                        <div className="flex items-center gap-2 text-[11.5px] font-semibold text-muted">
+                          <Switch
+                            checked={offer.isActive}
+                            onChange={() => toggleOfferActive(offer)}
+                            disabled={togglingOfferId === offer._id}
+                            label={`${offer.isActive ? 'Disable' : 'Enable'} ${offer.name || 'offer'}`}
+                          />
+                          {offer.isActive ? 'Enabled' : 'Disabled'}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(offer)}
+                          aria-label={`Delete ${offer.name || 'offer'}`}
+                          className="relative rounded-full border border-line p-2 text-muted t-fast before:absolute before:-inset-2 before:content-[''] hover:border-danger hover:text-danger"
+                        >
+                          <FiTrash2 size={14} />
+                        </button>
                       </div>
                     </Card>
                   );
@@ -717,6 +714,16 @@ const OffersPage = () => {
           Create offer
         </Button>
       </MobileActionBar>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDeleteOffer}
+        title="Delete this offer?"
+        description={`"${deleteTarget?.name || 'This offer'}" will stop applying immediately. This can't be undone.`}
+        confirmLabel="Delete offer"
+        loading={isDeletingOffer}
+      />
     </Container>
   );
 };
