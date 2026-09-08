@@ -1,0 +1,6 @@
+# This is a private seller admin dashboard, not a public storefront.
+# Complements the <meta name="robots" content="noindex, nofollow"> tag
+# in index.html: a robots.txt disallow stops a well-behaved crawler from
+# fetching pages at all, rather than fetching-then-not-indexing.
+User-agent: *
+Disallow: /

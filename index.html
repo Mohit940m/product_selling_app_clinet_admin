@@ -5,6 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
+    <!-- Private seller tool, not a public storefront — there was no
+         robots directive at all before this, meaning the default
+         (indexable) applied. A search engine indexing a login page (or,
+         via a route, cached fragments of dashboard/product data) has no
+         upside and a real downside. -->
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
