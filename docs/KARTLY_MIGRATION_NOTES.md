@@ -1543,3 +1543,46 @@ typed or constructed client-side. These fixes matter for a malformed
 direct API call, not anything reachable through this app's real UI.
 
 Verified with `npm run build` (server, clean) for both commits.
+
+## 2026-09-09 — CRITICAL: typing in any Modal form field stole its own keyboard focus
+
+Found while re-auditing `useDialogBehavior.ts` (shared by `Modal`,
+`ConfirmDialog`, and `Sheet`) for focus-trap correctness — a fresh angle
+this session hadn't checked despite doing extensive other accessibility
+work on adjacent components. Its focus-trap effect depended on
+`[open, onClose]`. `onClose` is a fresh inline arrow function at nearly
+every real call site in this app — `DashboardPage.tsx`'s restock `Modal`,
+`ProductDetailsPage.tsx`'s manage-variant and add-variant `Modal`s,
+`OffersPage.tsx`'s delete `ConfirmDialog`, `EditProductPage.tsx`'s two
+`ConfirmDialog`s, `ProductListPage`'s delete `ConfirmDialog` — and every
+dialog with a text/number input a seller types into (restock amount,
+variant price/stock, new-variant option/price/stock fields) re-renders
+its parent on every keystroke, creating a new `onClose` reference each
+time. That identity change tore the whole focus-trap effect down and
+rebuilt it on every single character typed: the cleanup's
+`triggerRef.current.focus()` yanked focus to the button that opened the
+dialog, then the setup's `focusable[0].focus()` moved it again to
+whatever's first inside the dialog — stealing keyboard focus out of the
+field being typed into, every keystroke, in every one of those dialogs.
+
+A WCAG 2.1.2 (No Keyboard Trap) / basic usability failure — genuinely
+broken typing for a keyboard or screen-reader user, janky even with a
+mouse (visible focus jumping on every character). This is arguably the
+most impactful frontend bug found this session: it affected the actual
+mechanics of using nearly every mutation dialog in the seller dashboard,
+not an edge case or a malformed-input scenario.
+
+Fixed with the standard "ref for a callback that shouldn't be an effect
+dependency" pattern: `onClose` tracked in a ref (`onCloseRef`), kept
+current via a no-dependency-array effect (runs every render, which is
+fine — it's just an assignment), the Escape handler calls
+`onCloseRef.current()` instead of `onClose()` directly, and the main
+effect's dependency array is now `[open]` only — it reruns correctly when
+the dialog opens/closes, never on a keystroke inside it. Identical fix
+applied in `product_selling_app_client_user` (commit `918000e`), whose
+own `Sheet.tsx` shares the same hook.
+
+Verified with `npm run build` (clean) and `npm run lint` (0 issues). No
+live browser was available to click-test this interactively in this
+environment — verified by tracing React's effect-dependency semantics
+against the actual code, the same way the bug itself was found.
