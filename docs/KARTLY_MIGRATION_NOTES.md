@@ -1518,3 +1518,28 @@ price inputs across `AddProductPage.tsx` and `ProductDetailsPage.tsx`
 runs *before* `uploadProductImages()` — catching this earlier than the
 backend fix alone would, and without spending a real Cloudinary upload
 on a submission that was always going to be rejected.
+
+## Backend fix (cross-repo) — malformed-id CastErrors across the seller product/offer API
+
+A systematic sweep of `product_selling_app_server` (prompted by the
+createProduct/addVariant fixes above) found this file's whole seller
+product controller had **zero** `isValidObjectId` checks anywhere,
+across all 9 functions taking a Mongo id from `req.params`/`req.body` —
+`editProduct`, `editProductStatus`, `increaseStock`, `editVariantPrice`,
+`editVariantStatus`, `getProductById`, `addVariant`, `deleteProduct`,
+`deleteProductPermanent`. Every one passed `productId` (and, for the
+three variant-mutation functions, `variantId`) straight into a Mongoose
+query unguarded — a malformed id throws a CastError, reported as a 500
+instead of a clean 400. `editVariantStatus`'s `variantId` was the worst
+of the nine: it had no presence check at all, unlike the other two
+variant functions. Same fix applied to `createOffer`'s
+`appliesTo.productIds`/`variantIds` arrays (each element now checked).
+Commits `7779312` and `4e4769d`.
+
+No frontend change needed anywhere in this app — every id this app sends
+to these endpoints already comes from its own prior API responses
+(a product's own `_id`, a variant's own `_id` from `get-product`), never
+typed or constructed client-side. These fixes matter for a malformed
+direct API call, not anything reachable through this app's real UI.
+
+Verified with `npm run build` (server, clean) for both commits.
