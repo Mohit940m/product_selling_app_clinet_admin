@@ -1477,3 +1477,44 @@ the complexity versus just reloading a typically-small list.
 Verified with `npm run build` (clean) and `npm run lint` (0 issues,
 after removing one eslint-disable directive the refactor made
 unnecessary).
+
+## Backend fixes (cross-repo) — addVariant and createProduct input validation
+
+Two related fixes in `product_selling_app_server`, both affecting pages
+in this app:
+
+- `addVariant` (used by `ProductDetailsPage.tsx`'s "Add variant" modal)
+  passed `attributes`/`price`/`stock` straight into `Variant.create()`
+  unguarded, relying on the model's own `min` bounds to reject bad
+  input — which worked, but surfaced as a raw 500 instead of a clean
+  400. This app's own client-side check in `submitAddVariant` already
+  covers the common case, so this only mattered for a direct API call.
+  Commit `017e4d8`.
+- More significant, and genuinely reachable through this app's own UI
+  (not just a direct API call): `createProduct` (used by
+  `AddProductPage.tsx`) creates the `Product` document, then each
+  `Variant` one at a time in a loop with no transaction and no
+  rollback. If one variant in the middle of the array was invalid,
+  everything before it — the Product and the earlier variants — was
+  already persisted, orphaned, while the seller just saw a 500
+  suggesting nothing happened. Fixed by validating every variant up
+  front, before any write happens. Not a complete fix — a genuine
+  mid-loop DB failure unrelated to input validation could still leave
+  a partial state, and a real fix for that needs a transaction,
+  deliberately not added without verifying this deployment's MongoDB
+  runs as a replica set. Commit `4600ebe`.
+
+Checked whether this app's own UI already prevented hitting that second
+one, rather than assuming it — it didn't. `AddProductPage.tsx`'s price
+inputs were `type="number" min="0"`, one unit looser than the model's
+actual `min: 0.01` bound, and `submitProduct` had no JS-level price/stock
+check of its own the way `ProductDetailsPage.tsx`'s `submitAddVariant`/
+`saveVariant` do — so a seller entering exactly `0` for one variant's
+price among several would pass the browser's own native validation,
+upload real images to Cloudinary, and only then hit the (now-fixed)
+backend rejection. Fixed here too: `min="0.01" step="0.01"` on all three
+price inputs across `AddProductPage.tsx` and `ProductDetailsPage.tsx`
+(matching the backend bound), plus a real `submitProduct` guard that
+runs *before* `uploadProductImages()` — catching this earlier than the
+backend fix alone would, and without spending a real Cloudinary upload
+on a submission that was always going to be rejected.

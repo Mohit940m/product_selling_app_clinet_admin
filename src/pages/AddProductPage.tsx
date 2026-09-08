@@ -176,6 +176,25 @@ const AddProductPage = () => {
       return;
     }
 
+    // The price input's own min="0.01" catches most of this via the
+    // browser's native form validation, but that's not a substitute for a
+    // real check here — same reasoning as submitAddVariant/saveVariant's
+    // explicit guards on ProductDetailsPage.tsx. Worth catching before
+    // uploadProductImages() below spends a real Cloudinary upload on a
+    // submission that's going to be rejected anyway.
+    for (let i = 0; i < variants.length; i++) {
+      const price = Number(variants[i].price);
+      if (!Number.isFinite(price) || price <= 0) {
+        toast.error(`Variant ${i + 1}: enter a valid price.`);
+        return;
+      }
+      const stock = variants[i].stock === '' ? 0 : Number(variants[i].stock);
+      if (!Number.isFinite(stock) || stock < 0) {
+        toast.error(`Variant ${i + 1}: enter a valid stock quantity.`);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setUploadStatus('Uploading product images to Cloudinary...');
 
@@ -313,7 +332,8 @@ const AddProductPage = () => {
                   />
                   <input
                     type="number"
-                    min="0"
+                    min="0.01"
+                    step="0.01"
                     value={variant.price}
                     onChange={(event) => updateVariant(variant.id, 'price', event.target.value)}
                     className="rounded-btn border border-line px-3 py-2.5 text-[12.5px] text-ink t-fast focus:border-accent"

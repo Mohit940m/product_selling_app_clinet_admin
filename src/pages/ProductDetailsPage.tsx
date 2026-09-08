@@ -535,7 +535,7 @@ const ProductDetailsPage = () => {
                 {Object.entries(manageTarget.attributes ?? {}).map(([k, v]) => `${k}: ${v}`).join(', ') || 'No attributes'}
               </p>
             </div>
-            <Input label="Price (₹)" type="number" min="0" value={managePrice} onChange={(e) => setManagePrice(e.target.value)} />
+            <Input label="Price (₹)" type="number" min="0.01" step="0.01" value={managePrice} onChange={(e) => setManagePrice(e.target.value)} />
             <Input
               label="Add stock (units)"
               type="number"
@@ -578,7 +578,7 @@ const ProductDetailsPage = () => {
               />
             </div>
             <div className="grid gap-3.5 sm:grid-cols-2">
-              <Input label="Price (₹)" type="number" min="0" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required />
+              <Input label="Price (₹)" type="number" min="0.01" step="0.01" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required />
               <Input label="Stock" type="number" min="0" value={newStock} onChange={(e) => setNewStock(e.target.value)} required />
             </div>
             <Button variant="primary" fullWidth loading={isAddingVariant} onClick={submitAddVariant}>
