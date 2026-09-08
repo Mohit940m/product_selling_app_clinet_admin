@@ -47,13 +47,61 @@ const getErrorMessage = (err: unknown, fallback: string) => {
 };
 
 type CreatedOffer = {
-  id: number;
+  id: string | number;
   name: string;
   type: OfferType;
   discountLabel: string;
   targetSummary: string;
   validFrom: string;
   validTill: string;
+};
+
+// Shape of one document returned by GET /offers/ — appliesTo.productIds and
+// .variantIds arrive populated (name/images, sku/attributes) per
+// getSellerOffers on the backend.
+type PersistedOffer = {
+  _id: string;
+  name: string;
+  type: OfferType;
+  config: Record<string, unknown>;
+  appliesTo: {
+    productIds?: { _id: string; name: string }[];
+    applyToAllVariants: boolean;
+    variantIds?: { _id: string; sku?: string; attributes?: Record<string, string> }[];
+  };
+  validFrom: string;
+  validTill: string;
+};
+
+const summarizeDiscountLabel = (type: OfferType, config: Record<string, unknown>) => {
+  if (type === 'DISCOUNT') {
+    const discountType = config.discountType as DiscountType | undefined;
+    const value = config.value as number | undefined;
+    return discountType === 'FLAT' ? `₹${value ?? 0} off` : `−${value ?? 0}%`;
+  }
+  if (type === 'CASHBACK') return `₹${(config.amount as number) ?? 0} cashback`;
+  if (type === 'BUY_GET') return `Buy ${(config.buyQty as number) ?? 0} Get ${(config.getQty as number) ?? 0}`;
+  return `Bundle @ ₹${(config.bundlePrice as number) ?? 0}`;
+};
+
+const toCreatedOfferSummary = (offer: PersistedOffer): CreatedOffer => {
+  const productCount = offer.appliesTo.productIds?.length ?? 0;
+  const variantCount = offer.appliesTo.variantIds?.length ?? 0;
+  const targetSummary = offer.type === 'PRODUCT_BUNDLE'
+    ? 'Bundle'
+    : variantCount > 0
+      ? `${variantCount} variant${variantCount === 1 ? '' : 's'}`
+      : `${productCount} product${productCount === 1 ? '' : 's'} (all variants)`;
+
+  return {
+    id: offer._id,
+    name: offer.name || OFFER_TYPE_LABELS[offer.type],
+    type: offer.type,
+    discountLabel: summarizeDiscountLabel(offer.type, offer.config),
+    targetSummary,
+    validFrom: offer.validFrom,
+    validTill: offer.validTill,
+  };
 };
 
 const today = () => new Date().toISOString().slice(0, 16);
@@ -110,14 +158,35 @@ const OffersPage = () => {
   const [isLoadingVariants, setIsLoadingVariants] = useState(false);
   const [selectedVariantIds, setSelectedVariantIds] = useState<string[]>([]);
 
-  // The seller API has no offer-listing endpoint, so this only tracks
-  // offers created in this browser session (not a persisted list) — see
-  // the "created this session" note rendered above the grid.
+  // Backed by the real GET /offers/ list (added alongside this fetch) —
+  // populated on mount, then a newly-created offer is prepended locally
+  // for instant feedback rather than waiting on a full refetch.
   const [createdOffers, setCreatedOffers] = useState<CreatedOffer[]>([]);
-  // Real filter over the session-scoped grid above — status is a genuine
-  // derived value (getOfferStatus), just scoped to what's been created
-  // this session rather than a true full-catalog offer list (4.8.7).
+  const [isLoadingOffers, setIsLoadingOffers] = useState(true);
+  // Real filter over the offer grid above — status is a genuine derived
+  // value (getOfferStatus) over the seller's actual persisted offers.
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'Active' | 'Scheduled' | 'Expired'>('ALL');
+
+  useEffect(() => {
+    let isCurrent = true;
+    sellerApi
+      .get('/offers/')
+      .then(({ data }) => {
+        if (!isCurrent) return;
+        const offers: PersistedOffer[] = data.data ?? [];
+        setCreatedOffers(offers.map(toCreatedOfferSummary));
+      })
+      .catch((err) => {
+        if (!isCurrent) return;
+        toast.error(getErrorMessage(err, 'Unable to load offers.'));
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoadingOffers(false);
+      });
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   const addBundleItem = () => {
     setBundleItems((current) => [...current, makeBundleItem()]);
@@ -317,7 +386,7 @@ const OffersPage = () => {
 
     try {
       const createdSummary = buildCreatedOfferSummary();
-      await sellerApi.post('/offer/create-offer', buildPayload());
+      await sellerApi.post('/offers/create-offer', buildPayload());
       toast.success('Offer created successfully.');
       setCreatedOffers((current) => [createdSummary, ...current]);
       resetForm();
@@ -338,25 +407,31 @@ const OffersPage = () => {
         </p>
       </div>
 
-      {createdOffers.length === 0 ? (
+      {isLoadingOffers ? (
+        <Panel className="mb-5">
+          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} interactive={false} padded className="space-y-2.5">
+                <div className="h-4 w-2/3 animate-pulse rounded bg-soft2" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-soft2" />
+                <div className="h-3 w-full animate-pulse rounded bg-soft2" />
+              </Card>
+            ))}
+          </div>
+        </Panel>
+      ) : createdOffers.length === 0 ? (
         <Panel className="mb-5">
           <EmptyState
             icon={<FiGift size={28} />}
             title="Your active offers will appear here"
-            description="The seller API only exposes offer creation right now — listing, editing, and disabling existing offers needs endpoints that don't exist yet."
-            action={
-              <span className="flex items-center gap-2 rounded-full border border-line bg-soft2 px-4 py-2 text-xs font-semibold text-muted">
-                <FiClock size={14} className="text-accent" />
-                Offer listing coming soon
-              </span>
-            }
+            description="Create your first offer below — editing and disabling existing offers isn't available yet, so treat validity dates as the way to retire one."
           />
         </Panel>
       ) : (
         <div className="mb-5">
           <p className="mb-3 flex items-center gap-1.5 text-[11.5px] font-semibold text-muted">
             <FiClock size={13} />
-            Created this session — there's no listing endpoint yet, so this isn't a persisted offer list.
+            Editing and disabling existing offers isn't available yet — validity dates are the only way to retire one.
           </p>
           <div className="mb-3 flex gap-2 overflow-x-auto no-scrollbar">
             {(['ALL', 'Active', 'Scheduled', 'Expired'] as const).map((option) => (
@@ -372,7 +447,7 @@ const OffersPage = () => {
             if (filteredOffers.length === 0) {
               return (
                 <p className="rounded-tile bg-soft2 p-4 text-[12.5px] font-medium text-muted">
-                  No {statusFilter.toLowerCase()} offers created this session.
+                  No {statusFilter.toLowerCase()} offers.
                 </p>
               );
             }
