@@ -66,6 +66,39 @@ const getErrorMessage = (err: unknown, fallback: string) => {
   return err instanceof Error ? err.message : fallback;
 };
 
+// Shape of one document returned by GET /offers/ — only the fields this
+// page actually reads. appliesTo.productIds arrives populated with at
+// least _id (see getSellerOffers on the backend).
+type ProductOffer = {
+  _id: string;
+  name: string;
+  type: 'DISCOUNT' | 'CASHBACK' | 'BUY_GET' | 'PRODUCT_BUNDLE';
+  config: Record<string, unknown>;
+  appliesTo: { productIds?: { _id: string }[]; applyToAllVariants: boolean };
+  validFrom: string;
+  validTill: string;
+};
+
+const summarizeOfferValue = (offer: ProductOffer) => {
+  const { type, config } = offer;
+  if (type === 'DISCOUNT') {
+    return config.discountType === 'FLAT' ? `₹${config.value ?? 0} off` : `−${config.value ?? 0}%`;
+  }
+  if (type === 'CASHBACK') return `₹${(config.amount as number) ?? 0} cashback`;
+  if (type === 'BUY_GET') return `Buy ${(config.buyQty as number) ?? 0} Get ${(config.getQty as number) ?? 0}`;
+  return `Bundle @ ₹${(config.bundlePrice as number) ?? 0}`;
+};
+
+/** Same Active/Scheduled/Expired derivation OffersPage.tsx uses. */
+const getOfferStatus = (validFrom: string, validTill: string): { label: string; tone: 'success' | 'warn' | 'plum' } => {
+  const now = Date.now();
+  const from = new Date(validFrom).getTime();
+  const till = new Date(validTill).getTime();
+  if (now < from) return { label: 'Scheduled', tone: 'warn' };
+  if (now > till) return { label: 'Expired', tone: 'plum' };
+  return { label: 'Active', tone: 'success' };
+};
+
 const ProductDetailsPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -88,6 +121,9 @@ const ProductDetailsPage = () => {
   const [newStock, setNewStock] = useState('');
   const [isAddingVariant, setIsAddingVariant] = useState(false);
 
+  const [productOffers, setProductOffers] = useState<ProductOffer[]>([]);
+  const [isLoadingOffers, setIsLoadingOffers] = useState(true);
+
   useEffect(() => {
     // Guards against a real race: navigating from one product straight to
     // another before the first fetch resolves could otherwise let a
@@ -108,6 +144,38 @@ const ProductDetailsPage = () => {
     loadProduct();
     return () => {
       isCurrent = false;
+    };
+  }, [productId]);
+
+  // GET /offers/ returns every offer this seller has, not just the ones
+  // targeting this product — there's no per-product filter endpoint, and
+  // a seller's total offer count is small enough that filtering client-side
+  // here is reasonable rather than adding backend query params for it.
+  useEffect(() => {
+    let isCurrent = true;
+    // Matches CartDrawer.tsx's (user client) established pattern for the
+    // same react-hooks/set-state-in-effect rule — a synchronous setState
+    // at the top of the effect body isn't allowed, so the reset routes
+    // through requestAnimationFrame instead.
+    const frame = requestAnimationFrame(() => {
+      if (isCurrent) setIsLoadingOffers(true);
+    });
+    sellerApi
+      .get('/offers/')
+      .then(({ data }) => {
+        if (!isCurrent) return;
+        const offers: ProductOffer[] = data.data ?? [];
+        setProductOffers(offers.filter((offer) => offer.appliesTo.productIds?.some((p) => p._id === productId)));
+      })
+      .catch(() => {
+        // Non-critical — the panel just shows "no active offers" this pass.
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoadingOffers(false);
+      });
+    return () => {
+      isCurrent = false;
+      cancelAnimationFrame(frame);
     };
   }, [productId]);
 
@@ -314,6 +382,43 @@ const ProductDetailsPage = () => {
                 {product.createdAt && <span>Created {formatDate(product.createdAt)}</span>}
                 {product.updatedAt && <span>Updated {formatDate(product.updatedAt)}</span>}
               </div>
+            </Panel>
+
+            <Panel>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-[15px] font-extrabold text-ink">Offers</h2>
+                <Link to="/offers" className="text-[11.5px] font-bold text-accent hover:underline">
+                  Manage offers
+                </Link>
+              </div>
+              {isLoadingOffers ? (
+                <div className="mt-3.5 space-y-2">
+                  <Skeleton className="h-14 w-full" />
+                </div>
+              ) : productOffers.length === 0 ? (
+                <p className="mt-3 text-[12px] font-medium text-muted">No offers target this product yet.</p>
+              ) : (
+                <div className="mt-3.5 space-y-2.5">
+                  {productOffers.map((offer) => {
+                    const status = getOfferStatus(offer.validFrom, offer.validTill);
+                    return (
+                      <div key={offer._id} className="flex items-center justify-between gap-3 rounded-tile border border-line p-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-[12.5px] font-bold text-ink">{offer.name}</p>
+                          <p className="mt-0.5 font-mono text-[10.5px] text-muted">
+                            {formatDate(offer.validFrom)} – {formatDate(offer.validTill)}
+                            {offer.appliesTo.applyToAllVariants ? '' : ' · specific variants'}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <Badge tone="ink">{summarizeOfferValue(offer)}</Badge>
+                          <Badge tone={status.tone}>{status.label}</Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </Panel>
 
             <Panel>
