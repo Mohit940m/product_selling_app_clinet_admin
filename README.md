@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+# Kartly Seller Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A seller-facing React SPA for managing products, offers, and shipping configuration. Part of the `product_selling_app` monorepo, implementing the **Kartly** design system. Note the intentional `clinet` typo in this folder's own name (`product_selling_app_clinet_admin`) — it isn't corrected in paths.
 
-Currently, two official plugins are available:
+> This README replaces the unedited Vite scaffold template that shipped here before — it had zero project-specific content. For full, actively-maintained architecture detail — routing, styling tokens, known backend gaps — see this app's own `CLAUDE.md`, which this file defers to rather than duplicating.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack
 
-## React Compiler
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + TypeScript |
+| Build tool | Vite |
+| Styling | Tailwind CSS v4 (`@tailwindcss/vite` plugin) |
+| Routing | react-router-dom v7 |
+| HTTP client | Axios |
+| Notifications | react-toastify |
+| Icons | react-icons (Feather `fi` prefix) |
+| Image uploads | Direct-to-Cloudinary via a backend-signed upload |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+No global state management — all state is local `useState` per page.
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 18+
+- A running instance of `product_selling_app_server` (or use the hosted backend)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd product_selling_app_clinet_admin
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env` file in the project root:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_SERVER_URL=https://product-selling-app-server.onrender.com
+VITE_PORT=5203
 ```
+
+Cloudinary credentials are fetched from the backend at runtime — they are not stored in this app's own `.env`.
+
+### Running the App
+
+```bash
+npm run dev       # Start dev server at http://localhost:5203
+npm run build     # Type-check (tsc -b) then build to dist/
+npm run lint      # ESLint
+npm run preview   # Serve the built dist/ locally
+```
+
+## Features
+
+- **Authentication** — Two-step OTP login (email + password, then OTP) and registration
+- **Dashboard** — Stats, recent products, shipping config shortcut
+- **Products** — List with search/status filter/pagination, create with Cloudinary image uploads, edit, per-variant price/stock/active-status management, restock
+- **Orders** — Honest empty state; no seller-side order-listing endpoint exists on the backend yet
+- **Shipping** — Origin + five fixed delivery-zone rates (same-city/state/region, rest of India, remote)
+- **Offers** — Create discount/cashback/buy-get/bundle offers targeting products or specific variants, a real persisted offer list, enable/disable and delete per offer
+
+## Routes
+
+| Path | Page | Notes |
+|---|---|---|
+| `/` | Redirects to `/login` | — |
+| `/login` | Two-step OTP login | — |
+| `/signup` | Seller registration | — |
+| `/dashboard` | Stats, recent products, shipping config | Behind `RequireSellerAuth` |
+| `/products` | Product list | Behind `RequireSellerAuth` |
+| `/products/new` | Create product | Behind `RequireSellerAuth` |
+| `/products/:productId` | Product details | Behind `RequireSellerAuth` |
+| `/products/:productId/edit` | Edit product | Behind `RequireSellerAuth` |
+| `/orders` | Order list (empty state) | Behind `RequireSellerAuth` |
+| `/shipping` | Shipping origin + rates | Behind `RequireSellerAuth` |
+| `/offers` | Offer creation + list | Behind `RequireSellerAuth` |
+| `*` | 404 page | Catch-all |
+
+Unlike the buyer storefront (`product_selling_app_client_user`), every route except `/login`/`/signup` sits behind a single centralized guard (`RequireSellerAuth`), not a per-page check.
+
+## Authentication Flow
+
+```
+Login:    POST /auth/login (email + password)
+            → backend sends OTP to email
+          POST /auth/verify-login (email + otp)
+            → JWT stored as sellerToken in localStorage
+
+Register: POST /auth/register (name, email, password, phone?)
+          POST /auth/verify-registration (email + otp)
+            → JWT stored as sellerToken in localStorage
+```
+
+Unlike the buyer storefront's passwordless login, seller login requires a password in addition to the OTP step. The OTP is returned directly in the API response for testing/demo purposes — there's no real email delivery; both auth pages surface it in a labelled dev-notice badge.
+
+## Design Tokens
+
+Current Kartly tokens (defined as CSS custom properties + a Tailwind v4 `@theme` block in `src/index.css`, with full light/dark theming, `localStorage` key `kartlyAdminTheme` — deliberately separate from the buyer storefront's `kartlyTheme` so the two apps' theme preferences don't collide):
+
+| Token | Light | Dark | Usage |
+|---|---|---|---|
+| `--k-accent` | `#A87BF5` | `#B999F7` | Buttons, links, active states |
+
+See `CLAUDE.md` → Styling for the full token/component inventory, including the fixed order-status palette — kept there rather than duplicated here to avoid this section going stale.
+
+## Related Apps
+
+| App | Description | Port |
+|---|---|---|
+| `product_selling_app_server` | Node.js + Express backend | 4000 |
+| `product_selling_app_clinet_admin` | Seller admin dashboard (this app) | 5203 |
+| `product_selling_app_client_user` | Buyer storefront | 5204 |
+| `product_selling_app_agent` | AI shopping-assistant service | 4100 |
