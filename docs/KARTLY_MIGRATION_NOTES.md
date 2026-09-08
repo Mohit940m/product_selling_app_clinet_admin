@@ -1439,3 +1439,41 @@ small, and a dedicated per-product endpoint would be premature for
 that scale.
 
 Verified with `npm run build` (clean) and `npm run lint` (0 issues).
+
+## 2026-09-09 — offer enable/disable and delete, plan item 4.8.4
+
+Continues the offers work from earlier today: added
+`PATCH /offers/edit-offer-status/:offerId` and
+`DELETE /offers/delete-offer/:offerId` server-side (commit `a30f381`,
+`product_selling_app_server`), mirroring `editProductStatus`/
+`deleteProduct`'s sellerId-scoped-ownership pattern exactly. `deleteOffer`
+does a real delete (not soft) — `Offer` has no `isDeleted` field, and per
+the model's own `usageLimit` dormancy comment, no `Order`/`OrderItem`
+records which offer was applied to a line item, so nothing else
+references an offer document by id.
+
+Wired both into `OffersPage.tsx`'s card footer (plan 4.8.4): a `Switch`
+for enable/disable, a delete button behind `ConfirmDialog`. "Edit" is
+still not wired — there's no endpoint to update an offer's own fields
+(name/config/dates/targets), only its `isActive` flag and whole-document
+delete, and building real field-level editing would need to match
+`createOffer`'s validation depth (overlap checks, variant-ownership
+checks, date-range checks) for an update path, which is a meaningfully
+bigger, separate piece of work.
+
+This also forced a real refactor of the page's offer state: it was
+tracking a flattened `CreatedOffer` summary type with an `id: string |
+number` (a `Date.now()` placeholder for the session just created, the
+real Mongo `_id` after a refetch) — too weak a foundation for mutations
+that need a stable, real `_id`. Switched to holding the actual
+`PersistedOffer` documents from `GET /offers/` directly, with
+`loadOffers()` extracted so mount, post-create, enable/disable, and
+delete all refresh through the same path. A successful create now
+triggers a full reload rather than locally prepending a hand-built
+summary — the raw creation response isn't populated the way the list
+endpoint is, and merging two different shapes for one card wasn't worth
+the complexity versus just reloading a typically-small list.
+
+Verified with `npm run build` (clean) and `npm run lint` (0 issues,
+after removing one eslint-disable directive the refactor made
+unnecessary).
