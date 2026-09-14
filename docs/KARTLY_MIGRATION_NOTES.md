@@ -1586,3 +1586,16 @@ Verified with `npm run build` (clean) and `npm run lint` (0 issues). No
 live browser was available to click-test this interactively in this
 environment — verified by tracing React's effect-dependency semantics
 against the actual code, the same way the bug itself was found.
+
+## Post-Phase-7 follow-up — 5.8 stat-value count-up animation, now built
+
+The Phase 5 entry above ("Not built: 5.8 stat-value count-up animation")
+is stale — `StatCard.tsx` was given a `useCountUp` hook later in this
+same session (commit `1b00f97`): eases 0 → target over 600ms on
+mount/change via `requestAnimationFrame`, skips straight to the final
+value under `prefers-reduced-motion`, and only animates `value` props
+that are actually numeric (a `'—'` loading placeholder or other
+`ReactNode` renders as-is, unanimated). Left the original Phase 5 entry
+untouched per this file's own changelog discipline — it accurately
+described the app's state as of Phase 5 — and recorded the fix here
+instead.
