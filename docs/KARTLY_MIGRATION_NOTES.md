@@ -1599,3 +1599,33 @@ that are actually numeric (a `'—'` loading placeholder or other
 untouched per this file's own changelog discipline — it accurately
 described the app's state as of Phase 5 — and recorded the fix here
 instead.
+
+## 2026-09-15 — Orders page and dashboard "recent orders" now use real data
+
+Earlier entries (and §4.1/§4.6) record that sellers had no order
+routes, so `OrderListPage` and the dashboard's fulfilment queue were
+`EmptyState`s. `product_selling_app_server` commit `6503b98` added
+read-only `GET /orders` and `GET /orders/:orderId` for sellers.
+
+- `OrderListPage.tsx` — `DataTable` (order id + date, ship-to, item
+  count, status, your subtotal) with Previous/Next pagination like
+  `ProductListPage`. A row opens a `Sheet` with this seller's line
+  items, the shipping address, and tracking if set. The old
+  non-interactive status legend and "API routes coming soon" pill are
+  gone.
+- `DashboardPage.tsx` — the "Fulfilment queue" card is now "Recent
+  orders": the latest four with a "View all N" link, loaded in its own
+  effect so an orders failure can't blank the product/shipping panels.
+
+**Deliberate limits.** The API returns only this seller's line items and
+a `sellerSubtotal`, because one order can hold several sellers' items;
+the order-wide total, discount and shipping are never shown here. There
+are still no status-change or tracking controls: `Order` has a single
+`orderStatus`/`tracking` for the whole order, so letting one seller mark
+a mixed order "Shipped" would change it for the others. That needs a
+decision on per-seller fulfilment before any UI is built. The revenue
+chart stays an `EmptyState`: charting from one paginated page of orders
+would be quietly wrong for any seller with more orders than fit on it.
+
+Verified with `npm run build` and `npm run lint` (both clean), plus a
+live read-only check that the new routes return 401 without a token.

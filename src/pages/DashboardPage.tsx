@@ -44,6 +44,14 @@ type ShippingConfig = {
   shippingRates?: Record<string, { cost?: number; time?: string }>;
 };
 
+type RecentOrder = {
+  _id: string;
+  orderId: string;
+  createdAt: string;
+  shippingAddress?: { fullName?: string };
+  sellerSubtotal: number;
+};
+
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
 
@@ -57,6 +65,24 @@ const DashboardPage = () => {
   const [restockTarget, setRestockTarget] = useState<{ productId: string; variantId: string; productName: string; sku?: string } | null>(null);
   const [restockAmount, setRestockAmount] = useState('');
   const [isRestocking, setIsRestocking] = useState(false);
+  const [recentOrders, setRecentOrders] = useState<{ rows: RecentOrder[]; total: number } | null>(null);
+  const [ordersFailed, setOrdersFailed] = useState(false);
+
+  // Separate from loadDashboard so an orders failure can't blank the product/shipping panels.
+  useEffect(() => {
+    let cancelled = false;
+    sellerApi
+      .get('/orders', { params: { limit: 4 } })
+      .then(({ data }) => {
+        if (!cancelled) setRecentOrders({ rows: data.data ?? [], total: data.pagination?.total ?? 0 });
+      })
+      .catch(() => {
+        if (!cancelled) setOrdersFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // RequireSellerAuth already guarantees a sellerToken exists for every
   // route inside AdminLayout, so this effect no longer needs to guard for
@@ -223,14 +249,41 @@ const DashboardPage = () => {
           <EmptyState
             icon={<FiBarChart2 size={28} />}
             title="No revenue data yet"
-            description="Revenue reporting needs order history, which the seller API doesn't expose yet."
+            description="Revenue reporting needs an aggregated sales endpoint, which the seller API doesn't expose yet."
           />
         </Panel>
         <div className="rounded-panel bg-soft p-6 text-[var(--k-on-soft)]">
-          <p className="mb-4.5 text-[15px] font-extrabold">Fulfilment queue</p>
-          <p className="text-[12.5px] font-semibold opacity-70">
-            Needs an orders endpoint on the seller API — not available yet.
-          </p>
+          <div className="mb-4.5 flex items-baseline justify-between gap-3">
+            <p className="text-[15px] font-extrabold">Recent orders</p>
+            {recentOrders && recentOrders.total > 0 && (
+              <Link to="/orders" className="text-[12.5px] font-bold hover:underline">
+                View all {recentOrders.total}
+              </Link>
+            )}
+          </div>
+          {ordersFailed ? (
+            <p className="text-[12.5px] font-semibold opacity-70">Couldn't load orders right now.</p>
+          ) : !recentOrders ? (
+            <div className="space-y-2.5">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-4 w-full" />
+              ))}
+            </div>
+          ) : recentOrders.rows.length === 0 ? (
+            <p className="text-[12.5px] font-semibold opacity-70">No paid orders for your products yet.</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {recentOrders.rows.map((order) => (
+                <li key={order._id} className="flex items-center justify-between gap-3 text-[12.5px]">
+                  <span className="min-w-0">
+                    <span className="block truncate font-mono font-bold">{order.orderId}</span>
+                    <span className="block truncate font-semibold opacity-70">{order.shippingAddress?.fullName}</span>
+                  </span>
+                  <span className="shrink-0 font-extrabold">{formatCurrency(order.sellerSubtotal)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
