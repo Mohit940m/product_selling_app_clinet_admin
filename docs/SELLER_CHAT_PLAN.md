@@ -34,10 +34,10 @@ talking to it:
   "Restock a product".
 
 ## Steps — commit after each
-1. **Plan** — this file.
-2. **Agent API client + types** — `src/api/agentApi.ts`
+1. ✅ **Plan** — this file.
+2. ✅ **Agent API client + types** — `src/api/agentApi.ts`
    (`VITE_AGENT_URL`), `src/components/assistant/types.ts`, `.env.example`.
-3. **Blocks** — product/stock tables, orders, notice, pending action card.
-4. **Chat product form** — form with variant rows and photo upload
+3. ✅ **Blocks** — product/stock tables, orders, notice, pending action card.
+4. ✅ **Chat product form** — form with variant rows and photo upload
    (reuses `uploadProductImages` / `partitionBySize`).
-5. **AssistantPage + navigation** — page, sidebar item, route, docs.
+5. ✅ **AssistantPage + navigation** — page, sidebar item, route, docs.

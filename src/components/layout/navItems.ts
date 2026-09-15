@@ -4,4 +4,5 @@ export const NAV_ITEMS = [
   { label: 'Orders', to: '/orders' },
   { label: 'Shipping', to: '/shipping' },
   { label: 'Offers', to: '/offers' },
+  { label: 'Assistant', to: '/assistant' },
 ];

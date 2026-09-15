@@ -40,6 +40,7 @@ Create a `.env` file in the project root:
 ```env
 VITE_SERVER_URL=https://product-selling-app-server.onrender.com
 VITE_PORT=5203
+VITE_AGENT_URL=http://localhost:4100   # seller assistant (agentic-chat branch)
 ```
 
 Cloudinary credentials are fetched from the backend at runtime — they are not stored in this app's own `.env`.
@@ -61,6 +62,7 @@ npm run preview   # Serve the built dist/ locally
 - **Orders** — Paid orders that include your products (your items and subtotal only) with a detail drawer; each product in an order has its own sub-order number, stage and tracking
 - **Shipping** — Origin + five fixed delivery-zone rates (same-city/state/region, rest of India, remote)
 - **Offers** — Create discount/cashback/buy-get/bundle offers targeting products or specific variants, a real persisted offer list, enable/disable and delete per offer
+- **Assistant** *(branch `agentic-chat`)* — Chat to check stock, restock, see orders and item statuses, and add products through an in-chat form with photo upload; changes wait for your confirmation. Needs `product_selling_app_agent` (branch `mcp`) and the server's `mcp` branch running.
 
 ## Routes
 
@@ -77,6 +79,7 @@ npm run preview   # Serve the built dist/ locally
 | `/orders` | Order list + status updates | Behind `RequireSellerAuth` |
 | `/shipping` | Shipping origin + rates | Behind `RequireSellerAuth` |
 | `/offers` | Offer creation + list | Behind `RequireSellerAuth` |
+| `/assistant` | Seller assistant chat | Behind `RequireSellerAuth` |
 | `*` | 404 page | Catch-all |
 
 Unlike the buyer storefront (`product_selling_app_client_user`), every route except `/login`/`/signup` sits behind a single centralized guard (`RequireSellerAuth`), not a per-page check.

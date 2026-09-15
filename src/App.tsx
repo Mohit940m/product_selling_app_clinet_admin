@@ -17,6 +17,7 @@ import ProductDetailsPage from "./pages/ProductDetailsPage"
 import EditProductPage from "./pages/EditProductPage"
 import ShippingConfigPage from "./pages/ShippingConfigPage"
 import OffersPage from "./pages/OffersPage"
+import AssistantPage from './pages/AssistantPage'
 import NotFoundPage from "./pages/NotFoundPage"
 
 const AppRoutes = () => {
@@ -40,6 +41,7 @@ const AppRoutes = () => {
               <Route path="/orders" element={<OrderListPage />} />
               <Route path="/shipping" element={<ShippingConfigPage />} />
               <Route path="/offers" element={<OffersPage />} />
+              <Route path="/assistant" element={<AssistantPage />} />
             </Route>
           </Route>
 
