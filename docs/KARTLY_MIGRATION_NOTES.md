@@ -1655,3 +1655,22 @@ stage manually from this app.
 
 Verified with `npm run build` and `npm run lint` (both clean). The
 status form wasn't exercised against a live order.
+
+## 2026-09-15 — Each item in an order is fulfilled and tracked separately
+
+Supersedes the order-wide status form from the entry above. Product
+decision: in a multi-product order, every product gets its own order
+number and tracking.
+
+The backend (`product_selling_app_server` commit `de68810`) now gives
+every order line a `subOrderId` (`<orderId>-1`, `-2`, ...), `status` and
+`tracking`. In `OrderListPage.tsx`'s detail Sheet each item card shows
+its sub-order number, status badge and tracking, with an "Update status /
+tracking" button that opens a form for that item only
+(`PATCH /orders/:orderId/items/:subOrderId/status`). This also removes
+the earlier "contains another seller's items" block: each seller updates
+only their own lines. The list's STATUS column shows the least advanced
+of this seller's items.
+
+Verified with `npm run build` and `npm run lint` (both clean); not
+exercised against a live order.

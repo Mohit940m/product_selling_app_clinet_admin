@@ -29,7 +29,13 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   CANCELLED: 'Cancelled',
 };
 
+type Tracking = { courier?: string; trackingId?: string; trackingUrl?: string };
+
 type SellerOrderItem = {
+  subOrderId: string;
+  status: OrderStatus;
+  tracking?: Tracking;
+  statusUpdatedAt?: string;
   productId: string;
   variantId: string;
   name: string;
@@ -44,6 +50,7 @@ type SellerOrder = {
   orderId: string;
   createdAt: string;
   paymentStatus: 'PAID' | 'REFUNDED';
+  /** Least advanced stage among this seller's items. */
   orderStatus: OrderStatus;
   shippingAddress: {
     fullName: string;
@@ -55,7 +62,6 @@ type SellerOrder = {
     pincode: string;
     country: string;
   };
-  tracking?: { courier?: string; trackingId?: string; trackingUrl?: string };
   items: SellerOrderItem[];
   canUpdateStatus: boolean;
   itemCount: number;
@@ -82,31 +88,28 @@ const OrderStatusBadge = ({ order }: { order: SellerOrder }) =>
     <Badge tone={statusTone(order.orderStatus)}>{STATUS_LABELS[order.orderStatus] ?? order.orderStatus}</Badge>
   );
 
-// Mirrors the server's forward-only flow in seller.controllers/order.controller.ts.
+// Mirrors the server's forward-only flow in utils/fulfilment.util.ts.
 const FULFILMENT_FLOW: OrderStatus[] = ['CONFIRMED', 'SHIPPED', 'OUT FOR DELIVERY', 'DELIVERED'];
 
-const StatusUpdateForm = ({ order, onUpdated }: { order: SellerOrder; onUpdated: (order: SellerOrder) => void }) => {
-  const currentIndex = FULFILMENT_FLOW.indexOf(order.orderStatus);
-  const nextStatuses = currentIndex === -1 ? [] : FULFILMENT_FLOW.slice(currentIndex + 1);
+const nextStatusesFor = (status: OrderStatus) => {
+  const index = FULFILMENT_FLOW.indexOf(status);
+  return index === -1 ? [] : FULFILMENT_FLOW.slice(index + 1);
+};
+
+type ItemStatusFormProps = {
+  order: SellerOrder;
+  item: SellerOrderItem;
+  onUpdated: (order: SellerOrder) => void;
+  onCancel: () => void;
+};
+
+const ItemStatusForm = ({ order, item, onUpdated, onCancel }: ItemStatusFormProps) => {
+  const nextStatuses = nextStatusesFor(item.status);
   const [status, setStatus] = useState<OrderStatus | ''>(nextStatuses[0] ?? '');
-  const [courier, setCourier] = useState(order.tracking?.courier ?? '');
-  const [trackingId, setTrackingId] = useState(order.tracking?.trackingId ?? '');
-  const [trackingUrl, setTrackingUrl] = useState(order.tracking?.trackingUrl ?? '');
+  const [courier, setCourier] = useState(item.tracking?.courier ?? '');
+  const [trackingId, setTrackingId] = useState(item.tracking?.trackingId ?? '');
+  const [trackingUrl, setTrackingUrl] = useState(item.tracking?.trackingUrl ?? '');
   const [isSaving, setIsSaving] = useState(false);
-
-  if (!order.canUpdateStatus) {
-    return (
-      <p className="rounded-tile bg-soft2 p-3 text-[12px] font-medium text-muted">
-        {order.paymentStatus === 'PAID'
-          ? "This order also contains another seller's items, so its status can't be changed from your account."
-          : 'Refunded orders can’t be updated.'}
-      </p>
-    );
-  }
-
-  if (nextStatuses.length === 0) {
-    return <p className="rounded-tile bg-soft2 p-3 text-[12px] font-medium text-muted">This order is delivered — nothing left to update.</p>;
-  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,21 +121,21 @@ const StatusUpdateForm = ({ order, onUpdated }: { order: SellerOrder; onUpdated:
     const hasTracking = courier.trim() || trackingId.trim() || trackingUrl.trim();
     setIsSaving(true);
     try {
-      const { data } = await sellerApi.patch(`/orders/${order._id}/status`, {
+      const { data } = await sellerApi.patch(`/orders/${order._id}/items/${encodeURIComponent(item.subOrderId)}/status`, {
         status,
         ...(hasTracking ? { tracking: { courier, trackingId, trackingUrl } } : {}),
       });
-      toast.success(`Order marked ${STATUS_LABELS[status].toLowerCase()}.`);
+      toast.success(`${item.subOrderId} marked ${STATUS_LABELS[status].toLowerCase()}.`);
       onUpdated(data.data);
     } catch (err) {
-      toast.error(axios.isAxiosError(err) ? err.response?.data?.message ?? 'Unable to update order.' : 'Unable to update order.');
+      toast.error(axios.isAxiosError(err) ? err.response?.data?.message ?? 'Unable to update item.' : 'Unable to update item.');
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <form onSubmit={submit} className="space-y-3.5">
+    <form onSubmit={submit} className="mt-3 space-y-3 border-t border-line pt-3">
       <Select label="Move to" value={status} onChange={(e) => setStatus(e.target.value as OrderStatus)}>
         {nextStatuses.map((s) => (
           <option key={s} value={s}>
@@ -152,18 +155,85 @@ const StatusUpdateForm = ({ order, onUpdated }: { order: SellerOrder; onUpdated:
         maxLength={500}
         placeholder="https://"
       />
-      <p className="text-[11.5px] font-medium text-muted">Stages only move forward. The buyer sees the new status and tracking right away.</p>
-      <Button type="submit" variant="primary" fullWidth loading={isSaving}>
-        Update status
-      </Button>
+      <div className="flex gap-2.5">
+        <Button type="button" variant="outline" size="sm" onClick={onCancel} disabled={isSaving}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" size="sm" fullWidth loading={isSaving}>
+          Update this item
+        </Button>
+      </div>
     </form>
+  );
+};
+
+type OrderItemCardProps = {
+  order: SellerOrder;
+  item: SellerOrderItem;
+  onUpdated: (order: SellerOrder) => void;
+};
+
+const OrderItemCard = ({ order, item, onUpdated }: OrderItemCardProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const canAdvance = order.canUpdateStatus && nextStatusesFor(item.status).length > 0;
+  const { tracking } = item;
+
+  return (
+    <li className="rounded-tile border border-line bg-card p-3">
+      <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+        <span className="break-all font-mono text-[11px] font-bold text-muted">{item.subOrderId}</span>
+        <Badge tone={statusTone(item.status)}>{STATUS_LABELS[item.status] ?? item.status}</Badge>
+      </div>
+      <div className="flex gap-3">
+        <ImageFrame src={item.image} alt={item.name} className="h-12 w-12 shrink-0 rounded-[12px]" />
+        <div className="min-w-0 flex-1">
+          <p className="line-clamp-2 text-[13px] font-bold text-ink">{item.name}</p>
+          {formatAttributes(item.attributes) && <p className="text-[12px] font-medium text-muted">{formatAttributes(item.attributes)}</p>}
+          <p className="text-[12px] font-medium text-muted">
+            {formatCurrency(item.priceAtPurchase)} × {item.quantity}
+          </p>
+        </div>
+        <span className="shrink-0 text-[13px] font-extrabold text-ink">{formatCurrency(item.priceAtPurchase * item.quantity)}</span>
+      </div>
+
+      {(tracking?.courier || tracking?.trackingId) && (
+        <p className="mt-2.5 text-[12px] font-semibold text-ink">
+          {tracking.courier || 'Courier'}
+          {tracking.trackingId && (
+            <>
+              {' '}
+              · <span className="font-mono">{tracking.trackingId}</span>
+            </>
+          )}
+        </p>
+      )}
+
+      {isEditing ? (
+        <ItemStatusForm
+          order={order}
+          item={item}
+          onCancel={() => setIsEditing(false)}
+          onUpdated={(updated) => {
+            setIsEditing(false);
+            onUpdated(updated);
+          }}
+        />
+      ) : (
+        canAdvance && (
+          <Button variant="soft" size="sm" className="mt-3" fullWidth onClick={() => setIsEditing(true)}>
+            Update status / tracking
+          </Button>
+        )
+      )}
+    </li>
   );
 };
 
 /**
  * Backed by `GET /orders` (seller): paid/refunded orders containing this
  * seller's products, with only this seller's line items and subtotal.
- * The detail Sheet moves an order forward via `PATCH /orders/:orderId/status`.
+ * Each item is its own sub-order: the detail Sheet moves items forward one
+ * at a time via `PATCH /orders/:orderId/items/:subOrderId/status`.
  */
 const OrderListPage = () => {
   useDocumentTitle('Orders');
@@ -200,6 +270,11 @@ const OrderListPage = () => {
   }, [page]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const replaceOrder = (updated: SellerOrder) => {
+    setSelected(updated);
+    setOrders((current) => current.map((o) => (o._id === updated._id ? updated : o)));
+  };
 
   const columns: DataTableColumn<SellerOrder>[] = [
     {
@@ -241,7 +316,7 @@ const OrderListPage = () => {
     <Container className="py-6 lg:py-8">
       <PageHeader
         title="Orders"
-        subtitle="Paid orders that include your products. Open an order to move it to the next stage."
+        subtitle="Paid orders that include your products. Each product ships and is tracked on its own."
       />
 
       {error && (
@@ -313,25 +388,15 @@ const OrderListPage = () => {
               <OrderStatusBadge order={selected} />
             </div>
 
+            {selected.paymentStatus !== 'PAID' && (
+              <p className="rounded-tile bg-soft2 p-3 text-[12px] font-medium text-muted">Refunded orders can’t be updated.</p>
+            )}
+
             <section>
-              <h3 className="mb-2.5 font-mono text-[10.5px] font-extrabold text-muted">YOUR ITEMS</h3>
+              <h3 className="mb-2.5 font-mono text-[10.5px] font-extrabold text-muted">YOUR ITEMS · EACH SHIPS SEPARATELY</h3>
               <ul className="space-y-2.5">
                 {selected.items.map((item) => (
-                  <li key={`${item.productId}-${item.variantId}`} className="flex gap-3 rounded-tile border border-line bg-card p-3">
-                    <ImageFrame src={item.image} alt={item.name} className="h-12 w-12 shrink-0 rounded-[12px]" />
-                    <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 text-[13px] font-bold text-ink">{item.name}</p>
-                      {formatAttributes(item.attributes) && (
-                        <p className="text-[12px] font-medium text-muted">{formatAttributes(item.attributes)}</p>
-                      )}
-                      <p className="text-[12px] font-medium text-muted">
-                        {formatCurrency(item.priceAtPurchase)} × {item.quantity}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-[13px] font-extrabold text-ink">
-                      {formatCurrency(item.priceAtPurchase * item.quantity)}
-                    </span>
-                  </li>
+                  <OrderItemCard key={`${item.subOrderId}-${item.status}`} order={selected} item={item} onUpdated={replaceOrder} />
                 ))}
               </ul>
               <div className="mt-3 flex justify-between border-t border-line pt-3 text-[13px]">
@@ -352,27 +417,6 @@ const OrderListPage = () => {
                 {selected.shippingAddress.country}
                 <span className="mt-1 block font-mono text-[11.5px]">{selected.shippingAddress.phone}</span>
               </address>
-            </section>
-
-            {selected.tracking?.trackingId && (
-              <section>
-                <h3 className="mb-2.5 font-mono text-[10.5px] font-extrabold text-muted">TRACKING</h3>
-                <p className="text-[12.5px] font-semibold text-ink">
-                  {selected.tracking.courier || 'Courier'} · <span className="font-mono">{selected.tracking.trackingId}</span>
-                </p>
-              </section>
-            )}
-
-            <section>
-              <h3 className="mb-2.5 font-mono text-[10.5px] font-extrabold text-muted">UPDATE STATUS</h3>
-              <StatusUpdateForm
-                key={`${selected._id}-${selected.orderStatus}`}
-                order={selected}
-                onUpdated={(updated) => {
-                  setSelected(updated);
-                  setOrders((current) => current.map((o) => (o._id === updated._id ? updated : o)));
-                }}
-              />
             </section>
           </div>
         )}
