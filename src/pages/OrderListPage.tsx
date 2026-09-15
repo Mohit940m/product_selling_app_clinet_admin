@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FiPackage } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import sellerApi from '../api/sellerApi';
 import Container from '../components/layout/Container';
@@ -10,6 +11,8 @@ import Card from '../components/ui/Card';
 import DataTable, { type DataTableColumn } from '../components/ui/DataTable';
 import EmptyState from '../components/ui/EmptyState';
 import ImageFrame from '../components/ui/ImageFrame';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 import Sheet from '../components/ui/Sheet';
 import statusTone from '../components/ui/statusTone';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -54,6 +57,7 @@ type SellerOrder = {
   };
   tracking?: { courier?: string; trackingId?: string; trackingUrl?: string };
   items: SellerOrderItem[];
+  canUpdateStatus: boolean;
   itemCount: number;
   sellerSubtotal: number;
 };
@@ -78,10 +82,88 @@ const OrderStatusBadge = ({ order }: { order: SellerOrder }) =>
     <Badge tone={statusTone(order.orderStatus)}>{STATUS_LABELS[order.orderStatus] ?? order.orderStatus}</Badge>
   );
 
+// Mirrors the server's forward-only flow in seller.controllers/order.controller.ts.
+const FULFILMENT_FLOW: OrderStatus[] = ['CONFIRMED', 'SHIPPED', 'OUT FOR DELIVERY', 'DELIVERED'];
+
+const StatusUpdateForm = ({ order, onUpdated }: { order: SellerOrder; onUpdated: (order: SellerOrder) => void }) => {
+  const currentIndex = FULFILMENT_FLOW.indexOf(order.orderStatus);
+  const nextStatuses = currentIndex === -1 ? [] : FULFILMENT_FLOW.slice(currentIndex + 1);
+  const [status, setStatus] = useState<OrderStatus | ''>(nextStatuses[0] ?? '');
+  const [courier, setCourier] = useState(order.tracking?.courier ?? '');
+  const [trackingId, setTrackingId] = useState(order.tracking?.trackingId ?? '');
+  const [trackingUrl, setTrackingUrl] = useState(order.tracking?.trackingUrl ?? '');
+  const [isSaving, setIsSaving] = useState(false);
+
+  if (!order.canUpdateStatus) {
+    return (
+      <p className="rounded-tile bg-soft2 p-3 text-[12px] font-medium text-muted">
+        {order.paymentStatus === 'PAID'
+          ? "This order also contains another seller's items, so its status can't be changed from your account."
+          : 'Refunded orders can’t be updated.'}
+      </p>
+    );
+  }
+
+  if (nextStatuses.length === 0) {
+    return <p className="rounded-tile bg-soft2 p-3 text-[12px] font-medium text-muted">This order is delivered — nothing left to update.</p>;
+  }
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!status || isSaving) return;
+    if (trackingUrl.trim() && !/^https?:\/\//i.test(trackingUrl.trim())) {
+      toast.error('Tracking link must start with http:// or https://.');
+      return;
+    }
+    const hasTracking = courier.trim() || trackingId.trim() || trackingUrl.trim();
+    setIsSaving(true);
+    try {
+      const { data } = await sellerApi.patch(`/orders/${order._id}/status`, {
+        status,
+        ...(hasTracking ? { tracking: { courier, trackingId, trackingUrl } } : {}),
+      });
+      toast.success(`Order marked ${STATUS_LABELS[status].toLowerCase()}.`);
+      onUpdated(data.data);
+    } catch (err) {
+      toast.error(axios.isAxiosError(err) ? err.response?.data?.message ?? 'Unable to update order.' : 'Unable to update order.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="space-y-3.5">
+      <Select label="Move to" value={status} onChange={(e) => setStatus(e.target.value as OrderStatus)}>
+        {nextStatuses.map((s) => (
+          <option key={s} value={s}>
+            {STATUS_LABELS[s]}
+          </option>
+        ))}
+      </Select>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Input label="Courier (optional)" value={courier} onChange={(e) => setCourier(e.target.value)} maxLength={100} placeholder="Delhivery" />
+        <Input label="Tracking number (optional)" value={trackingId} onChange={(e) => setTrackingId(e.target.value)} maxLength={100} />
+      </div>
+      <Input
+        label="Tracking link (optional)"
+        type="url"
+        value={trackingUrl}
+        onChange={(e) => setTrackingUrl(e.target.value)}
+        maxLength={500}
+        placeholder="https://"
+      />
+      <p className="text-[11.5px] font-medium text-muted">Stages only move forward. The buyer sees the new status and tracking right away.</p>
+      <Button type="submit" variant="primary" fullWidth loading={isSaving}>
+        Update status
+      </Button>
+    </form>
+  );
+};
+
 /**
  * Backed by `GET /orders` (seller): paid/refunded orders containing this
  * seller's products, with only this seller's line items and subtotal.
- * Read-only — the API has no endpoint to update status or tracking yet.
+ * The detail Sheet moves an order forward via `PATCH /orders/:orderId/status`.
  */
 const OrderListPage = () => {
   useDocumentTitle('Orders');
@@ -159,7 +241,7 @@ const OrderListPage = () => {
     <Container className="py-6 lg:py-8">
       <PageHeader
         title="Orders"
-        subtitle="Paid orders that include your products. Only your own items and subtotal are shown."
+        subtitle="Paid orders that include your products. Open an order to move it to the next stage."
       />
 
       {error && (
@@ -281,9 +363,17 @@ const OrderListPage = () => {
               </section>
             )}
 
-            <p className="text-[12px] font-medium text-muted">
-              Updating order status or adding tracking isn't available from the seller API yet.
-            </p>
+            <section>
+              <h3 className="mb-2.5 font-mono text-[10.5px] font-extrabold text-muted">UPDATE STATUS</h3>
+              <StatusUpdateForm
+                key={`${selected._id}-${selected.orderStatus}`}
+                order={selected}
+                onUpdated={(updated) => {
+                  setSelected(updated);
+                  setOrders((current) => current.map((o) => (o._id === updated._id ? updated : o)));
+                }}
+              />
+            </section>
           </div>
         )}
       </Sheet>

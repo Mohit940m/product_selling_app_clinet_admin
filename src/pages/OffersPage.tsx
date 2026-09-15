@@ -37,7 +37,7 @@ const OFFER_TYPE_LABELS: Record<OfferType, string> = {
 
 const OFFER_TYPE_DESCRIPTIONS: Record<OfferType, string> = {
   DISCOUNT: 'Percentage or flat amount off the product price.',
-  CASHBACK: 'Fixed cashback amount returned to the buyer.',
+  CASHBACK: 'Fixed amount taken off the order total at checkout.',
   BUY_GET: 'Buy a quantity and get extra units free.',
   PRODUCT_BUNDLE: 'Group products at a special bundle price.',
 };
