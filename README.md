@@ -58,7 +58,7 @@ npm run preview   # Serve the built dist/ locally
 - **Authentication** — Two-step OTP login (email + password, then OTP) and registration
 - **Dashboard** — Stats, recent products, shipping config shortcut
 - **Products** — List with search/status filter/pagination, create with Cloudinary image uploads, edit, per-variant price/stock/active-status management, restock
-- **Orders** — Paid orders that include your products (your items and subtotal only) with a detail drawer to move each order to the next stage and add tracking
+- **Orders** — Paid orders that include your products (your items and subtotal only) with a detail drawer; each product in an order has its own sub-order number, stage and tracking
 - **Shipping** — Origin + five fixed delivery-zone rates (same-city/state/region, rest of India, remote)
 - **Offers** — Create discount/cashback/buy-get/bundle offers targeting products or specific variants, a real persisted offer list, enable/disable and delete per offer
 
