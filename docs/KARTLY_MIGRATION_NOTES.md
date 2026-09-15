@@ -1629,3 +1629,29 @@ would be quietly wrong for any seller with more orders than fit on it.
 
 Verified with `npm run build` and `npm run lint` (both clean), plus a
 live read-only check that the new routes return 401 without a token.
+
+## 2026-09-15 — Manual order status updates; cashback now applied at checkout
+
+Supersedes the "still no status-change or tracking controls" limit in
+the entry above. Product decision: the seller moves orders through each
+stage manually from this app.
+
+- `OrderListPage.tsx` — the detail Sheet has an "Update status" form:
+  a Select offering only later stages (CONFIRMED → SHIPPED → OUT FOR
+  DELIVERY → DELIVERED), optional courier / tracking number / tracking
+  link, calling `PATCH /orders/:orderId/status`
+  (`product_selling_app_server` commit `0f7e8a8`). The updated order
+  replaces the row and Sheet in place.
+- Orders that also contain another seller's items come back with
+  `canUpdateStatus: false` and show an explanation instead of the form —
+  the order has one status for all its items, so one seller can't ship
+  it on everyone's behalf. Cancelling isn't offered: orders are paid and
+  there's no refund flow.
+- `OffersPage.tsx` — the Cashback type description no longer says the
+  amount is "returned to the buyer". Product decision: cashback is taken
+  off the order total at checkout, which the backend now does (it
+  previously had no effect at all — see "three of four offer types do
+  nothing" above; `BUY_GET` and `PRODUCT_BUNDLE` still don't).
+
+Verified with `npm run build` and `npm run lint` (both clean). The
+status form wasn't exercised against a live order.

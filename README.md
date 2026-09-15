@@ -58,7 +58,7 @@ npm run preview   # Serve the built dist/ locally
 - **Authentication** — Two-step OTP login (email + password, then OTP) and registration
 - **Dashboard** — Stats, recent products, shipping config shortcut
 - **Products** — List with search/status filter/pagination, create with Cloudinary image uploads, edit, per-variant price/stock/active-status management, restock
-- **Orders** — Paid orders that include your products (your items and subtotal only) with a detail drawer; read-only, no status updates yet
+- **Orders** — Paid orders that include your products (your items and subtotal only) with a detail drawer to move each order to the next stage and add tracking
 - **Shipping** — Origin + five fixed delivery-zone rates (same-city/state/region, rest of India, remote)
 - **Offers** — Create discount/cashback/buy-get/bundle offers targeting products or specific variants, a real persisted offer list, enable/disable and delete per offer
 
@@ -74,7 +74,7 @@ npm run preview   # Serve the built dist/ locally
 | `/products/new` | Create product | Behind `RequireSellerAuth` |
 | `/products/:productId` | Product details | Behind `RequireSellerAuth` |
 | `/products/:productId/edit` | Edit product | Behind `RequireSellerAuth` |
-| `/orders` | Order list (read-only) | Behind `RequireSellerAuth` |
+| `/orders` | Order list + status updates | Behind `RequireSellerAuth` |
 | `/shipping` | Shipping origin + rates | Behind `RequireSellerAuth` |
 | `/offers` | Offer creation + list | Behind `RequireSellerAuth` |
 | `*` | 404 page | Catch-all |
