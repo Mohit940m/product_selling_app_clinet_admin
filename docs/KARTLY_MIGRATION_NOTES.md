@@ -1674,3 +1674,24 @@ of this seller's items.
 
 Verified with `npm run build` and `npm run lint` (both clean); not
 exercised against a live order.
+
+## 2026-09-16 — Sellers see buyer-cancelled items and refunds
+
+Supersedes the "Cancelling isn't offered: orders are paid and there's no
+refund flow" note in the 2026-09 order-status entry above. Buyers can now
+cancel a paid, pre-ship (`CONFIRMED`) item via the storefront/agent, which
+the backend marks `CANCELLED` with a record-only refund and (when it's the
+last item) flips the order to `REFUNDED`.
+
+Sellers don't initiate cancellations (product decision: buyer-initiated,
+pre-ship only), so this app is read-only for the feature:
+- `OrderListPage.tsx` item cards now show a refund note for a
+  `CANCELLED` item ("Cancelled by customer. Refund of ₹X initiated…"),
+  and the item's "Update status / tracking" button no longer appears
+  (CANCELLED isn't in the forward-only flow, so it was already hidden).
+- Added a `Refund` type on `SellerOrderItem`. Status/refunded tones were
+  already handled by `statusTone` and `OrderStatusBadge`.
+
+Verified with `npm run build` and `npm run lint` (both clean). The backend
+cross-tenant/cancel behaviour was exercised live; not click-tested in a
+browser.

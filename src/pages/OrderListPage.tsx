@@ -31,10 +31,14 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 
 type Tracking = { courier?: string; trackingId?: string; trackingUrl?: string };
 
+// Recorded when a buyer cancels a pre-ship item; the seller sees it as read-only.
+type Refund = { status: 'INITIATED' | 'COMPLETED'; amount: number; initiatedAt?: string; reason?: string };
+
 type SellerOrderItem = {
   subOrderId: string;
   status: OrderStatus;
   tracking?: Tracking;
+  refund?: Refund;
   statusUpdatedAt?: string;
   productId: string;
   variantId: string;
@@ -205,6 +209,14 @@ const OrderItemCard = ({ order, item, onUpdated }: OrderItemCardProps) => {
               · <span className="font-mono">{tracking.trackingId}</span>
             </>
           )}
+        </p>
+      )}
+
+      {item.status === 'CANCELLED' && item.refund && (
+        <p className="mt-2.5 rounded-[12px] bg-soft2 p-2.5 text-[12px] font-medium text-muted">
+          <span className="font-bold text-ink">Cancelled by customer.</span> Refund of{' '}
+          {formatCurrency(item.refund.amount)} {item.refund.status === 'COMPLETED' ? 'completed' : 'initiated'}
+          {item.refund.reason ? ` — “${item.refund.reason}”` : ''}.
         </p>
       )}
 
