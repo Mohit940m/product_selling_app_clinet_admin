@@ -19,13 +19,14 @@ import {
   PendingActionCard,
   SellerOrderBlock,
   SellerOrdersBlock,
+  SellerCheckoutsBlock,
   SellerProductBlock,
   SellerProductsBlock,
 } from '../components/assistant/SellerBlocks';
 import type { Block, ChatAction, ChatMessage, ChatResponse, ConversationSummary } from '../components/assistant/types';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
-const SUGGESTIONS = ['Add a product', 'Which products are low on stock?', 'Show my recent orders', 'Restock a product'];
+const SUGGESTIONS = ['Add a product', 'Which products are low on stock?', 'Show my recent orders', 'Restock a product', 'Who checked out but didn’t place an order?'];
 
 let localId = 0;
 const nextId = () => `m${++localId}`;
@@ -50,6 +51,8 @@ const BlockView = ({ block, busy, onSend, onSubmitForm, interactive }: BlockView
       return <SellerOrdersBlock data={block.data} />;
     case 'seller_order':
       return <SellerOrderBlock data={block.data} />;
+    case 'seller_checkouts':
+      return <SellerCheckoutsBlock data={block.data} />;
     case 'notice':
       return <NoticeBlock data={block.data} />;
     case 'product_form':

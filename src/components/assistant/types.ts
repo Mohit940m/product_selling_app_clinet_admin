@@ -51,6 +51,25 @@ export type SellerOrderView = {
   items: OrderItemView[];
 };
 
+export type SellerCheckoutView = {
+  id: string;
+  status: 'NOT_PLACED' | 'COMPLETED';
+  customer: { name: string | null; email: string | null; phone: string | null };
+  items: { productId: string; name: string; image: string | null; quantity: number; price: number; attributes: Record<string, string> }[];
+  sellerSubtotal: number;
+  sources: string[];
+  reachedPayment: boolean;
+  lastCheckoutAt: string;
+  orderId: string | null;
+};
+
+export type SellerCheckoutsData = {
+  items: SellerCheckoutView[];
+  total: number;
+  status: 'not_placed' | 'completed' | 'all';
+  summary: { notPlaced: number; completed: number };
+};
+
 export type ProductFormPrefill = {
   name?: string;
   description?: string;
@@ -64,6 +83,7 @@ export type Block =
   | { type: 'seller_product'; data: SellerProductDetail }
   | { type: 'seller_orders'; data: { items: SellerOrderView[]; total: number } }
   | { type: 'seller_order'; data: SellerOrderView }
+  | { type: 'seller_checkouts'; data: SellerCheckoutsData }
   | { type: 'product_form'; data: { prefill: ProductFormPrefill } }
   | { type: 'notice'; data: { tone: 'success' | 'error'; message: string } };
 

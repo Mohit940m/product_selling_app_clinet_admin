@@ -10,6 +10,7 @@ import {
   formatAttributes,
   formatCurrency,
   type ChatMessage,
+  type SellerCheckoutsData,
   type SellerOrderView,
   type SellerProductDetail,
   type SellerProductRow,
@@ -174,6 +175,67 @@ export const SellerOrderBlock = ({ data }: { data: SellerOrderView }) => (
       Ship to {data.shipTo.fullName}, {data.shipTo.city} {data.shipTo.pincode} · your subtotal {formatCurrency(data.sellerSubtotal)}
     </p>
     <OrderItems order={data} />
+  </div>
+);
+
+const CHECKOUT_FILTER_LABELS: Record<SellerCheckoutsData['status'], string> = {
+  not_placed: 'NOT PLACED',
+  completed: 'COMPLETED',
+  all: 'ALL CHECKOUTS',
+};
+
+export const SellerCheckoutsBlock = ({ data }: { data: SellerCheckoutsData }) => (
+  <div className={blockShell}>
+    <div className="flex items-center justify-between border-b border-line px-3.5 py-2.5">
+      <span className="font-mono text-[10.5px] font-extrabold text-muted">
+        {CHECKOUT_FILTER_LABELS[data.status] ?? 'CHECKOUTS'} · {data.items.length} OF {data.total}
+      </span>
+      <Link to="/checkouts" className="text-[11.5px] font-bold text-accent hover:underline">
+        Open checkouts
+      </Link>
+    </div>
+    <p className="border-b border-line px-3.5 py-2 text-[11.5px] font-semibold text-muted">
+      {data.summary.notPlaced} not placed · {data.summary.completed} completed
+    </p>
+    {data.items.length === 0 ? (
+      <p className="p-3.5 text-[12.5px] font-medium text-muted">No customers in this list.</p>
+    ) : (
+      <ul className="divide-y divide-line">
+        {data.items.map((c) => (
+          <li key={c.id} className="space-y-2 px-3.5 py-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-bold text-ink">{c.customer.name ?? 'Unnamed customer'}</p>
+                <p className="truncate text-[11.5px] font-medium text-muted">
+                  {[c.customer.email, c.customer.phone].filter(Boolean).join(' · ') || 'No email or phone'}
+                </p>
+              </div>
+              {c.status === 'COMPLETED' ? (
+                <Badge tone="success">Order placed</Badge>
+              ) : (
+                <Badge tone="warn">{c.reachedPayment ? 'Payment not done' : 'Not placed'}</Badge>
+              )}
+            </div>
+            <ul className="space-y-1.5">
+              {c.items.map((item) => (
+                <li key={`${item.productId}-${formatAttributes(item.attributes)}`} className="flex items-center gap-2.5">
+                  <ImageFrame src={item.image} alt={item.name} className="h-8 w-8 shrink-0 rounded-[8px]" />
+                  <p className="min-w-0 flex-1 truncate text-[12px] font-semibold text-ink">
+                    {item.name} <span className="font-medium text-muted">× {item.quantity}</span>
+                  </p>
+                  <span className="text-[12px] font-bold text-ink">{formatCurrency(item.price * item.quantity)}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] font-medium text-muted">
+              {new Date(c.lastCheckoutAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })} · via{' '}
+              {c.sources.length > 1 ? 'app + AI assistant' : c.sources[0] === 'assistant' ? 'AI assistant' : 'store app'}
+              {c.orderId && ` · ${c.orderId}`}
+            </p>
+          </li>
+        ))}
+      </ul>
+    )}
   </div>
 );
 
