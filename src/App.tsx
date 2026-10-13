@@ -12,6 +12,7 @@ import SignUpPage from "./pages/SignUpPage"
 import DashboardPage from "./pages/DashboardPage"
 import ProductListPage from "./pages/ProductListPage"
 import OrderListPage from "./pages/OrderListPage"
+import CheckoutsPage from "./pages/CheckoutsPage"
 import AddProductPage from "./pages/AddProductPage"
 import ProductDetailsPage from "./pages/ProductDetailsPage"
 import EditProductPage from "./pages/EditProductPage"
@@ -39,6 +40,7 @@ const AppRoutes = () => {
               <Route path="/products/:productId" element={<ProductDetailsPage />} />
               <Route path="/products/:productId/edit" element={<EditProductPage />} />
               <Route path="/orders" element={<OrderListPage />} />
+              <Route path="/checkouts" element={<CheckoutsPage />} />
               <Route path="/shipping" element={<ShippingConfigPage />} />
               <Route path="/offers" element={<OffersPage />} />
               <Route path="/assistant" element={<AssistantPage />} />
